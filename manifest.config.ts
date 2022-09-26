@@ -13,7 +13,7 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 		version: pkg.version,
 		description: pkg.description,
 		action: {
-			default_icon: "./assets/icon-512.png",
+			default_icon: "./icon/icon-512.png",
 		},
 		background: {
 			service_worker: "background.js",
@@ -63,7 +63,7 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 
 		// web accessible resources
 		manifest.web_accessible_resources = (manifest.web_accessible_resources as Manifest.WebExtensionManifestWebAccessibleResourcesC2ItemType[])
-			.map((v) => v.matches).reduce((a, b) => [...a ?? [], ...b ?? []]);
+			.map((v) => v.resources).reduce((a, b) => [...a ?? [], ...b ?? []]);
 
 		// this is required on dev for Vite script to load
 		manifest.content_security_policy = `script-src-elem \'self\' \'unsafe-eval\' http://localhost:${4777}; object-src \'self\'`;
