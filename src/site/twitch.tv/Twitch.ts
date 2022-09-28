@@ -1,5 +1,3 @@
-import * as React from "react";
-
 export function findReactParents(
 	node: any,
 	predicate: Twitch.FindReactInstancePredicate,
@@ -67,6 +65,18 @@ export function getRouter(): Twitch.RouterComponent {
 	return node?.stateNode;
 }
 
+export function getUser(): Twitch.UserComponent {
+	const node = findReactParents(
+		getReactInstance(
+			document.querySelector("button[data-a-target='user-menu-toggle']")
+		),
+		n => n.stateNode?.props?.user,
+		100
+	);
+
+	return node?.stateNode;
+}
+
 export function getChatService(): Twitch.ChatServiceComponent {
 	const node = findReactChildren(
 		getReactInstance(
@@ -87,6 +97,16 @@ export function getChatController(): Twitch.ChatControllerComponent {
 		n =>
 			n.stateNode?.props.messageHandlerAPI &&
 			n.stateNode?.props.chatConnectionAPI,
+		100
+	);
+
+	return node?.stateNode;
+}
+
+export function getChatMessageContainer(): Twitch.AnyPureComponent {
+	const node = findReactParents(
+		getReactInstance(document.querySelector(".chat-list--default")),
+		n => n.stateNode && n.stateNode.props && n.stateNode.props.messages,
 		100
 	);
 
@@ -395,6 +415,15 @@ export namespace Twitch {
 		};
 	}>;
 
+	export type UserComponent = React.Component<{
+		user: {
+			id: string;
+			login: string;
+			displayName: string;
+			authToken?: string;
+		};
+	}>;
+
 	export type ChatServiceComponent = React.PureComponent<{
 		authToken: string;
 		currentUserLogin: string;
@@ -450,7 +479,7 @@ export namespace Twitch {
 		messageHandlerAPI: {
 			addMessageHandler: (event: (msg: ChatMessage) => void) => void;
 			removeMessageHandler: (event: (msg: ChatMessage) => void) => void;
-			handleMessage: () => void;
+			handleMessage: (msg: ChatMessage) => void;
 		};
 		rightColumnExpanded: boolean;
 		rootTrackerExists: boolean;

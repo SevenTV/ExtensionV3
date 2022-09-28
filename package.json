@@ -13,13 +13,12 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@types/chrome": "^0.0.195",
-		"@types/node": "^18.7.13",
 		"vue": "^3.2.37"
 	},
 	"devDependencies": {
+		"@types/chrome": "^0.0.195",
 		"@types/fs-extra": "^9.0.13",
-		"@types/react": "^18.0.21",
+		"@types/node": "^18.7.13",
 		"@typescript-eslint/eslint-plugin": "^5.34.0",
 		"@typescript-eslint/parser": "^5.34.0",
 		"@vitejs/plugin-vue": "^3.0.3",
