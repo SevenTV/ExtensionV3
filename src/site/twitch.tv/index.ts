@@ -1,19 +1,18 @@
 export function findReactParents(
 	node: any,
 	predicate: Twitch.FindReactInstancePredicate,
-	maxDepth = 15,
-	depth = 0
+	maxDepth = 15
 ): Twitch.AnyPureComponent | null {
-	let success = false;
-	try {
-		success = predicate(node);
-	} catch (_) {}
-	if (success) return node;
-	if (!node || depth > maxDepth) return null;
+	let travel = 0;
+	while (node && travel <= maxDepth) {
+		try {
+			let match = predicate?.(node);
+			if (match) return node;
+		}
+		catch (e) {}
 
-	const { return: parent } = node;
-	if (parent) {
-		return findReactParents(parent, predicate, maxDepth, depth + 1);
+		node = node.return;
+		travel++;
 	}
 
 	return null;
@@ -22,22 +21,30 @@ export function findReactParents(
 export function findReactChildren(
 	node: any,
 	predicate: Twitch.FindReactInstancePredicate,
-	maxDepth = 15,
-	depth = 0
+	maxDepth = 15
 ): Twitch.AnyPureComponent | null {
-	let success = false;
-	try {
-		success = predicate(node);
-	} catch (_) {}
-	if (success) return node;
-	if (!node || depth > maxDepth) return null;
+	let path: any[] = [];
 
-	const { child, sibling } = node;
-	if (child || sibling) {
-		return (
-			findReactChildren(child, predicate, maxDepth, depth + 1) ||
-			findReactChildren(sibling, predicate, maxDepth, depth + 1)
-		);
+	for (;;) {
+		if (!node || path.length > maxDepth) {
+			let parent = path.pop();
+			if (parent) {
+				node = parent.sibling;
+				continue;
+			}
+			else {
+				break;
+			}
+		}
+
+		try {
+			let match = predicate?.(node);
+			if (match) return node;
+		}
+		catch (e) {}
+
+		path.push(node);
+		node = node.child || node.sibling;
 	}
 
 	return null;
