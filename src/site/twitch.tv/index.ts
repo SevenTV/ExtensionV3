@@ -241,6 +241,18 @@ export function getChatLines(idList?: string[]): Twitch.ChatLineAndComponent[] {
 	return lines as Twitch.ChatLineAndComponent[];
 }
 
+export function getEmoteButton(): Twitch.EmoteButton {
+	const node = findReactParents(
+		getReactInstance(
+			document.querySelector("[data-test-selector='emote-button']")
+		),
+		n => n.stateNode?.props?.onEmoteClick,
+		10
+	);
+
+	return node?.stateNode;
+}
+
 export function getVideoChatMessage(
 	element: HTMLElement
 ): Twitch.GetChatLineResult {
@@ -381,6 +393,15 @@ export namespace Twitch {
 		useHighContrastColors: boolean;
 	}>;
 
+	export type EmoteButton = React.Component<{}> & {
+		props: {
+			onEmoteClick: (emote: {
+				emoteID: string;
+				initialTopOffset: number;
+			}) => void;
+		};
+	};
+
 	export interface VideoMessageAndComponent {
 		element: HTMLDivElement;
 		inst: TwitchPureComponent;
@@ -492,14 +513,8 @@ export namespace Twitch {
 		userID: string | undefined;
 		userLogin: string | undefined;
 	}> & {
-		pushMessage: (msg: {
-			id: string;
-			msgid: string;
-			channel: string;
-			type: number;
-			message: any;
-		}) => void;
-		sendMessage: (msg: string, n: any) => void;
+		pushMessage: (msg: Partial<ChatMessage>) => void;
+		sendMessage: (msg: string, n?: any) => void;
 	};
 
 	export type VideoChannelComponent = React.PureComponent<{
@@ -864,7 +879,7 @@ export namespace Twitch {
 	export interface ChatUser {
 		color: string;
 		isIntl: boolean;
-		displayName: string;
+		isSubscriber: boolean;
 		userDisplayName: string;
 		userID: string;
 		userLogin: string;

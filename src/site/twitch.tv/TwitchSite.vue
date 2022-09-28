@@ -1,5 +1,5 @@
 <template>
-	<ChatController :key="seq" />
+	<ChatController />
 </template>
 
 <script setup lang="ts">
@@ -28,15 +28,15 @@ store.setIdentity(
 		: null
 );
 
-const seq = ref(0);
-
 //
 if (router) {
 	// router may be undefined in certain places, such as popout chat
 	const route = router.props.location;
 
 	router.props.history.listen((loc, act) => {
-		seq.value++;
+		store.setLocation(route);
 	});
+
+	store.setLocation(route);
 }
 </script>

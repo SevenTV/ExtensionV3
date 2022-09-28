@@ -1,8 +1,10 @@
+import { Twitch } from "@/site/twitch.tv";
 import { defineStore } from "pinia";
 
 export interface State {
 	platform: Platform;
 	identity: (TwitchIdentity | YouTubeIdentity) | null;
+	location: Twitch.Location | null;
 }
 
 export interface TwitchIdentity {
@@ -28,7 +30,8 @@ export const useStore = defineStore("main", {
 	state: () =>
 		({
 			platform: "UNKNOWN",
-			identity: null
+			identity: null,
+			location: null
 		} as State),
 
 	actions: {
@@ -38,12 +41,19 @@ export const useStore = defineStore("main", {
 		) {
 			this.platform = platform;
 			this.identity = identity;
+		},
+
+		setLocation(location: Twitch.Location | null) {
+			this.location = location;
 		}
 	},
 
 	getters: {
 		getIdentity<T extends Platform>(state: State) {
 			return state.identity as PlatformIdentity<T>;
+		},
+		getLocation(state: State) {
+			return state.location;
 		}
 	}
 });
