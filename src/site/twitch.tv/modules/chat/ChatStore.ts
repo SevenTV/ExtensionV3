@@ -1,4 +1,4 @@
-import { Twitch } from "@/site/twitch.tv/Twitch";
+import { Twitch } from "@/site/twitch.tv";
 import { defineStore } from "pinia";
 
 export interface State {

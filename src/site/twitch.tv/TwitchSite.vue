@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { getRouter, getUser } from "@/site/twitch.tv/Twitch";
+import { getRouter, getUser } from "@/site/twitch.tv";
 import { useStore } from "@/store/main";
 import { ref } from "vue";
 import ChatController from "./modules/chat/ChatController.vue";
