@@ -207,12 +207,13 @@ export function getEmotePicker(): Twitch.AnyPureComponent {
 /**
  * Get an individual chat line
  */
-export function getChatLine(el: HTMLElement): Twitch.GetChatLineResult {
+export function getChatLine(el: HTMLElement): Twitch.ChatLineAndComponent {
 	const inst = getReactInstance(el);
 
 	return {
 		component: inst?.return?.stateNode,
-		instance: inst as Twitch.TwitchPureComponent
+		inst: inst as Twitch.TwitchPureComponent,
+		element: inst?.stateNode
 	};
 }
 
@@ -228,7 +229,7 @@ export function getChatLines(idList?: string[]): Twitch.ChatLineAndComponent[] {
 		return {
 			element,
 			component: chatLine.component,
-			inst: chatLine.instance
+			inst: chatLine.inst
 		};
 	});
 
@@ -251,51 +252,6 @@ export function getEmoteButton(): Twitch.EmoteButton {
 	);
 
 	return node?.stateNode;
-}
-
-export function getVideoChatMessage(
-	element: HTMLElement
-): Twitch.GetChatLineResult {
-	const inst = getReactInstance(element);
-
-	return {
-		component: inst?.return?.return?.stateNode,
-		instance: inst as Twitch.TwitchPureComponent
-	};
-}
-
-/**
- * Get VOD and clip messages as their elements and react components.
- */
-export function getVideoMessages(): Twitch.VideoMessageAndComponent[] {
-	const messages = Array.from(
-		document.querySelectorAll<HTMLElement>(
-			Twitch.Selectors.VideoChatMessage
-		)
-	).map(element => {
-		const message = getVideoChatMessage(element);
-
-		return {
-			element,
-			component: message.component,
-			inst: message.instance
-		};
-	});
-
-	return messages as Twitch.VideoMessageAndComponent[];
-}
-
-export function getEmoteCardOpener(): Twitch.EmoteCardOpener {
-	const inst = document.querySelector(Twitch.Selectors.ChatContainer);
-
-	// This has to walk deep FeelsDankMan
-	const opener = findReactParents(
-		getReactInstance(inst),
-		n => n.stateNode.onShowEmoteCard,
-		200
-	);
-
-	return opener?.stateNode;
 }
 
 export namespace Twitch {
@@ -348,15 +304,18 @@ export namespace Twitch {
 		updateQueue: any;
 	}
 
-	export interface GetChatLineResult {
-		instance: TwitchPureComponent;
-		component: AnyPureComponent;
-	}
 	export interface ChatLineAndComponent {
-		element: HTMLDivElement;
+		element?: HTMLDivElement;
 		inst: TwitchPureComponent;
 		component: ChatLineComponent;
 	}
+
+	export interface VideoChatLineAndComponent {
+		element?: HTMLDivElement;
+		inst: TwitchPureComponent;
+		component: VideoChatComponent;
+	}
+
 	export type ChatLineComponent = React.PureComponent<{
 		badgeSets: BadgeSets;
 		channelID: string;
@@ -391,7 +350,9 @@ export namespace Twitch {
 			hide: Function;
 		};
 		useHighContrastColors: boolean;
-	}>;
+	}> & {
+		openViewerCard: (e: any) => void;
+	};
 
 	export type EmoteButton = React.Component<{}> & {
 		props: {
@@ -402,11 +363,6 @@ export namespace Twitch {
 		};
 	};
 
-	export interface VideoMessageAndComponent {
-		element: HTMLDivElement;
-		inst: TwitchPureComponent;
-		component: VideoMessageComponent;
-	}
 	export type VideoMessageComponent = React.PureComponent<{
 		badgeSets: BadgeSets;
 		context: VideoChatCommentContext;

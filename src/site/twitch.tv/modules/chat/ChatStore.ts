@@ -2,6 +2,7 @@ import { Twitch } from "@/site/twitch.tv";
 import { defineStore } from "pinia";
 
 export interface State {
+	channel: CurrentChannel | null;
 	messages: Twitch.ChatMessage[];
 	lineLimit: number;
 }
@@ -9,6 +10,7 @@ export interface State {
 export const useChatStore = defineStore("chat", {
 	state: () =>
 		({
+			channel: null,
 			messages: [],
 			lineLimit: 200
 		} as State),
@@ -27,3 +29,9 @@ export const useChatStore = defineStore("chat", {
 		}
 	}
 });
+
+interface CurrentChannel {
+	id: string;
+	login: string;
+	displayName: string;
+}
