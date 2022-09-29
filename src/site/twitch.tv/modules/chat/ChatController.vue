@@ -1,7 +1,7 @@
 <template>
-	<Teleport v-if="extMounted" to="#seventv-chat-controller">
+	<Teleport v-if="extMounted" :to="containerEl">
 		<div class="seventv-message-container">
-			<div v-for="msg of chatStore.messages" :key="msg.id">
+			<div v-for="msg of chatStore.messages" :key="msg.id" :msg-id="msg.id">
 				<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
 			</div>
 		</div>
@@ -15,8 +15,7 @@
 			<div
 				class="seventv-scrollbar-thumb"
 				:style="{
-					top: `${containerEl.scrollHeight -
-						containerEl.clientHeight}px`
+					top: `${containerEl.scrollHeight - containerEl.clientHeight}px`
 				}"
 			/>
 		</div>
@@ -24,19 +23,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-	getChatController,
-	getChatMessageContainer,
-	Twitch
-} from "@/site/twitch.tv";
+import { getChatController, getChatMessageContainer, Twitch } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted } from "vue";
 import { useChatStore } from "./ChatStore";
 import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
-import {
-	registerEmoteCardOpener,
-	sendDummyMessage
-} from "@/site/twitch.tv/modules/chat/ChatBackend";
+import { registerEmoteCardCardOpener, sendDummyMessage, tools } from "@/site/twitch.tv/modules/chat/ChatBackend";
+import { log } from "@/common/Logger";
 
+const chatStore = useChatStore();
 const extMounted = ref(false);
 const controller = getChatController();
 const controllerClass = controller?.constructor?.prototype;
@@ -45,6 +39,8 @@ const el = document.createElement("seventv-container");
 el.id = "seventv-chat-controller";
 const containerEl = ref<HTMLElement>(el);
 const bounds = ref<DOMRect>(el.getBoundingClientRect());
+
+log.debug("<ChatController>", "Hook started");
 
 // Hook chat controller mount event
 {
@@ -61,34 +57,57 @@ const bounds = ref<DOMRect>(el.getBoundingClientRect());
 			parentEl.insertBefore(el, parentEl.children[2]);
 		}
 
-		extMounted.value = true;
-
-		// Listen for new messages
-		this.props.messageHandlerAPI.handleMessage = onMessage;
-
 		// Send dummy message
 		sendDummyMessage(this);
 
-		// TODO: use a mutation observer to detect the messages' creation
-		setTimeout(() => {
-			registerEmoteCardOpener();
-		}, 1000);
+		const scrollContainer = document.querySelector(Twitch.Selectors.ChatScrollableContainer);
+		if (scrollContainer) {
+			const observer = new MutationObserver(entries => {
+				for (let i = 0; i < entries.length; i++) {
+					const rec = entries[i];
+
+					rec.addedNodes.forEach(node => {
+						if (!(node instanceof HTMLElement) || !node.classList.contains("chat-line__message")) {
+							return;
+						}
+
+						// registration successful
+						if (!registerEmoteCardCardOpener()) {
+							return;
+						}
+
+						overwriteMessageContainer();
+						extMounted.value = true;
+
+						// Listen for new messages
+						this.props.messageHandlerAPI.handleMessage = onMessage;
+
+						observer.disconnect();
+					});
+				}
+			});
+
+			observer.observe(scrollContainer, {
+				childList: true
+			});
+
+			log.debug("<ChatController>", "Spawning MutationObserver");
+		}
 
 		if (typeof x === "function") x.bind(this);
 	};
 }
 
 // Take over the chat's native message container
-
-const container = getChatMessageContainer();
-const containerClass = container.constructor.prototype;
-if (container) {
-	containerClass.render = function() {
-		return null;
-	};
-}
-
-const chatStore = useChatStore();
+const overwriteMessageContainer = () => {
+	const container = getChatMessageContainer();
+	const containerClass = container.constructor.prototype;
+	if (container) {
+		containerClass.render = function() {
+			return null;
+		};
+	}
+};
 
 // Handle scrolling
 const scroll = reactive({
@@ -131,6 +150,8 @@ containerEl.value.addEventListener("scroll", (ev: Event) => {
 	}
 });
 
+const dict = {} as Record<number, Twitch.ChatMessage>;
+
 const onMessage = (msg: Twitch.ChatMessage) => {
 	if (scroll.paused) {
 		// if scrolling is paused, buffer the message
@@ -148,6 +169,12 @@ const onMessage = (msg: Twitch.ChatMessage) => {
 		// autoscroll on new message
 		scrollToLive();
 	});
+
+	if (msg.type !== 0 && !dict[msg.type]) {
+		dict[msg.type] = msg;
+
+		console.log("Current msg data dict", dict);
+	}
 };
 
 // Apply new boundaries when the window is resized
@@ -173,16 +200,12 @@ const openViewerCard = (ev: MouseEvent, viewer: Twitch.ChatUser) => {
 	controller.sendMessage(`.user ${viewer.userLogin}`);
 
 	// Watch for card being created
-	const userCardContainer = document.querySelector(
-		"[data-a-target='chat-user-card']"
-	);
+	const userCardContainer = document.querySelector("[data-a-target='chat-user-card']");
 	if (!userCardContainer) return;
 
 	const observer = new MutationObserver(() => {
 		// Find card element
-		const cardEl = document.querySelector<HTMLDivElement>(
-			"[data-test-selector='viewer-card-positioner']"
-		);
+		const cardEl = document.querySelector<HTMLDivElement>("[data-test-selector='viewer-card-positioner']");
 		if (!cardEl) return;
 
 		cardEl.style.top = `${ev.y - cardEl.getBoundingClientRect().height}px`;
@@ -247,11 +270,5 @@ onUnmounted(() => {
 			}
 		}
 	}
-}
-
-.chat-list--default {
-	position: absolute;
-	height: 0;
-	width: 0;
 }
 </style>
