@@ -1,5 +1,5 @@
 <template>
-	<span class="seventv-chat-message">
+	<span v-if="msg" class="seventv-chat-message">
 		<!-- Chat Author -->
 		<span
 			v-if="msg.user"
@@ -22,14 +22,20 @@
 
 <script setup lang="ts">
 import { Twitch } from "@/site/twitch.tv";
+import { onBeforeUnmount } from "vue";
+import { destroyObject } from "@/common/mem";
 
 const emit = defineEmits<{
 	(e: "open-viewer-card", ev: MouseEvent, viewer: Twitch.ChatUser): void;
 }>();
 
-defineProps<{
+const props = defineProps<{
 	msg: Twitch.ChatMessage;
 }>();
+
+onBeforeUnmount(() => {
+	destroyObject(props.msg);
+});
 </script>
 
 <style scoped lang="scss">

@@ -45,7 +45,7 @@ log.debug("<ChatController>", "Hook started");
 // Hook chat controller mount event
 {
 	const x = controller.componentDidUpdate;
-	controllerClass.componentDidUpdate = function () {
+	controllerClass.componentDidUpdate = function(this: Twitch.ChatControllerComponent) {
 		// Put placeholder to teleport our message list
 		if (document.getElementById("seventv-chat-controller")) {
 			return;
@@ -62,11 +62,11 @@ log.debug("<ChatController>", "Hook started");
 
 		const scrollContainer = document.querySelector(Twitch.Selectors.ChatScrollableContainer);
 		if (scrollContainer) {
-			const observer = new MutationObserver((entries) => {
+			const observer = new MutationObserver(entries => {
 				for (let i = 0; i < entries.length; i++) {
 					const rec = entries[i];
 
-					rec.addedNodes.forEach((node) => {
+					rec.addedNodes.forEach(node => {
 						if (!(node instanceof HTMLElement) || !node.classList.contains("chat-line__message")) {
 							return;
 						}
@@ -80,7 +80,7 @@ log.debug("<ChatController>", "Hook started");
 						extMounted.value = true;
 
 						// Listen for new messages
-						this.props.messageHandlerAPI.handleMessage = onMessage;
+						this.props.messageHandlerAPI.addMessageHandler(onMessage);
 
 						observer.disconnect();
 					});
@@ -103,7 +103,7 @@ const overwriteMessageContainer = () => {
 	const container = getChatMessageContainer();
 	const containerClass = container.constructor.prototype;
 	if (container) {
-		containerClass.render = function () {
+		containerClass.render = function() {
 			return null;
 		};
 	}
@@ -152,7 +152,9 @@ containerEl.value.addEventListener("scroll", (ev: Event) => {
 
 const dict = {} as Record<number, Twitch.ChatMessage>;
 
-const onMessage = (msg: Twitch.ChatMessage) => {
+const onMessage = (m: Twitch.ChatMessage) => {
+	const msg = { ...m };
+
 	if (scroll.paused) {
 		// if scrolling is paused, buffer the message
 		scroll.buffer.push(msg);
@@ -169,12 +171,6 @@ const onMessage = (msg: Twitch.ChatMessage) => {
 		// autoscroll on new message
 		scrollToLive();
 	});
-
-	if (msg.type !== 0 && !dict[msg.type]) {
-		dict[msg.type] = msg;
-
-		console.log("Current msg data dict", dict);
-	}
 };
 
 // Apply new boundaries when the window is resized
