@@ -31,21 +31,18 @@ export const useStore = defineStore("main", {
 		({
 			platform: "UNKNOWN",
 			identity: null,
-			location: null
+			location: null,
 		} as State),
 
 	actions: {
-		setIdentity<T extends Platform>(
-			platform: T,
-			identity: PlatformIdentity<T> | null
-		) {
+		setIdentity<T extends Platform>(platform: T, identity: PlatformIdentity<T> | null) {
 			this.platform = platform;
 			this.identity = identity;
 		},
 
 		setLocation(location: Twitch.Location | null) {
 			this.location = location;
-		}
+		},
 	},
 
 	getters: {
@@ -54,6 +51,6 @@ export const useStore = defineStore("main", {
 		},
 		getLocation(state: State) {
 			return state.location;
-		}
-	}
+		},
+	},
 });

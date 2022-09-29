@@ -10,6 +10,7 @@
 		"build:dev": "vite build --mode dev",
 		"build:prod": "vue-tsc --noEmit && vite build",
 		"dev:web": "vite",
+		"prettier": "prettier -w .",
 		"preview": "vite preview"
 	},
 	"dependencies": {

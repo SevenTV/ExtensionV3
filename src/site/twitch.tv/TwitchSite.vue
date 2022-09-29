@@ -23,9 +23,9 @@ store.setIdentity(
 		? {
 				id: user.id,
 				login: user.login,
-				displayName: user.displayName
+				displayName: user.displayName,
 		  }
-		: null
+		: null,
 );
 
 //

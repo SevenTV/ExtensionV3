@@ -15,7 +15,7 @@
 			<div
 				class="seventv-scrollbar-thumb"
 				:style="{
-					top: `${containerEl.scrollHeight - containerEl.clientHeight}px`
+					top: `${containerEl.scrollHeight - containerEl.clientHeight}px`,
 				}"
 			/>
 		</div>
@@ -45,7 +45,7 @@ log.debug("<ChatController>", "Hook started");
 // Hook chat controller mount event
 {
 	const x = controller.componentDidUpdate;
-	controllerClass.componentDidUpdate = function() {
+	controllerClass.componentDidUpdate = function () {
 		// Put placeholder to teleport our message list
 		if (document.getElementById("seventv-chat-controller")) {
 			return;
@@ -62,11 +62,11 @@ log.debug("<ChatController>", "Hook started");
 
 		const scrollContainer = document.querySelector(Twitch.Selectors.ChatScrollableContainer);
 		if (scrollContainer) {
-			const observer = new MutationObserver(entries => {
+			const observer = new MutationObserver((entries) => {
 				for (let i = 0; i < entries.length; i++) {
 					const rec = entries[i];
 
-					rec.addedNodes.forEach(node => {
+					rec.addedNodes.forEach((node) => {
 						if (!(node instanceof HTMLElement) || !node.classList.contains("chat-line__message")) {
 							return;
 						}
@@ -88,7 +88,7 @@ log.debug("<ChatController>", "Hook started");
 			});
 
 			observer.observe(scrollContainer, {
-				childList: true
+				childList: true,
 			});
 
 			log.debug("<ChatController>", "Spawning MutationObserver");
@@ -103,7 +103,7 @@ const overwriteMessageContainer = () => {
 	const container = getChatMessageContainer();
 	const containerClass = container.constructor.prototype;
 	if (container) {
-		containerClass.render = function() {
+		containerClass.render = function () {
 			return null;
 		};
 	}
@@ -115,7 +115,7 @@ const scroll = reactive({
 	sys: true,
 	visible: true,
 	paused: false, // whether or not scrolling is paused
-	buffer: [] as Twitch.ChatMessage[] // twitch chat message buffe when scrolling is paused
+	buffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
 });
 
 // Listen for scroll events
@@ -191,7 +191,7 @@ const scrollToLive = () => {
 	scroll.sys = true;
 
 	containerEl.value.scrollTo({
-		top: containerEl.value?.scrollHeight
+		top: containerEl.value?.scrollHeight,
 	});
 	bounds.value = containerEl.value.getBoundingClientRect();
 };
@@ -215,7 +215,7 @@ const openViewerCard = (ev: MouseEvent, viewer: Twitch.ChatUser) => {
 
 	observer.observe(userCardContainer, {
 		childList: true,
-		subtree: true
+		subtree: true,
 	});
 
 	// timeout the mutation observer

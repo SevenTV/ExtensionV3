@@ -42,7 +42,7 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 			{
 				resources: ["site.js", "styles.css"],
 				matches: ["*://*.twitch.tv/*"],
-			}
+			},
 		],
 	} as Manifest.WebExtensionManifest & MV3HostPermissions;
 
@@ -52,7 +52,7 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 
 		manifest.background = {
 			scripts: ["background.js"],
-		}
+		};
 
 		// Host permissions -> permissions
 		manifest.permissions = [...(manifest.permissions ?? []), ...(manifest.host_permissions ?? [])];
@@ -62,8 +62,11 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 		];
 
 		// web accessible resources
-		manifest.web_accessible_resources = (manifest.web_accessible_resources as Manifest.WebExtensionManifestWebAccessibleResourcesC2ItemType[])
-			.map((v) => v.resources).reduce((a, b) => [...a ?? [], ...b ?? []]);
+		manifest.web_accessible_resources = (
+			manifest.web_accessible_resources as Manifest.WebExtensionManifestWebAccessibleResourcesC2ItemType[]
+		)
+			.map((v) => v.resources)
+			.reduce((a, b) => [...(a ?? []), ...(b ?? [])]);
 
 		// this is required on dev for Vite script to load
 		manifest.content_security_policy = `script-src-elem \'self\' \'unsafe-eval\' http://localhost:${4777}; object-src \'self\'`;

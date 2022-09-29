@@ -12,11 +12,11 @@ export const useChatStore = defineStore("chat", {
 		({
 			channel: null,
 			messages: [],
-			lineLimit: 200
+			lineLimit: 200,
 		} as State),
 
 	getters: {
-		currentMessage: state => state.messages[state.messages.length - 1]
+		currentMessage: (state) => state.messages[state.messages.length - 1],
 	},
 
 	actions: {
@@ -26,8 +26,8 @@ export const useChatStore = defineStore("chat", {
 			if (this.messages.length > this.lineLimit) {
 				this.messages.shift();
 			}
-		}
-	}
+		},
+	},
 });
 
 interface CurrentChannel {

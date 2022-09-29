@@ -1,15 +1,14 @@
 export function findReactParents(
 	node: any,
 	predicate: Twitch.FindReactInstancePredicate,
-	maxDepth = 15
+	maxDepth = 15,
 ): Twitch.AnyPureComponent | null {
 	let travel = 0;
 	while (node && travel <= maxDepth) {
 		try {
 			let match = predicate?.(node);
 			if (match) return node;
-		}
-		catch (e) {}
+		} catch (e) {}
 
 		node = node.return;
 		travel++;
@@ -21,7 +20,7 @@ export function findReactParents(
 export function findReactChildren(
 	node: any,
 	predicate: Twitch.FindReactInstancePredicate,
-	maxDepth = 15
+	maxDepth = 15,
 ): Twitch.AnyPureComponent | null {
 	let path: any[] = [];
 
@@ -31,8 +30,7 @@ export function findReactChildren(
 			if (parent) {
 				node = parent.sibling;
 				continue;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
@@ -40,8 +38,7 @@ export function findReactChildren(
 		try {
 			let match = predicate?.(node);
 			if (match) return node;
-		}
-		catch (e) {}
+		} catch (e) {}
 
 		path.push(node);
 		node = node.child || node.sibling;
@@ -50,9 +47,7 @@ export function findReactChildren(
 	return null;
 }
 
-export function getReactInstance(
-	el: Element | null
-): (React.Component & { [x: string]: any }) | undefined {
+export function getReactInstance(el: Element | null): (React.Component & { [x: string]: any }) | undefined {
 	for (const k in el) {
 		if (k.startsWith("__reactInternalInstance$")) {
 			return (el as any)[k] as any;
@@ -62,11 +57,9 @@ export function getReactInstance(
 
 export function getRouter(): Twitch.RouterComponent {
 	const node = findReactChildren(
-		getReactInstance(
-			document.querySelectorAll(Twitch.Selectors.MainLayout)[0]
-		),
-		n => n.stateNode?.props?.history?.listen,
-		100
+		getReactInstance(document.querySelectorAll(Twitch.Selectors.MainLayout)[0]),
+		(n) => n.stateNode?.props?.history?.listen,
+		100,
 	);
 
 	return node?.stateNode;
@@ -74,11 +67,9 @@ export function getRouter(): Twitch.RouterComponent {
 
 export function getUser(): Twitch.UserComponent {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelector("button[data-a-target='user-menu-toggle']")
-		),
-		n => n.stateNode?.props?.user,
-		100
+		getReactInstance(document.querySelector("button[data-a-target='user-menu-toggle']")),
+		(n) => n.stateNode?.props?.user,
+		100,
 	);
 
 	return node?.stateNode;
@@ -86,11 +77,9 @@ export function getUser(): Twitch.UserComponent {
 
 export function getChatService(): Twitch.ChatServiceComponent {
 	const node = findReactChildren(
-		getReactInstance(
-			document.querySelectorAll(Twitch.Selectors.MainLayout)[0]
-		),
-		n => n.stateNode?.join && n.stateNode?.client,
-		500
+		getReactInstance(document.querySelectorAll(Twitch.Selectors.MainLayout)[0]),
+		(n) => n.stateNode?.join && n.stateNode?.client,
+		500,
 	);
 
 	return node?.stateNode;
@@ -98,13 +87,9 @@ export function getChatService(): Twitch.ChatServiceComponent {
 
 export function getChatController(): Twitch.ChatControllerComponent {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelectorAll(Twitch.Selectors.ChatContainer)[0]
-		),
-		n =>
-			n.stateNode?.props.messageHandlerAPI &&
-			n.stateNode?.props.chatConnectionAPI,
-		100
+		getReactInstance(document.querySelectorAll(Twitch.Selectors.ChatContainer)[0]),
+		(n) => n.stateNode?.props.messageHandlerAPI && n.stateNode?.props.chatConnectionAPI,
+		100,
 	);
 
 	return node?.stateNode;
@@ -113,8 +98,8 @@ export function getChatController(): Twitch.ChatControllerComponent {
 export function getChatMessageContainer(): Twitch.AnyPureComponent {
 	const node = findReactParents(
 		getReactInstance(document.querySelector(".chat-list--default")),
-		n => n.stateNode && n.stateNode.props && n.stateNode.props.messages,
-		100
+		(n) => n.stateNode && n.stateNode.props && n.stateNode.props.messages,
+		100,
 	);
 
 	return node?.stateNode;
@@ -127,11 +112,9 @@ export function getChatMessageContainer(): Twitch.AnyPureComponent {
  */
 export function getVideoChannel(): Twitch.VideoChannelComponent {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelectorAll(Twitch.Selectors.VideoChatContainer)[0]
-		),
-		n => n.stateNode?.props.channelID && n.stateNode?.props.displayName,
-		100
+		getReactInstance(document.querySelectorAll(Twitch.Selectors.VideoChatContainer)[0]),
+		(n) => n.stateNode?.props.channelID && n.stateNode?.props.displayName,
+		100,
 	);
 
 	// Kinda hacky? However, display names are merely
@@ -146,8 +129,8 @@ export function getVideoChannel(): Twitch.VideoChannelComponent {
 export function getChatScroller(): Twitch.ChatScrollerComponent {
 	const node = findReactParents(
 		getReactInstance(document.querySelector(".scrollable-area")),
-		n => n.stateNode.props["data-a-target"] === ("chat-scroller" as any),
-		10
+		(n) => n.stateNode.props["data-a-target"] === ("chat-scroller" as any),
+		10,
 	);
 
 	return node?.stateNode;
@@ -155,10 +138,8 @@ export function getChatScroller(): Twitch.ChatScrollerComponent {
 
 export function getChat(): Twitch.ChatComponent {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelectorAll(Twitch.Selectors.ChatContainer)[0]
-		),
-		n => n.stateNode?.props.onSendMessage
+		getReactInstance(document.querySelectorAll(Twitch.Selectors.ChatContainer)[0]),
+		(n) => n.stateNode?.props.onSendMessage,
 	);
 
 	return node?.stateNode;
@@ -169,11 +150,9 @@ export function getChat(): Twitch.ChatComponent {
  */
 export function getVideoChat(): Twitch.VideoChatComponent {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelectorAll(Twitch.Selectors.VideoChatContainer)[0]
-		),
-		n => n.stateNode?.props.comments && n.stateNode?.props.onCreate,
-		5
+		getReactInstance(document.querySelectorAll(Twitch.Selectors.VideoChatContainer)[0]),
+		(n) => n.stateNode?.props.comments && n.stateNode?.props.onCreate,
+		5,
 	);
 
 	return node?.stateNode;
@@ -182,7 +161,7 @@ export function getVideoChat(): Twitch.VideoChatComponent {
 export function getInputController(): Twitch.ChatInputController {
 	const node = findReactParents(
 		getReactInstance(document.querySelectorAll("div.chat-input")[0]),
-		n => n.stateNode?.props.onSendMessage
+		(n) => n.stateNode?.props.onSendMessage,
 	);
 	return node?.stateNode;
 }
@@ -194,7 +173,7 @@ export function getChatInput(): Twitch.ChatInputComponent {
 export function getAutocompleteHandler(): Twitch.ChatAutocompleteComponent {
 	const node = findReactChildren(
 		getReactInstance(document.querySelector(".chat-input__textarea")),
-		n => n.stateNode.providers
+		(n) => n.stateNode.providers,
 	);
 
 	return node?.stateNode;
@@ -202,10 +181,8 @@ export function getAutocompleteHandler(): Twitch.ChatAutocompleteComponent {
 
 export function getEmotePicker(): Twitch.AnyPureComponent {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelector("[data-a-target=emote-picker]")
-		),
-		n => !(n.stateNode instanceof HTMLElement) && n.stateNode !== null
+		getReactInstance(document.querySelector("[data-a-target=emote-picker]")),
+		(n) => !(n.stateNode instanceof HTMLElement) && n.stateNode !== null,
 	);
 
 	return node as any;
@@ -220,7 +197,7 @@ export function getChatLine(el: HTMLElement): Twitch.ChatLineAndComponent {
 	return {
 		component: inst?.return?.stateNode,
 		inst: inst as Twitch.TwitchPureComponent,
-		element: inst?.stateNode
+		element: inst?.stateNode,
 	};
 }
 
@@ -228,22 +205,18 @@ export function getChatLine(el: HTMLElement): Twitch.ChatLineAndComponent {
  * Get chat lines with the element & react component, optionally filtered by an ID list
  */
 export function getChatLines(idList?: string[]): Twitch.ChatLineAndComponent[] {
-	let lines = Array.from(
-		document.querySelectorAll<HTMLElement>(Twitch.Selectors.ChatLine)
-	).map(element => {
+	let lines = Array.from(document.querySelectorAll<HTMLElement>(Twitch.Selectors.ChatLine)).map((element) => {
 		const chatLine = getChatLine(element);
 
 		return {
 			element,
 			component: chatLine.component,
-			inst: chatLine.inst
+			inst: chatLine.inst,
 		};
 	});
 
 	if (!!idList) {
-		lines = lines.filter(({ component }) =>
-			idList?.includes((component?.props as any)?.message?.id)
-		);
+		lines = lines.filter(({ component }) => idList?.includes((component?.props as any)?.message?.id));
 	}
 
 	return lines as Twitch.ChatLineAndComponent[];
@@ -251,11 +224,9 @@ export function getChatLines(idList?: string[]): Twitch.ChatLineAndComponent[] {
 
 export function getEmoteButton(): Twitch.EmoteButton {
 	const node = findReactParents(
-		getReactInstance(
-			document.querySelector("[data-test-selector='emote-button']")
-		),
-		n => n.stateNode?.props?.onEmoteClick,
-		10
+		getReactInstance(document.querySelector("[data-test-selector='emote-button']")),
+		(n) => n.stateNode?.props?.onEmoteClick,
+		10,
 	);
 
 	return node?.stateNode;
@@ -267,17 +238,13 @@ export namespace Twitch {
 		export const NAV = '[data-a-target="top-nav-container"]';
 		export const MainLayout =
 			'main.twilight-main, #root.sunlight-root > div:nth-of-type(3), #root[data-a-page-loaded-name="PopoutChatPage"] > div, #root[data-a-page-loaded-name="ModerationViewChannelPage"] > div:nth-of-type(1)';
-		export const ChatContainer =
-			'section[data-test-selector="chat-room-component-layout"]';
+		export const ChatContainer = 'section[data-test-selector="chat-room-component-layout"]';
 		export const VideoChatContainer = "div.video-chat.va-vod-chat";
-		export const ChatScrollableContainer =
-			".chat-scrollable-area__message-container";
+		export const ChatScrollableContainer = ".chat-scrollable-area__message-container";
 		export const ChatLine = ".chat-line__message";
-		export const VideoChatMessage =
-			".vod-message > div:not(.vod-message__header) > div";
+		export const VideoChatMessage = ".vod-message > div:not(.vod-message__header) > div";
 		export const ChatInput = ".chat-input__textarea";
-		export const ChatInputButtonsContainer =
-			'div[data-test-selector="chat-input-buttons-container"]';
+		export const ChatInputButtonsContainer = 'div[data-test-selector="chat-input-buttons-container"]';
 		export const ChatMessageContainer = ".chat-line__message-container";
 		export const ChatUsernameContainer = ".chat-line__username-container";
 		export const ChatAuthorDisplayName = ".chat-author__display-name";
@@ -363,10 +330,7 @@ export namespace Twitch {
 
 	export type EmoteButton = React.Component<{}> & {
 		props: {
-			onEmoteClick: (emote: {
-				emoteID: string;
-				initialTopOffset: number;
-			}) => void;
+			onEmoteClick: (emote: { emoteID: string; initialTopOffset: number }) => void;
 		};
 	};
 
@@ -384,9 +348,7 @@ export namespace Twitch {
 			action: string;
 			goBack: () => void;
 			goForward: () => void;
-			listen: (
-				handler: (location: Location, action: string) => void
-			) => void;
+			listen: (handler: (location: Location, action: string) => void) => void;
 			location: Location;
 		};
 		location: Location;
@@ -422,13 +384,7 @@ export namespace Twitch {
 		service: {
 			client: {
 				events: {
-					joined: (
-						fn: (x: {
-							channel: string;
-							gotUsername: boolean;
-							username: string;
-						}) => void
-					) => void;
+					joined: (fn: (x: { channel: string; gotUsername: boolean; username: string }) => void) => void;
 				};
 			};
 		};
@@ -552,7 +508,7 @@ export namespace Twitch {
 					parentMsgId: string;
 					parentUid: string;
 					parentUserLogin: string;
-				}
+				},
 			) => any;
 		};
 	};
@@ -616,16 +572,12 @@ export namespace Twitch {
 			theme: Theme;
 		};
 		renderEmoteSuggestion: (e: TwitchEmote) => TwitchEmote;
-		hydrateEmotes: (
-			emotes: any,
-			b: boolean,
-			theme: Twitch.Theme
-		) => Twitch.TwitchEmoteSet[];
+		hydrateEmotes: (emotes: any, b: boolean, theme: Twitch.Theme) => Twitch.TwitchEmoteSet[];
 	};
 
 	export enum Theme {
 		"Light",
-		"Dark"
+		"Dark",
 	}
 
 	// Standard React location object.

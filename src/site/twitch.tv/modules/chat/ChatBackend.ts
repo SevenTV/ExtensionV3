@@ -1,7 +1,7 @@
 import { getChatLine, getEmoteButton, Twitch } from "../..";
 
 export const tools = {
-	emoteClick: (() => {}) as Twitch.EmoteButton["props"]["onEmoteClick"]
+	emoteClick: (() => {}) as Twitch.EmoteButton["props"]["onEmoteClick"],
 };
 
 export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => {
@@ -14,7 +14,7 @@ export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => 
 			userID: "77777777",
 			color: "",
 			userType: "",
-			isSubscriber: false
+			isSubscriber: false,
 		},
 		messageParts: [
 			{
@@ -24,23 +24,23 @@ export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => 
 						dark: {
 							"1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/1.0",
 							"2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/2.0",
-							"4x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0"
+							"4x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/dark/3.0",
 						},
 						light: {
 							"1x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/light/1.0",
 							"2x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/light/2.0",
-							"4x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/light/3.0"
+							"4x": "https://static-cdn.jtvnw.net/emoticons/v2/25/default/light/3.0",
 						},
-						themed: true
+						themed: true,
 					},
 					alt: "",
-					emoteID: "-1"
-				}
-			}
+					emoteID: "-1",
+				},
+			},
 		],
 		messageBody: "",
 		type: 0,
-		messageType: 0
+		messageType: 0,
 	});
 };
 

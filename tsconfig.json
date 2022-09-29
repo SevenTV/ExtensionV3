@@ -18,13 +18,6 @@
 			"@/*": ["./src/*"]
 		}
 	},
-	"include": [
-		"src/*.ts",
-		"src/**/*.ts",
-		"src/**/*.d.ts",
-		"src/**/*.tsx",
-		"src/**/*.vue",
-		"manifest.config.ts"
-	],
+	"include": ["src/*.ts", "src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "manifest.config.ts"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }
