@@ -1,5 +1,5 @@
 import path from "path";
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import { getManifest } from "./manifest.config";
 import fs from "fs-extra";
 import vue from "@vitejs/plugin-vue";
@@ -9,6 +9,7 @@ const r = (...args: string[]) => path.resolve(__dirname, ...args);
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
 	const isDev = mode === "dev";
+	process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
 	return {
 		server: {

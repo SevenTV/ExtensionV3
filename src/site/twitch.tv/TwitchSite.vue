@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { log } from "@/common/Logger";
 import { getRouter, getUser } from "@/site/twitch.tv";
 import { useStore } from "@/store/main";
 import ChatController from "./modules/chat/ChatController.vue";
@@ -39,6 +38,4 @@ if (router) {
 
 	store.setLocation(route);
 }
-
-log.setContextName("site/twitch.tv");
 </script>
