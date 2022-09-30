@@ -8,6 +8,7 @@
 
 		<!-- Custom Scrollbar -->
 		<div
+			v-if="scroll.visible"
 			class="seventv-scrollbar"
 			:class="{ 'seventv-scrollbar--visible': scroll.visible }"
 			:style="{ height: `${bounds.height}px` }"
@@ -26,10 +27,10 @@
 import { getChatController, getChatMessageContainer, Twitch } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
 import { useChatStore } from "./ChatStore";
-import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
-import { registerEmoteCardCardOpener, sendDummyMessage, tools } from "@/site/twitch.tv/modules/chat/ChatBackend";
+import { registerEmoteCardCardOpener, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
+import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
 
 const chatStore = useChatStore();
 const { channel } = storeToRefs(chatStore);
@@ -72,6 +73,7 @@ watch(channel, channel => {
 		if (document.getElementById("seventv-chat-controller")) {
 			return;
 		}
+		let t = Date.now();
 
 		// Attach to chat
 		const parentEl = document.querySelector(".chat-room__content");
@@ -101,6 +103,7 @@ watch(channel, channel => {
 						overwriteMessageContainer();
 						extMounted.value = true;
 
+						log.debug("<ChatController>", "Chat controller mounted", `(${Date.now() - t}ms)`);
 						observer.disconnect();
 					});
 				}

@@ -1,9 +1,8 @@
 import path from "path";
-import { build, defineConfig } from "vite";
+import { defineConfig } from "vite";
 import { getManifest } from "./manifest.config";
 import fs from "fs-extra";
 import vue from "@vitejs/plugin-vue";
-import chokidar from "chokidar";
 
 const r = (...args: string[]) => path.resolve(__dirname, ...args);
 
@@ -36,7 +35,7 @@ export default defineConfig(({ mode }) => {
 					site: r("src/site/site.ts"),
 				},
 				output: {
-					entryFileNames: (info) => {
+					entryFileNames: info => {
 						const name = path.basename(info.facadeModuleId.replace(".ts", ".js"));
 
 						return name;

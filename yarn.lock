@@ -140,6 +140,11 @@
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
 
+"@types/sharedworker@^0.0.82":
+  version "0.0.82"
+  resolved "https://registry.yarnpkg.com/@types/sharedworker/-/sharedworker-0.0.82.tgz#baaa018f487a0e4f211f0057bc15e3fd549e8bc1"
+  integrity sha512-ESiG9F4jA2qMQUV5pylHasrbnCvh9lPf9uFxkoMOHxsGci5lN2a2llsEBnwgRK8+WDY0PoA2Q9kJefvysJzoow==
+
 "@typescript-eslint/eslint-plugin@^5.0.0", "@typescript-eslint/eslint-plugin@^5.34.0":
   version "5.35.1"
   resolved "https://registry.yarnpkg.com/@typescript-eslint/eslint-plugin/-/eslint-plugin-5.35.1.tgz#0d822bfea7469904dfc1bb8f13cabd362b967c93"

@@ -10,7 +10,7 @@
 		"sourceMap": true,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"lib": ["ESNext", "DOM"],
+		"lib": ["ESNext", "DOM", "WebWorker"],
 		"types": ["vite/client", "chrome"],
 		"skipLibCheck": true,
 		"baseUrl": ".",

@@ -1,7 +1,8 @@
 import { createApp, h } from "vue";
-import App from "@/site/App.vue";
 import { createPinia } from "pinia";
+import App from "@/site/App.vue";
 
+// Create Vue App
 const root = document.createElement("div");
 root.id = "seventv-root";
 
