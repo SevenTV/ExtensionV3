@@ -434,6 +434,9 @@ export namespace Twitch {
 	}> & {
 		pushMessage: (msg: Partial<ChatMessage>) => void;
 		sendMessage: (msg: string, n?: any) => void;
+		onRoomStateUpdated: (e: any) => void;
+		onChatEvent: (e: any) => void;
+		onBadgesUpdated: (e: any) => void;
 	};
 
 	export type VideoChannelComponent = React.PureComponent<{

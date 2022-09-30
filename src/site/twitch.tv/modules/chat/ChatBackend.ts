@@ -45,11 +45,13 @@ export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => 
 	});
 };
 
-export const registerEmoteCardCardOpener = (): boolean => {
+export const registerEmoteCardCardOpener = (node?: HTMLElement): boolean => {
 	const btn = getEmoteButton();
 	if (!btn) {
 		return false;
 	}
+
+	// test
 
 	tools.emoteClick = btn.props.onEmoteClick;
 

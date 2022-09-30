@@ -1,5 +1,5 @@
 <template>
-	<Teleport v-if="extMounted" :to="containerEl">
+	<Teleport v-if="extMounted && channel && channel.id" :to="containerEl">
 		<div class="seventv-message-container">
 			<div v-for="msg of chatStore.messages" :key="msg.id" :msg-id="msg.id">
 				<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
@@ -56,8 +56,8 @@ watch(channel, channel => {
 
 // Hook chat controller mount event
 {
-	const x = controller.componentDidUpdate;
-	controllerClass.componentDidUpdate = function(this: Twitch.ChatControllerComponent) {
+	const x = controllerClass.componentDidUpdate;
+	controllerClass.componentDidUpdate = function(this: Twitch.ChatControllerComponent, args: any[]) {
 		// Listen for new messages
 		this.props.messageHandlerAPI.addMessageHandler(onMessage);
 
@@ -113,7 +113,7 @@ watch(channel, channel => {
 			log.debug("<ChatController>", "Spawning MutationObserver");
 		}
 
-		if (typeof x === "function") x.bind(this);
+		return x.apply(this, [args]);
 	};
 }
 
@@ -138,7 +138,7 @@ const scroll = reactive({
 });
 
 // Listen for scroll events
-containerEl.value.addEventListener("scroll", (ev: Event) => {
+containerEl.value.addEventListener("scroll", () => {
 	const top = Math.floor(containerEl.value.scrollTop);
 	const h = Math.floor(containerEl.value.scrollHeight - bounds.value.height);
 
@@ -168,8 +168,6 @@ containerEl.value.addEventListener("scroll", (ev: Event) => {
 		});
 	}
 });
-
-const dict = {} as Record<number, Twitch.ChatMessage>;
 
 const onMessage = (m: Twitch.ChatMessage) => {
 	if (m.id === "seventv-hook-message") {
@@ -289,5 +287,10 @@ onUnmounted(() => {
 			}
 		}
 	}
+}
+
+.community-highlight {
+	opacity: 0.75;
+	backdrop-filter: blur(1em);
 }
 </style>
