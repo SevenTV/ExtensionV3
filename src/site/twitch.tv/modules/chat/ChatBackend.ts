@@ -41,6 +41,7 @@ export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => 
 		messageBody: "",
 		type: 0,
 		messageType: 0,
+		id: "seventv-hook-message",
 	});
 };
 

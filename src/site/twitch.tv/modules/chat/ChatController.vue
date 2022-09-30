@@ -24,13 +24,16 @@
 
 <script setup lang="ts">
 import { getChatController, getChatMessageContainer, Twitch } from "@/site/twitch.tv";
-import { ref, reactive, nextTick, onUnmounted } from "vue";
+import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
 import { useChatStore } from "./ChatStore";
 import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
 import { registerEmoteCardCardOpener, sendDummyMessage, tools } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
+import { storeToRefs } from "pinia";
 
 const chatStore = useChatStore();
+const { channel } = storeToRefs(chatStore);
+
 const extMounted = ref(false);
 const controller = getChatController();
 const controllerClass = controller?.constructor?.prototype;
@@ -38,14 +41,33 @@ const controllerClass = controller?.constructor?.prototype;
 const el = document.createElement("seventv-container");
 el.id = "seventv-chat-controller";
 const containerEl = ref<HTMLElement>(el);
+
 const bounds = ref<DOMRect>(el.getBoundingClientRect());
 
 log.debug("<ChatController>", "Hook started");
+
+watch(channel, channel => {
+	if (!channel) {
+		return;
+	}
+
+	log.info("<ChatController>", `Joining #${channel.login}`);
+});
 
 // Hook chat controller mount event
 {
 	const x = controller.componentDidUpdate;
 	controllerClass.componentDidUpdate = function(this: Twitch.ChatControllerComponent) {
+		// Listen for new messages
+		this.props.messageHandlerAPI.addMessageHandler(onMessage);
+
+		// Update current channel
+		chatStore.setChannel({
+			id: this.props.channelID,
+			login: this.props.channelLogin,
+			displayName: this.props.channelDisplayName,
+		});
+
 		// Put placeholder to teleport our message list
 		if (document.getElementById("seventv-chat-controller")) {
 			return;
@@ -53,7 +75,7 @@ log.debug("<ChatController>", "Hook started");
 
 		// Attach to chat
 		const parentEl = document.querySelector(".chat-room__content");
-		if (parentEl) {
+		if (parentEl && !parentEl.contains(el)) {
 			parentEl.insertBefore(el, parentEl.children[2]);
 		}
 
@@ -71,16 +93,13 @@ log.debug("<ChatController>", "Hook started");
 							return;
 						}
 
-						// registration successful
+						// Finalize all chat hooks
 						if (!registerEmoteCardCardOpener()) {
 							return;
 						}
 
 						overwriteMessageContainer();
 						extMounted.value = true;
-
-						// Listen for new messages
-						this.props.messageHandlerAPI.addMessageHandler(onMessage);
 
 						observer.disconnect();
 					});
@@ -153,6 +172,10 @@ containerEl.value.addEventListener("scroll", (ev: Event) => {
 const dict = {} as Record<number, Twitch.ChatMessage>;
 
 const onMessage = (m: Twitch.ChatMessage) => {
+	if (m.id === "seventv-hook-message") {
+		return;
+	}
+
 	const msg = { ...m };
 
 	if (scroll.paused) {
@@ -193,7 +216,7 @@ const scrollToLive = () => {
 };
 
 const openViewerCard = (ev: MouseEvent, viewer: Twitch.ChatUser) => {
-	controller.sendMessage(`.user ${viewer.userLogin}`);
+	controller.sendMessage(`/user ${viewer.userLogin}`);
 
 	// Watch for card being created
 	const userCardContainer = document.querySelector("[data-a-target='chat-user-card']");

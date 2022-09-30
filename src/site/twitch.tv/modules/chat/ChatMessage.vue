@@ -2,7 +2,7 @@
 	<span v-if="msg" class="seventv-chat-message">
 		<!-- Chat Author -->
 		<span
-			v-if="msg.user"
+			v-if="msg.user && msg.user.userDisplayName"
 			class="seventv-chat-message-author"
 			:style="{ color: msg.user.color }"
 			@click="emit('open-viewer-card', $event, msg.user)"

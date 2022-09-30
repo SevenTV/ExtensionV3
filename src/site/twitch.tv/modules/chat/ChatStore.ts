@@ -1,5 +1,6 @@
 import { Twitch } from "@/site/twitch.tv";
 import { defineStore } from "pinia";
+import { ref, Ref } from "vue";
 
 export interface State {
 	channel: CurrentChannel | null;
@@ -16,7 +17,7 @@ export const useChatStore = defineStore("chat", {
 		} as State),
 
 	getters: {
-		currentMessage: (state) => state.messages[state.messages.length - 1],
+		currentMessage: state => state.messages[state.messages.length - 1],
 	},
 
 	actions: {
@@ -26,6 +27,15 @@ export const useChatStore = defineStore("chat", {
 			if (this.messages.length > this.lineLimit) {
 				this.messages.shift();
 			}
+		},
+
+		setChannel(channel: CurrentChannel) {
+			if (this.channel && this.channel.id === channel.id) {
+				return; // no change.
+			}
+
+			this.channel = channel;
+			this.messages = [];
 		},
 	},
 });
