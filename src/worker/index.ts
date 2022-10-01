@@ -28,6 +28,7 @@ export interface NetworkWorkerInstance {
 	id: number;
 	online: boolean;
 	primary: boolean;
+	primary_vote?: number;
 
 	_timeout?: number;
 }
