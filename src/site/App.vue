@@ -7,7 +7,29 @@
 import { nanoid } from "nanoid";
 import { log } from "@/common/Logger";
 import TwitchSite from "./twitch.tv/TwitchSite.vue";
-import AppWorker from "@/worker/SharedWorker?sharedworker&inline";
+import { NetworkMessage, NetworkMessageType } from "@/worker";
+import NetworkWorker from "@/worker/NetworkWorker?worker&inline";
+
+// Spawn NetworkWorker
+// This contains the connection for the Event API
+{
+	const nw = new NetworkWorker();
+
+	const id = Math.floor(Math.random() * 32768);
+	let state = WebSocket.CONNECTING;
+	log.info("<Global>", "Initializing WebSocket,", `id=${id}`);
+
+	nw.postMessage({
+		source: "SEVENTV",
+		type: NetworkMessageType.INIT,
+		data: {
+			id: id,
+		},
+	} as NetworkMessage<NetworkMessageType.INIT>);
+
+	// Broadcast Channel
+	const bc = new BroadcastChannel("SEVENTV#Network");
+}
 
 // Detect current platform
 const domain = window.location.hostname
@@ -20,16 +42,4 @@ const platformComponent = {
 }[domain];
 
 log.setContextName(`site/${domain}`);
-
-// Spawn SharedWorker
-// This contains the concurrent connection for the Event API
-{
-	const aw = new AppWorker();
-
-	const id = nanoid(6);
-	let state = WebSocket.CONNECTING;
-	log.info("<Global>", "Initializing SharedWorker,", `id=${id}`);
-
-	aw.port.start();
-}
 </script>

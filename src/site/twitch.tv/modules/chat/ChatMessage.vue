@@ -15,8 +15,6 @@
 
 <script setup lang="ts">
 import { Twitch } from "@/site/twitch.tv";
-import { onBeforeUnmount } from "vue";
-import { destroyObject } from "@/common/mem";
 import ChatUserTag from "@/site/twitch.tv/modules/chat/ChatUserTag.vue";
 
 const emit = defineEmits<{
@@ -26,14 +24,6 @@ const emit = defineEmits<{
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
 }>();
-
-onBeforeUnmount(() => {
-	if (![0].includes(props.msg.type)) {
-		return; // only clean specific types
-	}
-
-	destroyObject(props.msg);
-});
 </script>
 
 <style scoped lang="scss"></style>
