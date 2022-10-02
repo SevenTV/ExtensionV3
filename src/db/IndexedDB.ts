@@ -3,7 +3,7 @@
 import { Dexie, Table } from "dexie";
 
 export class Dexie7 extends Dexie {
-	VERSION = 1.02;
+	VERSION = 1.03;
 
 	emoteSets!: Table<SevenTV.EmoteSet, SevenTV.ObjectID>;
 	emotes!: Table<SevenTV.Emote, SevenTV.ObjectID>;
@@ -14,6 +14,7 @@ export class Dexie7 extends Dexie {
 		this.version(this.VERSION).stores({
 			emoteSets: "id,name,owner.id,provider",
 			emotes: "id,name,owner.id",
+			users: "id,username,connections.id,connections.username",
 		});
 	}
 }

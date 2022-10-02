@@ -1,7 +1,18 @@
-import { getChatLine, getEmoteButton, Twitch } from "../..";
+import { getChatLine, getEmoteButton } from "@/site/twitch.tv";
 
 export const tools = {
 	emoteClick: (() => {}) as Twitch.EmoteButton["props"]["onEmoteClick"],
+};
+
+export const registerEmoteCardCardOpener = (node?: HTMLElement): boolean => {
+	const btn = getEmoteButton();
+	if (!btn) {
+		return false;
+	}
+
+	tools.emoteClick = btn.props.onEmoteClick;
+
+	return true;
 };
 
 export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => {
@@ -43,17 +54,4 @@ export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => 
 		messageType: 0,
 		id: "seventv-hook-message",
 	});
-};
-
-export const registerEmoteCardCardOpener = (node?: HTMLElement): boolean => {
-	const btn = getEmoteButton();
-	if (!btn) {
-		return false;
-	}
-
-	// test
-
-	tools.emoteClick = btn.props.onEmoteClick;
-
-	return true;
 };

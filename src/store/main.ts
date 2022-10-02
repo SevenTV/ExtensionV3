@@ -1,10 +1,17 @@
-import { TransformWorkerMessage, TransformWorkerMessageType, TypedTransformWorkerMessage } from "@/worker";
+import {
+	NetWorkerMessage,
+	NetWorkerMessageType,
+	TransformWorkerMessage,
+	TransformWorkerMessageType,
+	TypedTransformWorkerMessage,
+} from "@/worker";
 import { defineStore } from "pinia";
 
 export interface State {
 	platform: Platform;
 	identity: (TwitchIdentity | YouTubeIdentity) | null;
 	location: Twitch.Location | null;
+	channel: CurrentChannel | null;
 	workers: {
 		net: Worker | null;
 		transform: Worker | null;
@@ -12,31 +19,13 @@ export interface State {
 	workerSeq: number;
 }
 
-export interface TwitchIdentity {
-	id: string;
-	login: string;
-	displayName: string;
-	color?: string;
-}
-
-export interface YouTubeIdentity {
-	id: string;
-}
-
-export type Platform = "TWITCH" | "YOUTUBE" | "UNKNOWN";
-
-export type PlatformIdentity<T extends Platform> = {
-	TWITCH: TwitchIdentity;
-	YOUTUBE: YouTubeIdentity;
-	UNKNOWN: null;
-}[T];
-
 export const useStore = defineStore("main", {
 	state: () =>
 		({
 			platform: "UNKNOWN",
 			identity: null,
 			location: null,
+			channel: null,
 			workers: {
 				net: null,
 				transform: null,
@@ -53,6 +42,30 @@ export const useStore = defineStore("main", {
 
 		setLocation(location: Twitch.Location | null) {
 			this.location = location;
+		},
+
+		setChannel(channel: CurrentChannel): boolean {
+			if (this.channel && this.channel.id === channel.id) {
+				return false; // no change.
+			}
+
+			this.channel = channel;
+
+			const w = this.workers.net;
+			if (w) {
+				w.postMessage({
+					source: "SEVENTV",
+					type: NetWorkerMessageType.STATE,
+					data: {
+						local: {
+							identity: { ...this.identity },
+							platform: this.platform,
+						},
+					},
+				} as NetWorkerMessage<NetWorkerMessageType.STATE>);
+			}
+
+			return true;
 		},
 
 		setWorker(name: keyof State["workers"], worker: Worker | null) {

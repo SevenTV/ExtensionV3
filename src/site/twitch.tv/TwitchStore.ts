@@ -1,8 +1,9 @@
+import { useStore } from "@/store/main";
+import { NetWorkerMessage, NetWorkerMessageType } from "@/worker";
 import { defineStore } from "pinia";
 import { ref, Ref } from "vue";
 
 export interface State {
-	channel: CurrentChannel | null;
 	messages: Twitch.ChatMessage[];
 	lineLimit: number;
 	emoteMap: Record<string, SevenTV.Emote>;
@@ -29,20 +30,5 @@ export const useTwitchStore = defineStore("chat", {
 				this.messages.shift();
 			}
 		},
-
-		setChannel(channel: CurrentChannel) {
-			if (this.channel && this.channel.id === channel.id) {
-				return; // no change.
-			}
-
-			this.channel = channel;
-			this.messages = [];
-		},
 	},
 });
-
-interface CurrentChannel {
-	id: string;
-	login: string;
-	displayName: string;
-}

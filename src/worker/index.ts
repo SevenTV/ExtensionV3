@@ -29,8 +29,10 @@ export type TypedNetWorkerMessage<T extends NetWorkerMessageType> = {
 	};
 	[NetWorkerMessageType.PING]: {};
 	[NetWorkerMessageType.PONG]: {};
-	[NetWorkerMessageType.STATE]: {};
-	[NetWorkerMessageType.MESSAGE]: 0;
+	[NetWorkerMessageType.STATE]: {
+		local?: NetWorkerInstance["local"];
+	};
+	[NetWorkerMessageType.MESSAGE]: SevenTV.EventAPI.WebSocketPayload<unknown>;
 }[T];
 
 export interface NetWorkerInstance {
@@ -38,6 +40,10 @@ export interface NetWorkerInstance {
 	online: boolean;
 	primary: boolean;
 	primary_vote?: number;
+	local?: {
+		platform: Platform;
+		identity: TwitchIdentity | YouTubeIdentity | null;
+	};
 
 	_timeout?: number;
 }

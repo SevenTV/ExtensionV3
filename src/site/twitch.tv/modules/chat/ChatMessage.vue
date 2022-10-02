@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { Twitch } from "@/site/twitch.tv";
 import ChatUserTag from "@/site/twitch.tv/modules/chat/ChatUserTag.vue";
 
 const emit = defineEmits<{

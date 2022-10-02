@@ -1,5 +1,6 @@
 import { log } from "@/common/Logger";
 import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
+import { ws } from "./NetWorkerSocket";
 
 const w = (self as unknown) as DedicatedWorkerGlobalScope;
 
@@ -43,6 +44,15 @@ w.onmessage = ev => {
 
 			log.debug("Initialized as #" + msg.data.id);
 			break;
+		case NetWorkerMessageType.STATE: {
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.STATE>;
+			if (!msg.data.local) return;
+
+			state.local = msg.data.local;
+			broadcastMessage(NetWorkerMessageType.STATE, { local: state.local });
+
+			log.debug("<NetWorker>", "Local State Updated", JSON.stringify(state.local));
+		}
 
 		default:
 			break;
@@ -53,8 +63,6 @@ bc.onmessage = ev => {
 	if (ev.data.source !== "SEVENTV") return;
 	// ignore if "to" is set and it's not us
 	if (ev.data.to && ev.data.to !== state.id) return;
-	// ignore if "from" is us
-	if (ev.data.from.id === state.id) return;
 
 	switch (ev.data.type as NetWorkerMessageType) {
 		case NetWorkerMessageType.STATE: {
@@ -81,6 +89,7 @@ bc.onmessage = ev => {
 				inst.primary = msg.from.primary;
 				inst.online = msg.from.online;
 				inst.primary_vote = msg.from.primary_vote;
+				inst.local = msg.from.local;
 
 				if (inst.primary) {
 					log.debug("<NetworkState>", `#${msg.from.id}`, "elected as primary");
@@ -91,12 +100,14 @@ bc.onmessage = ev => {
 			// we will run a primary election
 			clearInterval(electionTimeout);
 			electionTimeout = setTimeout(runPrimaryElection, 1000);
+			break;
 		}
 		// Another instance asks us if we are still alive
 		case NetWorkerMessageType.PING: {
 			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.PING>;
 
 			broadcastMessage(NetWorkerMessageType.PONG, {}, msg.from.id);
+			break;
 		}
 		// Another instance tells us that it is still alive
 		case NetWorkerMessageType.PONG: {
@@ -108,6 +119,14 @@ bc.onmessage = ev => {
 
 			clearTimeout(inst._timeout);
 			setInstanceTimeout(inst);
+			break;
+		}
+		case NetWorkerMessageType.MESSAGE: {
+			if (ev.data.from.id === state.id) return; // ignore messages from self
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.MESSAGE>;
+
+			ws.pushMessage(msg.data);
+			break;
 		}
 		default:
 			break;
@@ -119,20 +138,21 @@ setInterval(() => {
 	broadcastMessage(NetWorkerMessageType.PING, {});
 }, PING_INTERVAL);
 
-function runPrimaryElection(): void {
-	const instanceList = Object.values(instances);
-	// There is only one instance, so it is the primary
-	if (instanceList.length === 1) {
-		becomePrimary();
+function runPrimaryElection(exclude?: number): void {
+	const instanceList = Object.values(instances).filter(i => i.id !== exclude);
 
-		return;
-	}
-
-	const primaryExists = Object.values(instances).some(i => i.primary);
+	const primaryExists = instanceList.some(i => i.primary);
 	if (!primaryExists) {
+		// There is only one instance, so it is the primary
+		if (instanceList.length === 1) {
+			becomePrimary();
+
+			return;
+		}
+
 		// Tally votes
 		const votes = instanceList.filter(i => typeof i.primary_vote === "number").map(i => i.primary_vote as number);
-		if (votes.length === instanceList.length) {
+		if (votes.length >= instanceList.length - 1) {
 			// all the votes are in. we can now elect a primary
 			const primary = instanceList.find(i => i.primary_vote === Math.max(...votes));
 			if (!primary || primary.id !== state.id) return;
@@ -141,6 +161,9 @@ function runPrimaryElection(): void {
 			becomePrimary();
 
 			return;
+		} else {
+			// check again in a bit if the election couldn't pass
+			setTimeout(() => runPrimaryElection(exclude), 500);
 		}
 
 		// Pick the highest ID as the favored to become primary
@@ -156,9 +179,18 @@ function becomePrimary(): void {
 	state.primary = true;
 
 	// Connect to the WebSocket
+	ws.connect();
+	ws.getSocket()?.addEventListener("message", (ev: MessageEvent) => {
+		const msg = JSON.parse(ev.data) as SevenTV.EventAPI.WebSocketPayload<unknown>;
+
+		// push the message to self
+		ws.pushMessage(msg);
+		// broadcast the message to the network
+		broadcastMessage(NetWorkerMessageType.MESSAGE, msg);
+	});
 
 	broadcastMessage(NetWorkerMessageType.STATE, {});
-	log.debug("<NetworkState>", "Elected as primary");
+	log.info("<NetworkState>", "Elected as primary");
 }
 
 function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWorkerMessage<T>, to?: number): void {
@@ -186,7 +218,7 @@ function setInstanceTimeout(inst: NetWorkerInstance): void {
 		const primaryExists = Object.values(instances).some(i => i.primary);
 		if (!primaryExists) {
 			log.debug("<NetworkState>", `#${inst.id} was primary, but has quit. Running primary election.`);
-			runPrimaryElection();
+			runPrimaryElection(inst.id);
 		}
-	}, PING_INTERVAL * 1.5);
+	}, PING_INTERVAL * 1.25);
 }

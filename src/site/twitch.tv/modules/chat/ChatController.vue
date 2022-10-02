@@ -30,13 +30,14 @@ import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { registerEmoteCardCardOpener, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
-import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
 import { useStore } from "@/store/main";
 import { TransformWorkerMessageType } from "@/worker";
+import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
 
 const store = useStore();
 const chatStore = useTwitchStore();
-const { channel } = storeToRefs(chatStore);
+const { channel } = storeToRefs(store);
+const { messages } = storeToRefs(chatStore);
 
 const extMounted = ref(false);
 const controller = getChatController();
@@ -55,7 +56,7 @@ watch(channel, channel => {
 		return;
 	}
 
-	log.info("<ChatController>", `Joining #${channel.login}`);
+	log.info("<ChatController>", `Joining #${channel.username}`);
 });
 
 // Hook chat controller mount event
@@ -66,11 +67,15 @@ watch(channel, channel => {
 		this.props.messageHandlerAPI.addMessageHandler(onMessage);
 
 		// Update current channel
-		chatStore.setChannel({
-			id: this.props.channelID,
-			login: this.props.channelLogin,
-			displayName: this.props.channelDisplayName,
-		});
+		if (
+			store.setChannel({
+				id: this.props.channelID,
+				username: this.props.channelLogin,
+				display_name: this.props.channelDisplayName,
+			})
+		) {
+			messages.value = [];
+		}
 
 		// Put placeholder to teleport our message list
 		if (document.getElementById("seventv-chat-controller")) {
@@ -108,9 +113,12 @@ watch(channel, channel => {
 
 						// Bind twitch emotes
 						if (this.props.emoteSetsData) {
+							// We must wait for the data to be received
 							const i = setInterval(() => {
 								if (this.props.emoteSetsData?.loading) return;
 
+								// Send the twitch emotes to the transform worker
+								// These can later be fetched from IDB by components
 								store.sendTransformRequest(TransformWorkerMessageType.TWITCH_EMOTES, {
 									input: this.props.emoteSetsData?.emoteSets ?? [],
 								});

@@ -78,4 +78,64 @@ declare module SevenTV {
 	type ObjectID = string;
 
 	type Provider = "7TV" | "TWITCH" | "BTTV" | "FFZ";
+
+	namespace EventAPI {
+		interface WebSocketPayload<T> {
+			op: number;
+			t: number;
+			d: T;
+		}
+		namespace WebSocketPayload {
+			interface Hello {
+				heartbeat_interval: number;
+				session_id: string;
+			}
+		}
+
+		interface ChangeMap<T> {
+			id: string;
+			kind: number;
+			actor: null; //
+			added: ChangeField<T>[];
+			updated: ChangeField<T>[];
+			removed: ChangeField<T>[];
+			pushed: ChangeField<T>[];
+			pulled: ChangeField<T>[];
+			object: T;
+		}
+
+		interface ChangeField<T, O, N> {
+			key: keyof T;
+			index: number | null;
+			nested?: boolean;
+			type: string;
+			old_value?: O;
+			value: N;
+		}
+	}
+}
+
+declare interface TwitchIdentity {
+	id: string;
+	login: string;
+	displayName: string;
+	color?: string;
+}
+
+declare interface YouTubeIdentity {
+	id: string;
+}
+
+declare type Platform = "TWITCH" | "YOUTUBE" | "UNKNOWN";
+
+declare type PlatformIdentity<T extends Platform> = {
+	TWITCH: TwitchIdentity;
+	YOUTUBE: YouTubeIdentity;
+	UNKNOWN: null;
+}[T];
+
+interface CurrentChannel {
+	id: string;
+	username: string;
+	display_name: string;
 }
