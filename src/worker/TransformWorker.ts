@@ -79,8 +79,25 @@ export function ConvertTwitchEmote(data: Twitch.TwitchEmote): SevenTV.Emote {
 		listed: true,
 		owner: null,
 		host: {
-			url: "https://static-cdn.jtvnw.net/emoticons/v1/" + data.id + "/default/dark",
-			files: [],
+			url: "https://static-cdn.jtvnw.net/emoticons/v2/" + data.id + "/default/dark",
+			files: [
+				{
+					name: "1.0",
+					format: "PNG",
+				},
+				{
+					name: "2.0",
+					format: "PNG",
+				},
+				{
+					name: "3.0",
+					format: "PNG",
+				},
+				{
+					name: "4.0",
+					format: "PNG",
+				},
+			],
 		},
 	};
 }

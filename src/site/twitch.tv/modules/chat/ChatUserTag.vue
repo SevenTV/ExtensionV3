@@ -8,8 +8,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Twitch } from "@/site/twitch.tv";
-
 defineProps<{
 	user: Twitch.ChatUser;
 }>();
@@ -17,6 +15,7 @@ defineProps<{
 
 <style scoped lang="scss">
 .seventv-chat-user {
+	display: inline-block !important;
 	cursor: pointer;
 	word-break: break-all;
 }

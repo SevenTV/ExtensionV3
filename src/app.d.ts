@@ -67,15 +67,15 @@ declare module SevenTV {
 
 	interface ImageFile {
 		name: string;
-		static_name: string;
-		width: number;
-		height: number;
+		static_name?: string;
+		width?: number;
+		height?: number;
 		frame_count?: number;
 		size?: number;
 		format: ImageFormat;
 	}
 
-	type ImageFormat = "AVIF" | "WEBP";
+	type ImageFormat = "AVIF" | "WEBP" | "PNG" | "GIF";
 
 	type ObjectID = string;
 
