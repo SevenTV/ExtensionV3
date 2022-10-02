@@ -7,7 +7,7 @@
 import { log } from "@/common/Logger";
 import TwitchSite from "./twitch.tv/TwitchSite.vue";
 import { NetworkMessage, NetworkMessageType } from "@/worker";
-import NetworkWorker from "@/worker/NetworkWorker?worker&inline";
+import NetworkWorker from "@/worker/NetWorker?worker&inline";
 
 // Spawn NetworkWorker
 // This contains the connection for the Event API
