@@ -1,4 +1,3 @@
-import { Twitch } from "@/site/twitch.tv";
 import { defineStore } from "pinia";
 import { ref, Ref } from "vue";
 
@@ -6,6 +5,7 @@ export interface State {
 	channel: CurrentChannel | null;
 	messages: Twitch.ChatMessage[];
 	lineLimit: number;
+	emoteMap: Record<string, Emote>;
 }
 
 export const useChatStore = defineStore("chat", {
@@ -14,6 +14,7 @@ export const useChatStore = defineStore("chat", {
 			channel: null,
 			messages: [],
 			lineLimit: 200,
+			emoteMap: {},
 		} as State),
 
 	getters: {

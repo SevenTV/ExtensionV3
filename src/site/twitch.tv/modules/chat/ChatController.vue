@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { getChatController, getChatMessageContainer, Twitch } from "@/site/twitch.tv";
+import { getChatController, getChatMessageContainer, Selectors } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
 import { useChatStore } from "./ChatStore";
 import { registerEmoteCardCardOpener, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
@@ -69,6 +69,8 @@ watch(channel, channel => {
 			displayName: this.props.channelDisplayName,
 		});
 
+		// Sort twitch emotes
+
 		// Put placeholder to teleport our message list
 		if (document.getElementById("seventv-chat-controller")) {
 			return;
@@ -84,7 +86,7 @@ watch(channel, channel => {
 		// Send dummy message
 		sendDummyMessage(this);
 
-		const scrollContainer = document.querySelector(Twitch.Selectors.ChatScrollableContainer);
+		const scrollContainer = document.querySelector(Selectors.ChatScrollableContainer);
 		if (scrollContainer) {
 			const observer = new MutationObserver(entries => {
 				for (let i = 0; i < entries.length; i++) {
