@@ -3,7 +3,7 @@
 import { Dexie, Table } from "dexie";
 
 export class Dexie7 extends Dexie {
-	VERSION = 1.03;
+	VERSION = 1.04;
 
 	emoteSets!: Table<SevenTV.EmoteSet, SevenTV.ObjectID>;
 	emotes!: Table<SevenTV.Emote, SevenTV.ObjectID>;

@@ -6,6 +6,9 @@
 			</div>
 		</div>
 
+		<!-- Data Logic -->
+		<ChatData />
+
 		<!-- Custom Scrollbar -->
 		<div
 			v-if="scroll.visible"
@@ -33,6 +36,7 @@ import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
 import { TransformWorkerMessageType } from "@/worker";
 import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
+import ChatData from "./ChatData.vue";
 
 const store = useStore();
 const chatStore = useTwitchStore();

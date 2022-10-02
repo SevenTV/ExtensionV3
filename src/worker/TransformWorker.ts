@@ -63,6 +63,7 @@ export function ConvertTwitchEmoteSet(data: Twitch.TwitchEmoteSet): SevenTV.Emot
 			id: e.id,
 			name: e.token,
 			flags: 0,
+			provider: "TWITCH",
 			data: ConvertTwitchEmote(e),
 		})),
 	};

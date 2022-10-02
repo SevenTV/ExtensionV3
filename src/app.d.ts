@@ -56,6 +56,8 @@ declare module SevenTV {
 		timestamp?: number;
 		actor_id?: ObjectID;
 		data?: Emote;
+
+		provider?: Provider;
 	}
 
 	interface ImageHost {

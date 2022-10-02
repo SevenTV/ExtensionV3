@@ -6,7 +6,7 @@ import { ref, Ref } from "vue";
 export interface State {
 	messages: Twitch.ChatMessage[];
 	lineLimit: number;
-	emoteMap: Record<string, SevenTV.Emote>;
+	emoteMap: Record<string, SevenTV.ActiveEmote>;
 }
 
 export const useTwitchStore = defineStore("chat", {
