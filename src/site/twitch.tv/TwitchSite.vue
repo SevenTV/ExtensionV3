@@ -7,7 +7,14 @@ import { getRouter, getUser } from "@/site/twitch.tv";
 import { useStore } from "@/store/main";
 import ChatController from "./modules/chat/ChatController.vue";
 
+const props = defineProps<{
+	netWorker: Worker;
+	transformWorker: Worker;
+}>();
+
 const store = useStore();
+store.setWorker("net", props.netWorker);
+store.setWorker("transform", props.transformWorker);
 
 // Retrieve the current user from twitch internals
 const user = getUser()?.props.user ?? null;

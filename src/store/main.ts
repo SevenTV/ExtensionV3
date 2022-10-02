@@ -1,10 +1,15 @@
-import { Twitch } from "@/site/twitch.tv";
+import { TransformWorkerMessage, TransformWorkerMessageType, TypedTransformWorkerMessage } from "@/worker";
 import { defineStore } from "pinia";
 
 export interface State {
 	platform: Platform;
 	identity: (TwitchIdentity | YouTubeIdentity) | null;
 	location: Twitch.Location | null;
+	workers: {
+		net: Worker | null;
+		transform: Worker | null;
+	};
+	workerSeq: number;
 }
 
 export interface TwitchIdentity {
@@ -32,6 +37,12 @@ export const useStore = defineStore("main", {
 			platform: "UNKNOWN",
 			identity: null,
 			location: null,
+			workers: {
+				net: null,
+				transform: null,
+				transformSeq: 0,
+			},
+			workerSeq: 0,
 		} as State),
 
 	actions: {
@@ -42,6 +53,31 @@ export const useStore = defineStore("main", {
 
 		setLocation(location: Twitch.Location | null) {
 			this.location = location;
+		},
+
+		setWorker(name: keyof State["workers"], worker: Worker | null) {
+			this.workers[name] = worker;
+		},
+
+		sendTransformRequest<T extends TransformWorkerMessageType>(t: T, data: TypedTransformWorkerMessage<T>): void {
+			if (!this.workers.transform) return;
+			this.workerSeq++;
+
+			const resp = (ev: MessageEvent) => {
+				if (!this.workers.transform) return;
+				if (ev.data.seq !== this.workerSeq) return;
+
+				this.workers.transform.removeEventListener("message", resp);
+			};
+
+			this.workers.transform.addEventListener("message", resp);
+
+			this.workers.transform.postMessage({
+				source: "SEVENTV",
+				type: t,
+				seq: this.workerSeq,
+				data,
+			} as TransformWorkerMessage<T>);
 		},
 	},
 

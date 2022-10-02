@@ -5,10 +5,10 @@ export interface State {
 	channel: CurrentChannel | null;
 	messages: Twitch.ChatMessage[];
 	lineLimit: number;
-	emoteMap: Record<string, Emote>;
+	emoteMap: Record<string, SevenTV.Emote>;
 }
 
-export const useChatStore = defineStore("chat", {
+export const useTwitchStore = defineStore("chat", {
 	state: () =>
 		({
 			channel: null,

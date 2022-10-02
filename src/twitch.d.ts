@@ -146,6 +146,7 @@ declare module Twitch {
 		};
 		chatRules: string[];
 		emoteSetsData?: {
+			loading: boolean;
 			emoteMap: Record<string, TwitchEmote>;
 			emoteSets: TwitchEmoteSet[];
 		};

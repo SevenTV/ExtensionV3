@@ -1,12 +1,21 @@
-export interface NetworkMessage<T extends NetworkMessageType> {
+export interface WorkerMessage<E, T> {
 	source: "SEVENTV";
-	type: T;
-	from: NetworkWorkerInstance;
+	type: E;
 	to?: string;
-	data: TypedNetworkMessage<T>;
+	seq?: number;
+	data: T;
 }
 
-export enum NetworkMessageType {
+// Networking
+
+export type NetWorkerMessage<T extends NetWorkerMessageType> = WorkerMessage<
+	NetWorkerMessageType,
+	TypedNetWorkerMessage<T>
+> & {
+	from: NetWorkerInstance;
+};
+
+export enum NetWorkerMessageType {
 	INIT = 1, // the tab sends this to its dedicated worker to initialize it
 	STATE,
 	PING,
@@ -14,17 +23,17 @@ export enum NetworkMessageType {
 	MESSAGE,
 }
 
-export type TypedNetworkMessage<T extends NetworkMessageType> = {
-	[NetworkMessageType.INIT]: {
+export type TypedNetWorkerMessage<T extends NetWorkerMessageType> = {
+	[NetWorkerMessageType.INIT]: {
 		id: number;
 	};
-	[NetworkMessageType.PING]: {};
-	[NetworkMessageType.PONG]: {};
-	[NetworkMessageType.STATE]: {};
-	[NetworkMessageType.MESSAGE]: 0;
+	[NetWorkerMessageType.PING]: {};
+	[NetWorkerMessageType.PONG]: {};
+	[NetWorkerMessageType.STATE]: {};
+	[NetWorkerMessageType.MESSAGE]: 0;
 }[T];
 
-export interface NetworkWorkerInstance {
+export interface NetWorkerInstance {
 	id: number;
 	online: boolean;
 	primary: boolean;
@@ -32,3 +41,20 @@ export interface NetworkWorkerInstance {
 
 	_timeout?: number;
 }
+
+// Transform
+export type TransformWorkerMessage<T extends TransformWorkerMessageType> = WorkerMessage<
+	TransformWorkerMessageType,
+	TypedTransformWorkerMessage<T>
+>;
+
+export enum TransformWorkerMessageType {
+	TWITCH_EMOTES = 1,
+}
+
+export type TypedTransformWorkerMessage<T extends TransformWorkerMessageType> = {
+	[TransformWorkerMessageType.TWITCH_EMOTES]: {
+		input?: Twitch.TwitchEmoteSet[];
+		output?: SevenTV.Emote[];
+	};
+}[T];

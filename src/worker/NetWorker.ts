@@ -1,21 +1,21 @@
 import { log } from "@/common/Logger";
-import { NetworkMessage, NetworkMessageType, NetworkWorkerInstance, TypedNetworkMessage } from ".";
+import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
 
 const w = (self as unknown) as DedicatedWorkerGlobalScope;
 
 // Set up logger
-log.setContextName("NetworkWorker");
+log.setContextName("NetWorker");
 
 // Set up a BroadcastChannel to communicate with the workers
 const bc = new BroadcastChannel("SEVENTV#Network");
 
 const PING_INTERVAL = 6000;
-const instances = {} as Record<string, NetworkWorkerInstance>;
+const instances = {} as Record<string, NetWorkerInstance>;
 const state = {
 	id: 0,
 	online: false,
 	primary: false,
-} as NetworkWorkerInstance;
+} as NetWorkerInstance;
 
 // Listen to global messages
 let electionTimeout = 0;
@@ -26,10 +26,10 @@ w.onmessage = ev => {
 		return; // not a message from us
 	}
 
-	switch (ev.data.type as NetworkMessageType) {
+	switch (ev.data.type as NetWorkerMessageType) {
 		// Receive the ID from the tab
-		case NetworkMessageType.INIT:
-			const msg = ev.data as NetworkMessage<NetworkMessageType.INIT>;
+		case NetWorkerMessageType.INIT:
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.INIT>;
 			state.id = msg.data.id;
 			state.online = true;
 
@@ -39,7 +39,7 @@ w.onmessage = ev => {
 			// If no other tabs are found, we will become the primary
 			electionTimeout = setTimeout(runPrimaryElection, 1000);
 
-			broadcastMessage(NetworkMessageType.STATE, {});
+			broadcastMessage(NetWorkerMessageType.STATE, {});
 
 			log.debug("Initialized as #" + msg.data.id);
 			break;
@@ -56,9 +56,9 @@ bc.onmessage = ev => {
 	// ignore if "from" is us
 	if (ev.data.from.id === state.id) return;
 
-	switch (ev.data.type as NetworkMessageType) {
-		case NetworkMessageType.STATE: {
-			const msg = ev.data as NetworkMessage<NetworkMessageType.STATE>;
+	switch (ev.data.type as NetWorkerMessageType) {
+		case NetWorkerMessageType.STATE: {
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.STATE>;
 
 			const exists = !!instances[msg.from.id];
 
@@ -67,7 +67,7 @@ bc.onmessage = ev => {
 
 				// Broadcast presence to the network
 				if (!msg.to) {
-					broadcastMessage(NetworkMessageType.STATE, {}, msg.from.id);
+					broadcastMessage(NetWorkerMessageType.STATE, {}, msg.from.id);
 				}
 
 				// Set timeout
@@ -93,14 +93,14 @@ bc.onmessage = ev => {
 			electionTimeout = setTimeout(runPrimaryElection, 1000);
 		}
 		// Another instance asks us if we are still alive
-		case NetworkMessageType.PING: {
-			const msg = ev.data as NetworkMessage<NetworkMessageType.PING>;
+		case NetWorkerMessageType.PING: {
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.PING>;
 
-			broadcastMessage(NetworkMessageType.PONG, {}, msg.from.id);
+			broadcastMessage(NetWorkerMessageType.PONG, {}, msg.from.id);
 		}
 		// Another instance tells us that it is still alive
-		case NetworkMessageType.PONG: {
-			const msg = ev.data as NetworkMessage<NetworkMessageType.PONG>;
+		case NetWorkerMessageType.PONG: {
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.PONG>;
 
 			// Reset timeout
 			const inst = instances[msg.from.id];
@@ -116,7 +116,7 @@ bc.onmessage = ev => {
 
 // Set up pinging
 setInterval(() => {
-	broadcastMessage(NetworkMessageType.PING, {});
+	broadcastMessage(NetWorkerMessageType.PING, {});
 }, PING_INTERVAL);
 
 function runPrimaryElection(): void {
@@ -148,7 +148,7 @@ function runPrimaryElection(): void {
 		state.primary_vote = highest.id;
 
 		// Cast our vote
-		broadcastMessage(NetworkMessageType.STATE, {});
+		broadcastMessage(NetWorkerMessageType.STATE, {});
 	}
 }
 
@@ -157,11 +157,11 @@ function becomePrimary(): void {
 
 	// Connect to the WebSocket
 
-	broadcastMessage(NetworkMessageType.STATE, {});
+	broadcastMessage(NetWorkerMessageType.STATE, {});
 	log.debug("<NetworkState>", "Elected as primary");
 }
 
-function broadcastMessage<T extends NetworkMessageType>(t: T, data: TypedNetworkMessage<T>, to?: number): void {
+function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWorkerMessage<T>, to?: number): void {
 	bc.postMessage({
 		source: "SEVENTV",
 		type: t,
@@ -170,13 +170,13 @@ function broadcastMessage<T extends NetworkMessageType>(t: T, data: TypedNetwork
 			online: state.online,
 			primary: state.primary,
 			primary_vote: state.primary_vote,
-		} as NetworkWorkerInstance,
+		} as NetWorkerInstance,
 		to,
 		data,
 	});
 }
 
-function setInstanceTimeout(inst: NetworkWorkerInstance): void {
+function setInstanceTimeout(inst: NetWorkerInstance): void {
 	inst._timeout = setTimeout(() => {
 		delete instances[inst.id];
 

@@ -26,13 +26,16 @@
 <script setup lang="ts">
 import { getChatController, getChatMessageContainer, Selectors } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
-import { useChatStore } from "./ChatStore";
+import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { registerEmoteCardCardOpener, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
+import { useStore } from "@/store/main";
+import { TransformWorkerMessageType } from "@/worker";
 
-const chatStore = useChatStore();
+const store = useStore();
+const chatStore = useTwitchStore();
 const { channel } = storeToRefs(chatStore);
 
 const extMounted = ref(false);
@@ -69,8 +72,6 @@ watch(channel, channel => {
 			displayName: this.props.channelDisplayName,
 		});
 
-		// Sort twitch emotes
-
 		// Put placeholder to teleport our message list
 		if (document.getElementById("seventv-chat-controller")) {
 			return;
@@ -104,6 +105,18 @@ watch(channel, channel => {
 
 						overwriteMessageContainer();
 						extMounted.value = true;
+
+						// Bind twitch emotes
+						if (this.props.emoteSetsData) {
+							const i = setInterval(() => {
+								if (this.props.emoteSetsData?.loading) return;
+
+								store.sendTransformRequest(TransformWorkerMessageType.TWITCH_EMOTES, {
+									input: this.props.emoteSetsData?.emoteSets ?? [],
+								});
+								clearInterval(i);
+							}, 200);
+						}
 
 						log.debug("<ChatController>", "Chat controller mounted", `(${Date.now() - t}ms)`);
 						observer.disconnect();
