@@ -23,7 +23,8 @@
 <script setup lang="ts">
 import ChatUserTag from "@/site/twitch.tv/modules/chat/ChatUserTag.vue";
 import { storeToRefs } from "pinia";
-import { useTwitchStore } from "../../TwitchStore";
+import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
+import { ConvertTwitchEmote } from "@/common/Transform";
 import ChatEmote from "@/components/ChatEmote.vue";
 
 const emit = defineEmits<{
@@ -35,6 +36,7 @@ const props = defineProps<{
 }>();
 
 const { emoteMap } = storeToRefs(useTwitchStore());
+const localEmoteMap = {} as { [key: string]: SevenTV.ActiveEmote };
 
 // Tokenize the message
 const tokens = [] as MessageToken[];
@@ -42,6 +44,19 @@ const tokens = [] as MessageToken[];
 if (props.msg && typeof props.msg.messageBody === "string") {
 	const split = (props.msg.messageBody ?? "").split(" ");
 	const currentText = [] as string[];
+
+	// Local twitch emotes?
+	props.msg.messageParts
+		.filter(p => p.type === 6)
+		.forEach(p => {
+			const emote = p.content as Twitch.ChatMessage.EmoteRef;
+			if (Object.keys(emote).length) {
+				localEmoteMap[emote.alt] = {
+					name: emote.alt,
+					data: ConvertTwitchEmote({ id: emote.emoteID, token: emote.alt }),
+				} as SevenTV.ActiveEmote;
+			}
+		});
 
 	const tokenOfCurrentText = () => {
 		tokens.push({
@@ -56,7 +71,7 @@ if (props.msg && typeof props.msg.messageBody === "string") {
 	while (split.length) {
 		const s = split.shift()!;
 
-		const emote = emoteMap.value[s];
+		const emote = localEmoteMap[s] || emoteMap.value[s];
 		const start = !split[i - 1];
 		const end = !split[i + 1];
 
