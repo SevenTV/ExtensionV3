@@ -5,6 +5,7 @@ import { ref, Ref } from "vue";
 
 export interface State {
 	messages: Twitch.ChatMessage[];
+	messageMap: Record<string, Twitch.ChatMessage>;
 	lineLimit: number;
 	emoteMap: Record<string, SevenTV.ActiveEmote>;
 }
@@ -14,6 +15,7 @@ export const useTwitchStore = defineStore("chat", {
 		({
 			channel: null,
 			messages: [],
+			messageMap: {} as Record<string, Twitch.ChatMessage>,
 			lineLimit: 200,
 			emoteMap: {},
 		} as State),
@@ -23,11 +25,14 @@ export const useTwitchStore = defineStore("chat", {
 	},
 
 	actions: {
-		pushMessage(message: Twitch.ChatMessage) {
+		pushMessage(message: Twitch.ChatMessage, maybeDupe?: boolean) {
+			if (maybeDupe && this.messageMap[message.id]) return;
+
 			this.messages.push(message);
+			this.messageMap[message.id] = message;
 
 			if (this.messages.length > this.lineLimit) {
-				this.messages.shift();
+				delete this.messageMap[this.messages.shift()!.id];
 			}
 		},
 	},

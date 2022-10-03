@@ -2,11 +2,11 @@
 	<Teleport v-if="extMounted && channel && channel.id" :to="containerEl">
 		<div class="seventv-message-container">
 			<div v-for="msg of chatStore.messages" :key="msg.id" :msg-id="msg.id">
-				<template v-if="handledMessageTypes.includes(msg.type)">
+				<template v-if="msg.seventv">
 					<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
 				</template>
 				<template v-else>
-					<div :id="'seventv-unhandled-msg-ref-' + msg.id" />
+					<div :id="msg.id" />
 				</template>
 			</div>
 		</div>
@@ -72,9 +72,6 @@ watch(channel, channel => {
 {
 	const x = controllerClass.componentDidUpdate;
 	controllerClass.componentDidUpdate = function(this: Twitch.ChatControllerComponent, args: any[]) {
-		// Listen for new messages
-		this.props.messageHandlerAPI.addMessageHandler(onMessage);
-
 		// Update current channel
 		if (
 			store.setChannel({
@@ -101,7 +98,7 @@ watch(channel, channel => {
 		// Send dummy message
 		sendDummyMessage(this);
 
-		const scrollContainer = document.querySelector(Selectors.ChatScrollableContainer);
+		const scrollContainer = document.querySelector<HTMLDivElement>(Selectors.ChatScrollableContainer);
 		if (scrollContainer) {
 			const observer = new MutationObserver(entries => {
 				for (let i = 0; i < entries.length; i++) {
@@ -117,7 +114,7 @@ watch(channel, channel => {
 							return;
 						}
 
-						overwriteMessageContainer(scrollContainer);
+						overwriteMessageContainer(this, scrollContainer);
 						extMounted.value = true;
 
 						// Bind twitch emotes
@@ -136,11 +133,13 @@ watch(channel, channel => {
 						}
 
 						log.debug("<ChatController>", "Chat controller mounted", `(${Date.now() - t}ms)`);
-						observer.disconnect();
+						observer.disconnect(); // work is done, stop the mutation observer
 					});
 				}
 			});
 
+			// start looking for our system message
+			// we need its component to be mounted to get the constructor to message-specific hooks
 			observer.observe(scrollContainer, {
 				childList: true,
 			});
@@ -154,7 +153,7 @@ watch(channel, channel => {
 
 // Take over the chat's native message container
 const handledMessageTypes = [0];
-const overwriteMessageContainer = (scrollContainer: Element) => {
+const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, scrollContainer: HTMLDivElement) => {
 	const { inst: container } = getChatMessageContainer();
 	const containerClass = container.constructor.prototype;
 	if (container) {
@@ -165,6 +164,60 @@ const overwriteMessageContainer = (scrollContainer: Element) => {
 			return result;
 		};
 	}
+
+	// Hook the handleMessage method
+	// We will use our custom renderer for all supported types
+	// if a message type is unsupported, we will instead render it as native
+	// and then move it into our context.
+	const xHandleMessage = controller.props.messageHandlerAPI.handleMessage;
+	controller.props.messageHandlerAPI.handleMessage = function(
+		this: Twitch.ChatControllerComponent["props"]["messageHandlerAPI"],
+		msg: Twitch.ChatMessage,
+	) {
+		const ok = onMessage.apply(this, [msg]);
+		if (ok) return; // message was rendered by the extension
+
+		// message type is not supported:
+		// render is natively
+		const o = new MutationObserver(x => {
+			for (let i = 0; i < x.length; i++) {
+				const rec = x[i];
+
+				rec.addedNodes.forEach(node => {
+					if (!(node instanceof HTMLElement)) return;
+
+					// Move the message into our context
+					const unhandledID = `seventv-unhandled-msg-ref-${msg.id}`;
+					chatStore.pushMessage(
+						{
+							...msg,
+							id: unhandledID,
+							seventv: false,
+							element: node,
+						},
+						true,
+					);
+
+					nextTick(() => {
+						const wrapper = document.getElementById(unhandledID);
+						if (wrapper) {
+							wrapper.appendChild(node);
+						}
+
+						scrollToLive();
+					});
+
+					o.disconnect();
+				});
+			}
+		});
+
+		o.observe(scrollContainer, {
+			childList: true,
+		});
+
+		return xHandleMessage.apply(this, [msg]);
+	};
 };
 
 // Handle scrolling
@@ -208,19 +261,19 @@ containerEl.value.addEventListener("scroll", () => {
 	}
 });
 
-const onMessage = (m: Twitch.ChatMessage) => {
+function onMessage(this: Twitch.ChatControllerComponent["props"]["messageHandlerAPI"], m: Twitch.ChatMessage): boolean {
 	if (m.id === "seventv-hook-message" || !handledMessageTypes.includes(m.type)) {
-		return;
+		return false;
 	}
 
-	const msg = { ...m };
+	const msg = { ...m, seventv: true };
 
 	if (scroll.paused) {
 		// if scrolling is paused, buffer the message
 		scroll.buffer.push(msg);
 		if (scroll.buffer.length > chatStore.lineLimit) scroll.buffer.shift();
 
-		return;
+		return true;
 	}
 
 	// Add message to store
@@ -231,7 +284,9 @@ const onMessage = (m: Twitch.ChatMessage) => {
 		// autoscroll on new message
 		scrollToLive();
 	});
-};
+
+	return true;
+}
 
 // Apply new boundaries when the window is resized
 const resizeObserver = new ResizeObserver(() => {
@@ -295,7 +350,7 @@ onUnmounted(() => {
 	overflow-x: hidden !important;
 
 	.seventv-message-container {
-		padding: 1em;
+		padding-bottom: 1em;
 		line-height: 1.5em;
 	}
 

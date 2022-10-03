@@ -485,24 +485,10 @@ declare module Twitch {
 			slowModeDuration: number;
 			subsOnly: boolean;
 		};
-
-		// Other third party things
-		ffz_tokens?: {
-			big: boolean;
-			can_big?: boolean;
-			modifiers: any[];
-			provider: string;
-			src: string;
-			src2: string;
-			srcSet: string;
-			srcSet2: string;
-			text: string;
-			type: "emote" | "text";
-		}[];
-		ffz_emotes: any;
 		emotes?: any;
-		_ffz_checked?: boolean;
-		opener?: Twitch.MessageCardOpeners;
+
+		seventv?: boolean;
+		element?: HTMLElement;
 	}
 	export namespace ChatMessage {
 		export interface Part {
