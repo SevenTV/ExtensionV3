@@ -76,7 +76,13 @@ declare module Twitch {
 
 	export type EmoteButton = React.Component<{}> & {
 		props: {
-			onEmoteClick: (emote: { emoteID: string; initialTopOffset: number }) => void;
+			onEmoteClick: (emote: {
+				emoteID: string;
+				emoteCode: string;
+				sourceID: "chat";
+				initialTopOffset: number;
+				initialBottomOffset: number;
+			}) => void;
 		};
 	};
 
@@ -370,8 +376,13 @@ declare module Twitch {
 		};
 	}
 
-	export interface EmoteCardOpener {
+	export interface MessageCardOpeners {
 		onShowEmoteCard: (v: any) => void;
+		onShowViewerCard: (v: any) => void;
+		hideViewerCard: () => void;
+		props: {
+			onUsernameClick: (v: any) => void;
+		};
 	}
 
 	export interface TwitchEmoteSet {
@@ -491,7 +502,7 @@ declare module Twitch {
 		ffz_emotes: any;
 		emotes?: any;
 		_ffz_checked?: boolean;
-		opener?: Twitch.EmoteCardOpener;
+		opener?: Twitch.MessageCardOpeners;
 	}
 	export namespace ChatMessage {
 		export interface Part {

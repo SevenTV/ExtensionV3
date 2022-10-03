@@ -95,14 +95,15 @@ export function getChatController(): Twitch.ChatControllerComponent {
 	return node?.stateNode;
 }
 
-export function getChatMessageContainer(): Twitch.AnyPureComponent {
+export function getChatMessageContainer(): { inst: Twitch.AnyPureComponent; el: HTMLElement } {
+	const el = document.querySelector(".chat-list--default");
 	const node = findReactParents(
-		getReactInstance(document.querySelector(".chat-list--default")),
+		getReactInstance(el),
 		n => n.stateNode && n.stateNode.props && n.stateNode.props.messages,
 		100,
 	);
 
-	return node?.stateNode;
+	return { inst: node?.stateNode, el: el as HTMLElement };
 }
 
 /**
@@ -204,9 +205,9 @@ export function getChatLine(el: HTMLElement): Twitch.ChatLineAndComponent {
 /**
  * Get chat lines with the element & react component, optionally filtered by an ID list
  */
-export function getChatLines(idList?: string[]): Twitch.ChatLineAndComponent[] {
-	let lines = Array.from(document.querySelectorAll<HTMLElement>(Selectors.ChatLine)).map(element => {
-		const chatLine = getChatLine(element);
+export function getChatLines(container: HTMLElement, idList?: string[]): Twitch.ChatLineAndComponent[] {
+	let lines = Array.from(container.children).map(element => {
+		const chatLine = getChatLine(element as HTMLElement);
 
 		return {
 			element,
@@ -231,6 +232,16 @@ export function getEmoteButton(): Twitch.EmoteButton {
 
 	return node?.stateNode;
 }
+
+export function getMessageCardOpeners(): Twitch.MessageCardOpeners {
+	const inst = document.querySelector(Selectors.ChatContainer);
+
+	// This has to walk deep FeelsDankMan
+	const opener = findReactParents(getReactInstance(inst), n => n.stateNode.onShowEmoteCard, 200);
+
+	return opener?.stateNode;
+}
+
 export namespace Selectors {
 	export const ROOT = "#root div";
 	export const NAV = '[data-a-target="top-nav-container"]';

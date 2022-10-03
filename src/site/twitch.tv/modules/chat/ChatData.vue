@@ -23,14 +23,14 @@ watch(setMap, () => {
 });
 
 // Query Twitch Emotes
-liveQuery(() =>
-	db.emoteSets
-		.where("provider")
-		.equals("TWITCH")
-		.toArray(),
-).subscribe({
-	next: emoteSets => {
-		setMap.twitch = emoteSets;
-	},
-});
+// liveQuery(() =>
+// 	db.emoteSets
+// 		.where("provider")
+// 		.equals("TWITCH")
+// 		.toArray(),
+// ).subscribe({
+// 	next: emoteSets => {
+// 		setMap.twitch = emoteSets;
+// 	},
+// });
 </script>

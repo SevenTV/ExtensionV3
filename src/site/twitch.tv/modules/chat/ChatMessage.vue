@@ -52,8 +52,10 @@ if (props.msg && typeof props.msg.messageBody === "string") {
 			const emote = p.content as Twitch.ChatMessage.EmoteRef;
 			if (Object.keys(emote).length) {
 				localEmoteMap[emote.alt] = {
+					id: emote.emoteID,
 					name: emote.alt,
 					data: ConvertTwitchEmote({ id: emote.emoteID, token: emote.alt }),
+					provider: "TWITCH",
 				} as SevenTV.ActiveEmote;
 			}
 		});

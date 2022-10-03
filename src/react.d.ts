@@ -39,6 +39,17 @@ import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import { Interaction as SchedulerInteraction } from "scheduler/tracing";
 
+declare module "react-dom" {
+	export function findDOMNode(instance: ReactInstance | null | undefined): Element | null | Text;
+	export function unmountComponentAtNode(container: Element | DocumentFragment): boolean;
+
+	export function createPortal(
+		children: ReactNode,
+		container: Element | DocumentFragment,
+		key?: null | string,
+	): ReactPortal;
+}
+
 type NativeAnimationEvent = AnimationEvent;
 type NativeClipboardEvent = ClipboardEvent;
 type NativeCompositionEvent = CompositionEvent;
@@ -109,7 +120,7 @@ declare namespace React {
 			| ForwardRefExoticComponent<any>
 			| { new (props: any): Component<any> }
 			| ((props: any, context?: any) => ReactElement | null)
-			| keyof JSX.IntrinsicElements,
+			| keyof JSX.IntrinsicElements
 	> =
 		// need to check first if `ref` is a valid prop for ts@3.0
 		// otherwise it will infer `{}` instead of `never`
@@ -139,7 +150,7 @@ declare namespace React {
 
 	interface ReactElement<
 		P = any,
-		T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>,
+		T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>
 	> {
 		type: T;
 		props: P;
@@ -148,7 +159,7 @@ declare namespace React {
 
 	interface ReactComponentElement<
 		T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>,
-		P = Pick<ComponentProps<T>, Exclude<keyof ComponentProps<T>, "key" | "ref">>,
+		P = Pick<ComponentProps<T>, Exclude<keyof ComponentProps<T>, "key" | "ref">>
 	> extends ReactElement<P, Exclude<T, number>> {}
 
 	interface FunctionComponentElement<P> extends ReactElement<P, FunctionComponent<P>> {
@@ -839,12 +850,13 @@ declare namespace React {
 	 * NOTE: prefer ComponentPropsWithRef, if the ref is forwarded,
 	 * or ComponentPropsWithoutRef when refs are not supported.
 	 */
-	type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> =
-		T extends JSXElementConstructor<infer P>
-			? P
-			: T extends keyof JSX.IntrinsicElements
-			? JSX.IntrinsicElements[T]
-			: {};
+	type ComponentProps<
+		T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>
+	> = T extends JSXElementConstructor<infer P>
+		? P
+		: T extends keyof JSX.IntrinsicElements
+		? JSX.IntrinsicElements[T]
+		: {};
 	type ComponentPropsWithRef<T extends ElementType> = T extends new (props: infer P) => Component<any, any>
 		? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
 		: PropsWithRef<ComponentProps<T>>;

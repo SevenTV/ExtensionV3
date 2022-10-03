@@ -2,7 +2,12 @@
 	<Teleport v-if="extMounted && channel && channel.id" :to="containerEl">
 		<div class="seventv-message-container">
 			<div v-for="msg of chatStore.messages" :key="msg.id" :msg-id="msg.id">
-				<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
+				<template v-if="handledMessageTypes.includes(msg.type)">
+					<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
+				</template>
+				<template v-else>
+					<div :id="'seventv-unhandled-msg-ref-' + msg.id" />
+				</template>
 			</div>
 		</div>
 
@@ -30,7 +35,7 @@
 import { getChatController, getChatMessageContainer, Selectors } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
-import { registerEmoteCardCardOpener, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
+import { registerCardOpeners, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
@@ -108,11 +113,11 @@ watch(channel, channel => {
 						}
 
 						// Finalize all chat hooks
-						if (!registerEmoteCardCardOpener()) {
+						if (!registerCardOpeners()) {
 							return;
 						}
 
-						overwriteMessageContainer();
+						overwriteMessageContainer(scrollContainer);
 						extMounted.value = true;
 
 						// Bind twitch emotes
@@ -148,12 +153,16 @@ watch(channel, channel => {
 }
 
 // Take over the chat's native message container
-const overwriteMessageContainer = () => {
-	const container = getChatMessageContainer();
+const handledMessageTypes = [0];
+const overwriteMessageContainer = (scrollContainer: Element) => {
+	const { inst: container } = getChatMessageContainer();
 	const containerClass = container.constructor.prototype;
 	if (container) {
+		const x = containerClass.render;
 		containerClass.render = function() {
-			return null;
+			const result = x.apply(this);
+
+			return result;
 		};
 	}
 };
@@ -200,7 +209,7 @@ containerEl.value.addEventListener("scroll", () => {
 });
 
 const onMessage = (m: Twitch.ChatMessage) => {
-	if (m.id === "seventv-hook-message") {
+	if (m.id === "seventv-hook-message" || !handledMessageTypes.includes(m.type)) {
 		return;
 	}
 
@@ -322,5 +331,9 @@ onUnmounted(() => {
 .community-highlight {
 	opacity: 0.75;
 	backdrop-filter: blur(1em);
+}
+
+.chat-list--default {
+	display: none !important;
 }
 </style>

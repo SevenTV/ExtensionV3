@@ -1,16 +1,17 @@
-import { getChatLine, getEmoteButton } from "@/site/twitch.tv";
+import { getEmoteButton, getMessageCardOpeners } from "@/site/twitch.tv";
 
 export const tools = {
 	emoteClick: (() => {}) as Twitch.EmoteButton["props"]["onEmoteClick"],
+	userClick: (() => {}) as Twitch.MessageCardOpeners["onShowViewerCard"],
 };
 
-export const registerEmoteCardCardOpener = (node?: HTMLElement): boolean => {
-	const btn = getEmoteButton();
-	if (!btn) {
+export const registerCardOpeners = (): boolean => {
+	const opener = getMessageCardOpeners();
+	if (!opener) {
 		return false;
 	}
 
-	tools.emoteClick = btn.props.onEmoteClick;
+	tools.emoteClick = opener.onShowEmoteCard;
 
 	return true;
 };
