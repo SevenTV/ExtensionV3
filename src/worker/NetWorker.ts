@@ -1,5 +1,6 @@
 import { log } from "@/common/Logger";
 import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
+import { seventv } from "./NetWorkerHttp";
 import { ws } from "./NetWorkerSocket";
 
 const w = (self as unknown) as DedicatedWorkerGlobalScope;
@@ -50,6 +51,12 @@ w.onmessage = ev => {
 
 			state.local = msg.data.local;
 			broadcastMessage(NetWorkerMessageType.STATE, { local: state.local });
+
+			// Load local data
+			// todo: make this better
+			if (state.local.channel) {
+				seventv.loadUserConnection("TWITCH", state.local.channel.id).catch(err => console.error(err));
+			}
 
 			log.debug("<NetWorker>", "Local State Updated", JSON.stringify(state.local));
 		}

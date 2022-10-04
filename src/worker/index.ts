@@ -43,6 +43,7 @@ export interface NetWorkerInstance {
 	local?: {
 		platform: Platform;
 		identity: TwitchIdentity | YouTubeIdentity | null;
+		channel?: CurrentChannel;
 	};
 
 	_timeout?: number;

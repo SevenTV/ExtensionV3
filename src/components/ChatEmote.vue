@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { getMessageCardOpeners } from "@/site/twitch.tv";
 import { tools } from "@/site/twitch.tv/modules/chat/ChatBackend";
 
 const props = defineProps<{
@@ -13,7 +12,7 @@ const props = defineProps<{
 
 const host = props.emote.data?.host ?? { url: "", files: [] };
 const srcset = host.files
-	.filter(f => f.format === props.format)
+	.filter(f => f.format === host.files[0].format)
 	.map((f, i) => `${host.url}/${f.name} ${i + 1}x`)
 	.join(", ");
 

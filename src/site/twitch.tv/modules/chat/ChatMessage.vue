@@ -13,7 +13,7 @@
 					{{ t.value }}
 				</template>
 				<template v-else-if="t.type === 'emote'">
-					<ChatEmote :emote="t.value" format="PNG" />
+					<ChatEmote :emote="t.value" format="WEBP" />
 				</template>
 			</span>
 		</span>

@@ -60,6 +60,7 @@ export const useStore = defineStore("main", {
 						local: {
 							identity: { ...this.identity },
 							platform: this.platform,
+							channel: this.channel && this.channel.id ? { ...this.channel } : null,
 						},
 					},
 				} as NetWorkerMessage<NetWorkerMessageType.STATE>);

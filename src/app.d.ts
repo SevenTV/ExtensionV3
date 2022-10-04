@@ -75,6 +75,30 @@ declare module SevenTV {
 		format: ImageFormat;
 	}
 
+	interface User {
+		id: ObjectID;
+		type: UserType;
+		username: string;
+		display_name: string;
+		profile_picture_url: string;
+		biography: string;
+		connections: UserConnection[];
+	}
+
+	interface UserConnection {
+		id: ObjectID;
+		platform: Platform;
+		username: string;
+		display_name: string;
+		linked_at: number;
+		emote_capacity: number;
+		emote_set: EmoteSet;
+
+		user?: User;
+	}
+
+	type UserType = "" | "BOT" | "SYSTEM";
+
 	type ImageFormat = "AVIF" | "WEBP" | "PNG" | "GIF";
 
 	type ObjectID = string;

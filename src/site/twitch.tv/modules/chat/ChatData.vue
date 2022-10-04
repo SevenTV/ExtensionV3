@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { db } from "@/db/IndexedDB";
+import { useStore } from "@/store/main";
 import { liveQuery } from "dexie";
+import { storeToRefs } from "pinia";
 import { reactive, watch } from "vue";
 import { useTwitchStore } from "../../TwitchStore";
 
+const { channel } = storeToRefs(useStore());
 const twitchStore = useTwitchStore();
 const setMap = reactive({
 	twitch: [] as SevenTV.EmoteSet[],
@@ -22,15 +25,20 @@ watch(setMap, () => {
 	}
 });
 
-// Query Twitch Emotes
-// liveQuery(() =>
-// 	db.emoteSets
-// 		.where("provider")
-// 		.equals("TWITCH")
-// 		.toArray(),
-// ).subscribe({
-// 	next: emoteSets => {
-// 		setMap.twitch = emoteSets;
-// 	},
-// });
+// Query 7TV Emotes
+liveQuery(() =>
+	db.userConnections
+		.where({
+			id: channel.value?.id,
+		})
+		.first(),
+).subscribe({
+	next(conn) {
+		if (!conn) return;
+
+		for (const emote of conn!.emote_set.emotes) {
+			twitchStore.emoteMap[emote.name] = emote;
+		}
+	},
+});
 </script>
