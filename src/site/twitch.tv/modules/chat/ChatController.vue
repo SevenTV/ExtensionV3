@@ -5,8 +5,8 @@
 				<template v-if="msg.seventv">
 					<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
 				</template>
-				<template v-else>
-					<div :id="msg.id" />
+				<template v-else-if="msg.seventv === false">
+					<div :id="(msg.t as number).toString()" />
 				</template>
 			</div>
 		</div>
@@ -42,6 +42,7 @@ import { useStore } from "@/store/main";
 import { TransformWorkerMessageType } from "@/worker";
 import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
 import ChatData from "./ChatData.vue";
+import { getRandomInt } from "@/common/Rand";
 
 const store = useStore();
 const chatStore = useTwitchStore();
@@ -174,7 +175,10 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 		this: Twitch.ChatControllerComponent["props"]["messageHandlerAPI"],
 		msg: Twitch.ChatMessage,
 	) {
-		const ok = onMessage.apply(this, [msg]);
+		const t = Date.now() + getRandomInt(0, 1000);
+		const msgData = Object.assign({ seventv: true, t }, msg);
+
+		const ok = onMessage(msgData);
 		if (ok) return; // message was rendered by the extension
 
 		// message type is not supported:
@@ -187,16 +191,10 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 					if (!(node instanceof HTMLElement)) return;
 
 					// Move the message into our context
-					const unhandledID = `seventv-unhandled-msg-ref-${msg.id}`;
-					chatStore.pushMessage(
-						{
-							...msg,
-							id: unhandledID,
-							seventv: false,
-							element: node,
-						},
-						true,
-					);
+					const unhandledID = `seventv-unhandled-msg-ref-${msgData.t}`;
+					msgData.seventv = false;
+					msgData.id = unhandledID;
+					chatStore.pushMessage(msgData);
 
 					nextTick(() => {
 						const wrapper = document.getElementById(unhandledID);
@@ -208,6 +206,7 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 					});
 
 					o.disconnect();
+					clearTimeout(timeout);
 				});
 			}
 		});
@@ -215,8 +214,9 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 		o.observe(scrollContainer, {
 			childList: true,
 		});
+		const timeout = setTimeout(() => o.disconnect(), 1250);
 
-		return xHandleMessage.apply(this, [msg]);
+		return xHandleMessage.apply(this, [msgData]);
 	};
 };
 
@@ -261,12 +261,10 @@ containerEl.value.addEventListener("scroll", () => {
 	}
 });
 
-function onMessage(this: Twitch.ChatControllerComponent["props"]["messageHandlerAPI"], m: Twitch.ChatMessage): boolean {
-	if (m.id === "seventv-hook-message" || !handledMessageTypes.includes(m.type)) {
+const onMessage = (msg: Twitch.ChatMessage): boolean => {
+	if (msg.id === "seventv-hook-message" || !handledMessageTypes.includes(msg.type)) {
 		return false;
 	}
-
-	const msg = { ...m, seventv: true };
 
 	if (scroll.paused) {
 		// if scrolling is paused, buffer the message
@@ -286,7 +284,7 @@ function onMessage(this: Twitch.ChatControllerComponent["props"]["messageHandler
 	});
 
 	return true;
-}
+};
 
 // Apply new boundaries when the window is resized
 const resizeObserver = new ResizeObserver(() => {

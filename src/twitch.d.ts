@@ -488,7 +488,7 @@ declare module Twitch {
 		emotes?: any;
 
 		seventv?: boolean;
-		element?: HTMLElement;
+		t?: number;
 	}
 	export namespace ChatMessage {
 		export interface Part {
