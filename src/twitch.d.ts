@@ -489,6 +489,7 @@ declare module Twitch {
 
 		seventv?: boolean;
 		t?: number;
+		element?: HTMLElement;
 	}
 	export namespace ChatMessage {
 		export interface Part {

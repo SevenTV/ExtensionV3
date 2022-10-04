@@ -1,12 +1,12 @@
 <template>
 	<Teleport v-if="extMounted && channel && channel.id" :to="containerEl">
-		<div class="seventv-message-container">
+		<div id="seventv-message-container" class="seventv-message-container">
 			<div v-for="msg of chatStore.messages" :key="msg.id" :msg-id="msg.id">
 				<template v-if="msg.seventv">
 					<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
 				</template>
-				<template v-else-if="msg.seventv === false">
-					<div :id="(msg.t as number).toString()" />
+				<template v-else>
+					<ChatMessageUnhandled :msg="msg" />
 				</template>
 			</div>
 		</div>
@@ -32,17 +32,17 @@
 </template>
 
 <script setup lang="ts">
-import { getChatController, getChatMessageContainer, Selectors } from "@/site/twitch.tv";
+import { getChatController, Selectors } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { registerCardOpeners, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
-import { TransformWorkerMessageType } from "@/worker";
 import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
 import ChatData from "./ChatData.vue";
 import { getRandomInt } from "@/common/Rand";
+import ChatMessageUnhandled from "./ChatMessageUnhandled.vue";
 
 const store = useStore();
 const chatStore = useTwitchStore();
@@ -119,19 +119,19 @@ watch(channel, channel => {
 						extMounted.value = true;
 
 						// Bind twitch emotes
-						if (this.props.emoteSetsData) {
-							// We must wait for the data to be received
-							const i = setInterval(() => {
-								if (this.props.emoteSetsData?.loading) return;
-
-								// Send the twitch emotes to the transform worker
-								// These can later be fetched from IDB by components
-								store.sendTransformRequest(TransformWorkerMessageType.TWITCH_EMOTES, {
-									input: this.props.emoteSetsData?.emoteSets ?? [],
-								});
-								clearInterval(i);
-							}, 200);
-						}
+						// if (this.props.emoteSetsData) {
+						// 	// We must wait for the data to be received
+						// 	const i = setInterval(() => {
+						// 		if (this.props.emoteSetsData?.loading) return;
+						//
+						// 		// Send the twitch emotes to the transform worker
+						// 		// These can later be fetched from IDB by components
+						// 		store.sendTransformRequest(TransformWorkerMessageType.TWITCH_EMOTES, {
+						// 			input: this.props.emoteSetsData?.emoteSets ?? [],
+						// 		});
+						// 		clearInterval(i);
+						// 	}, 200);
+						// }
 
 						log.debug("<ChatController>", "Chat controller mounted", `(${Date.now() - t}ms)`);
 						observer.disconnect(); // work is done, stop the mutation observer
@@ -153,18 +153,14 @@ watch(channel, channel => {
 }
 
 // Take over the chat's native message container
-const handledMessageTypes = [0];
-const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, scrollContainer: HTMLDivElement) => {
-	const { inst: container } = getChatMessageContainer();
-	const containerClass = container.constructor.prototype;
-	if (container) {
-		const x = containerClass.render;
-		containerClass.render = function() {
-			const result = x.apply(this);
+const handledMessageTypes = [0, 2];
 
-			return result;
-		};
+let currentController: Twitch.ChatControllerComponent;
+const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, scrollContainer: HTMLDivElement) => {
+	if (currentController) {
+		currentController.props.messageHandlerAPI.handleMessage = () => {};
 	}
+	currentController = controller;
 
 	// Hook the handleMessage method
 	// We will use our custom renderer for all supported types
@@ -176,10 +172,13 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 		msg: Twitch.ChatMessage,
 	) {
 		const t = Date.now() + getRandomInt(0, 1000);
-		const msgData = Object.assign({ seventv: true, t }, msg);
+		const msgData = Object.create({ seventv: true, t });
+		for (const k of Object.keys(msg)) {
+			msgData[k] = msg[k as keyof Twitch.ChatMessage];
+		}
 
 		const ok = onMessage(msgData);
-		if (ok) return; // message was rendered by the extension
+		if (ok) return ""; // message was rendered by the extension
 
 		// message type is not supported:
 		// render is natively
@@ -190,7 +189,6 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 				rec.addedNodes.forEach(node => {
 					if (!(node instanceof HTMLElement)) return;
 
-					// Move the message into our context
 					const unhandledID = `seventv-unhandled-msg-ref-${msgData.t}`;
 					msgData.seventv = false;
 					msgData.id = unhandledID;
@@ -199,7 +197,7 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 					nextTick(() => {
 						const wrapper = document.getElementById(unhandledID);
 						if (wrapper) {
-							wrapper.appendChild(node);
+							wrapper.appendChild(node as Node);
 						}
 
 						scrollToLive();
@@ -215,8 +213,9 @@ const overwriteMessageContainer = (controller: Twitch.ChatControllerComponent, s
 			childList: true,
 		});
 		const timeout = setTimeout(() => o.disconnect(), 1250);
+		//////////
 
-		return xHandleMessage.apply(this, [msgData]);
+		xHandleMessage.call(this, msg);
 	};
 };
 

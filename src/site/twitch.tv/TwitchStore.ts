@@ -17,7 +17,7 @@ export const useTwitchStore = defineStore("chat", {
 			channel: null,
 			messages: [],
 			messageIds: new Set(),
-			lineLimit: 100,
+			lineLimit: 250,
 			emoteMap: {},
 		} as State),
 
@@ -35,8 +35,6 @@ export const useTwitchStore = defineStore("chat", {
 			if (this.messages.length > this.lineLimit) {
 				const msg = this.messages.shift() as Twitch.ChatMessage;
 				this.messageIds.delete(msg.id);
-
-				destroyObject(msg);
 			}
 		},
 	},

@@ -21,10 +21,10 @@
 </template>
 
 <script setup lang="ts">
-import ChatUserTag from "@/site/twitch.tv/modules/chat/ChatUserTag.vue";
 import { storeToRefs } from "pinia";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { ConvertTwitchEmote } from "@/common/Transform";
+import ChatUserTag from "@/site/twitch.tv/modules/chat/ChatUserTag.vue";
 import ChatEmote from "@/components/ChatEmote.vue";
 
 const emit = defineEmits<{

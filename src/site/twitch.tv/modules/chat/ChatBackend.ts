@@ -6,12 +6,12 @@ export const tools = {
 };
 
 export const registerCardOpeners = (): boolean => {
-	const opener = getMessageCardOpeners();
+	const opener = getEmoteButton();
 	if (!opener) {
 		return false;
 	}
 
-	tools.emoteClick = opener.onShowEmoteCard;
+	tools.emoteClick = opener.props.onEmoteClick;
 
 	return true;
 };
