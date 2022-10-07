@@ -6,6 +6,9 @@ production:
 dev:
 	yarn build:dev
 
+stage:
+	yarn build:stage
+
 format:
 	yarn format
 

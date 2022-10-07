@@ -1,5 +1,5 @@
 import type { Manifest } from "webextension-polyfill-ts";
-import pkg from "./package.json";
+import { version, displayName, name, description } from "./package.json";
 
 interface MV3HostPermissions {
 	host_permissions?: string[];
@@ -9,9 +9,9 @@ interface MV3HostPermissions {
 export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionManifest> {
 	const manifest = {
 		manifest_version: 3,
-		name: pkg.displayName || pkg.name,
-		version: pkg.version,
-		description: pkg.description,
+		name: displayName || name,
+		version: version,
+		description: description,
 		action: {
 			default_icon: "./icon/icon-512.png",
 		},
