@@ -40,7 +40,7 @@ import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
 import { getRandomInt } from "@/common/Rand";
-import ChatMessage from "@/site/twitch.tv/modules/chat/ChatMessage.vue";
+import ChatMessage from "@/site/twitch.tv/modules/chat/components/ChatMessage.vue";
 import ChatData from "./ChatData.vue";
 import ChatMessageUnhandled from "./ChatMessageUnhandled.vue";
 

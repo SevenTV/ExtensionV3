@@ -12,8 +12,8 @@
 <script setup lang="ts">
 import { useTooltip } from "@/composable/useTooltip";
 import { tools } from "@/site/twitch.tv/modules/chat/ChatBackend";
-import { markRaw, ref } from "vue";
-import Tooltip from "./Tooltip.vue";
+import { ref } from "vue";
+import ChatEmoteTooltip from "@/site/twitch.tv/modules/chat/components/ChatEmoteTooltip.vue";
 
 const props = defineProps<{
 	emote: SevenTV.ActiveEmote;
@@ -28,8 +28,8 @@ const srcset = host.files
 
 const imgRef = ref<HTMLElement>();
 
-const { show, hide } = useTooltip(Tooltip, {
-	emote: markRaw(props.emote),
+const { show, hide } = useTooltip(ChatEmoteTooltip, {
+	emote: props.emote,
 });
 
 const openCard = (ev: MouseEvent) => {
