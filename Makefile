@@ -9,5 +9,8 @@ dev:
 format:
 	yarn format
 
+deps:
+	yarn
+
 lint:
 	yarn lint
