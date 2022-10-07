@@ -172,13 +172,13 @@ export function getInputController(): Twitch.ChatInputController {
 	return node?.stateNode;
 }
 
-export function getChatInput(): Twitch.ChatInputComponent {
+export function getChatInput(): Twitch.ChatInputComponent | undefined {
 	return getAutocompleteHandler()?.componentRef;
 }
 
-export function getAutocompleteHandler(): Twitch.ChatAutocompleteComponent {
+export function getAutocompleteHandler(parent?: HTMLElement): Twitch.ChatAutocompleteComponent | undefined {
 	const node = findReactChildren(
-		getReactInstance(document.querySelector(".chat-input__textarea")),
+		getReactInstance(parent ?? document.querySelector(".chat-input__textarea")),
 		(n) => n.stateNode.providers,
 	);
 

@@ -279,13 +279,68 @@ declare module Twitch {
 	export type ChatInputComponent = React.Component<{
 		channelID: string;
 		channelLogin: string;
+		currentUserID: string;
+		currentUserLogin: string;
 		setInputValue: (v: string) => void;
 		onFocus: (v: any) => void;
 		onChange: (v: any) => void;
 		onKeyDown: (v: any) => void;
 		onValueUpdate: (v: any) => void;
+		emotes: TwitchEmoteSet[];
 		value: string;
-	}> & { selectionStart: number };
+	}> & {
+		focus: () => void;
+		selectionStart: number;
+		setSelectionRange: (start: number, end: number) => void;
+		state?: {
+			slateEditor?: ChatSlate
+		};
+		_SEVENTV_state?: {
+			tabState?: {
+				index: number;
+				matches: string[];
+				expectedPath: number[];
+				expectedOffset: number;
+				expectedWord: string;
+			};
+		};
+	};
+
+	export type ChatSlate = {
+		children: ChatStateLeaf[];
+		selection: {
+			anchor: {
+				offset: number;
+				path: number[];
+			};
+			focus: {
+				offset: number;
+				path: number[];
+			};
+		} | null;
+		isInline: (element: ChatSlateLeaf) => boolean;
+		isVoid: (element: ChatSlateLeaf) => boolean;
+		normalizeNode: (entry: ChatSlateLeaf) => void;
+		onChange: () => void;
+		addMark: (key: string, value: any) => void;
+		apply: (operation: object) => void;
+		deleteBackward: (unit: 'character' | 'word' | 'line' | 'block') => void;
+		deleteForward: (unit: 'character' | 'word' | 'line' | 'block') => void;
+		deleteFragment: () => void;
+		insertBreak: () => void;
+		insertFragment: (fragment: ChatSlateLeaf[]) => void;
+		insertNode: (node: ChatSlateLeaf) => void;
+		insertText: (text: string) => void;
+		removeMark: (key: string) => void;
+	};
+
+	export type ChatSlateLeaf = {
+		type: "text" | "paragraph" | "emote";
+		children: ChatStateLeaf[];
+		emoteData?: {};
+		emoteName?: string;
+		text?: string;
+	};
 
 	export type ChatAutocompleteComponent = {
 		componentRef: Twitch.ChatInputComponent;
@@ -319,23 +374,24 @@ declare module Twitch {
 			tray: any;
 			useHighContrastColors: boolean;
 		};
-		providers: Provider[];
+		providers: ChatAutoCompleteProvider[];
 	};
 
-	export type Provider = {
+	export type ChatAutoCompleteProvider = {
 		autocompleteType: string;
 		canBeTriggeredByTab: boolean;
-		doesEmoteMatchTerm: (e: TwitchEmote, t: string) => boolean;
-		getMatchedEmotes: (s: string) => TwitchEmote[];
-		getMatches: (x: string) => any[];
+		getMatches: (string: string, unk: unknown, index: number) => {
+			current: string;
+			element: React.ReactFragment;
+			replacement: string;
+			type: string;
+		}[] | undefined;
 		props: {
 			emotes: TwitchEmoteSet[];
 			isEmoteAnimationsEnabled: boolean;
-			registerAutocompleteProvider: (p: Provider) => void;
+			registerAutocompleteProvider: (p: ChatAutoCompleteProvider) => void;
 			theme: Theme;
 		};
-		renderEmoteSuggestion: (e: TwitchEmote) => TwitchEmote;
-		hydrateEmotes: (emotes: any, b: boolean, theme: Twitch.Theme) => Twitch.TwitchEmoteSet[];
 	};
 
 	export enum Theme {
@@ -555,7 +611,7 @@ declare module Twitch {
 		setID: string;
 		displayName?: string;
 		token: string;
-		type: string;
+		type?: string;
 		owner?: {
 			displayName: string;
 			id: string;
@@ -563,7 +619,6 @@ declare module Twitch {
 			profileImageURL: string;
 		};
 		__typename?: string;
-		_thirdPartyGlobal: boolean;
 		srcSet?: string;
 	}
 }

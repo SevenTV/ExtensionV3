@@ -14,6 +14,9 @@
 		<!-- Data Logic -->
 		<ChatData />
 
+		<!-- Auto Complete and slate rendering -->
+		<ChatAutoComplete />
+
 		<!-- Custom Scrollbar -->
 		<div
 			v-if="scroll.visible"
@@ -43,6 +46,7 @@ import { getRandomInt } from "@/common/Rand";
 import ChatMessage from "@/site/twitch.tv/modules/chat/components/ChatMessage.vue";
 import ChatData from "./ChatData.vue";
 import ChatMessageUnhandled from "./ChatMessageUnhandled.vue";
+import ChatAutoComplete from "./ChatAutoComplete.vue";
 import { TransformWorkerMessageType } from "@/worker";
 
 const store = useStore();
