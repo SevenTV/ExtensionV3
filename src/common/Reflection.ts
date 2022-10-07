@@ -17,18 +17,15 @@ export function definePropertyProxy(object: any, prop: string, handler: ProxyHan
 export function defineFunctionHook<O>(
 	object: O,
 	prop: string,
-	callback: (this: O, hooked: (...args: any[]) => any, ...args: any[]) => any,
+	callback: (this: O, old: ((...args: any[]) => any) | null, ...args: any[]) => any,
 ) {
-	let hooked: ((...args: any[]) => any) | undefined;
+	let hooked: (...args: any[]) => any;
 	definePropertyHook(object, prop, {
 		value: (v) => {
-			if (typeof v == "function") {
-				hooked = function (this: O, ...args: any[]) {
-					return Reflect.apply(callback, this, [v, ...args]);
-				};
-			} else {
-				hooked = undefined;
-			}
+			const old = typeof v == "function" ? v : undefined;
+			hooked = function (this: O, ...args: any[]) {
+				return Reflect.apply(callback, this, [old, ...args]);
+			};
 		},
 		get: (v) => hooked ?? v,
 	});

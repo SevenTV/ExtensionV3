@@ -186,7 +186,7 @@ watch(
 			defineFunctionHook(emoteProvider, "getMatches", function (old, str: string, ...args: any[]) {
 				if (!str.startsWith(":") || str.length < 3) return;
 
-				const results = old.call(this, str, ...args) ?? [];
+				const results = old?.call(this, str, ...args) ?? [];
 
 				const emotes = emoteMap.value;
 				const tokens = findMatchingTokens(str.substring(1));
