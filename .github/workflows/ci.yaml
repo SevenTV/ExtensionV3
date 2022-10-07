@@ -54,7 +54,7 @@ jobs:
 
             - name: Install Dependencies
               run: |
-                  make deps dev_deps
+                  make deps
 
             - name: Run Linter
               run: make lint
