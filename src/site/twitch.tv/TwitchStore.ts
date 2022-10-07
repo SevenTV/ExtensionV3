@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 
 export interface State {
+	chatController: Twitch.ChatControllerComponent | null;
 	messages: Twitch.ChatMessage[];
 	messageIds: Set<string>;
 	lineLimit: number;
@@ -11,6 +12,7 @@ export const useTwitchStore = defineStore("chat", {
 	state: () =>
 		({
 			channel: null,
+			chatController: null,
 			messages: [],
 			messageIds: new Set(),
 			lineLimit: 250,
@@ -33,5 +35,9 @@ export const useTwitchStore = defineStore("chat", {
 				this.messageIds.delete(msg.id);
 			}
 		},
+
+		setChatController(controller: Twitch.ChatControllerComponent | null) {
+			this.chatController = controller;
+		}
 	},
 });

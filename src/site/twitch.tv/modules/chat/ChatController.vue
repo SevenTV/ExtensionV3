@@ -48,11 +48,10 @@ import { TransformWorkerMessageType } from "@/worker";
 const store = useStore();
 const chatStore = useTwitchStore();
 const { channel } = storeToRefs(store);
-const { messages } = storeToRefs(chatStore);
+const { messages, chatController } = storeToRefs(chatStore);
 
 const extMounted = ref(false);
-const controller = getChatController();
-const controllerClass = controller?.constructor?.prototype;
+const controllerClass = getChatController()?.constructor?.prototype;
 
 const el = document.createElement("seventv-container");
 el.id = "seventv-chat-controller";
@@ -79,10 +78,13 @@ const hooks = reactive({
 // Hook chat controller mount event
 hooks.controllerMounted = controllerClass.componentDidUpdate;
 {
-	hooks.handleMessage = controller.props.messageHandlerAPI.handleMessage;
-
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	controllerClass.componentDidUpdate = function (this: Twitch.ChatControllerComponent, args: any[]) {
+		// Update refrence to current controller
+		chatStore.setChatController(this);
+
+		hooks.handleMessage = this.props.messageHandlerAPI.handleMessage;
+
 		// Update current channel
 		if (
 			store.setChannel({
@@ -169,6 +171,8 @@ hooks.controllerMounted = controllerClass.componentDidUpdate;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return hooks.controllerMounted?.apply(this, [args] as any[any]);
 	};
+
+	chatStore.chatController?.forceUpdate();
 }
 
 // Take over the chat's native message container
@@ -318,7 +322,9 @@ const resizeObserver = new ResizeObserver(() => {
 resizeObserver.observe(containerEl.value);
 
 const openViewerCard = (ev: MouseEvent, viewer: Twitch.ChatUser) => {
-	controller.sendMessage(`/user ${viewer.userLogin}`);
+	if (!chatStore.chatController) return;
+
+	chatStore.chatController.sendMessage(`/user ${viewer.userLogin}`);
 
 	// Watch for card being created
 	const userCardContainer = document.querySelector("[data-a-target='chat-user-card']");
@@ -349,7 +355,7 @@ onUnmounted(() => {
 	resizeObserver.disconnect();
 
 	controllerClass.componentDidUpdate = hooks.controllerMounted;
-	controller.props.messageHandlerAPI.handleMessage = hooks.handleMessage;
+	if (chatStore.chatController) chatStore.chatController.props.messageHandlerAPI.handleMessage = hooks.handleMessage;
 
 	el.remove();
 	hooks.chatListEl?.classList.remove("seventv-checked");
