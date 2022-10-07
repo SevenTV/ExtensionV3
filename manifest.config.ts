@@ -15,6 +15,7 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 		action: {
 			default_icon: "./icon/icon-512.png",
 		},
+
 		background: {
 			service_worker: "background.js",
 		},
@@ -69,7 +70,7 @@ export async function getManifest(dev?: boolean): Promise<Manifest.WebExtensionM
 			.reduce((a, b) => [...(a ?? []), ...(b ?? [])]);
 
 		// this is required on dev for Vite script to load
-		manifest.content_security_policy = `script-src-elem \'self\' \'unsafe-eval\' http://localhost:${4777}; object-src \'self\'`;
+		manifest.content_security_policy = `script-src-elem 'self' 'unsafe-eval' http://localhost:${4777}; object-src 'self'`;
 	}
 
 	return manifest;
