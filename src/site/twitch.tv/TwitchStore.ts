@@ -38,6 +38,6 @@ export const useTwitchStore = defineStore("chat", {
 
 		setChatController(controller: Twitch.ChatControllerComponent | null) {
 			this.chatController = controller;
-		}
+		},
 	},
 });

@@ -293,7 +293,7 @@ declare module Twitch {
 		selectionStart: number;
 		setSelectionRange: (start: number, end: number) => void;
 		state?: {
-			slateEditor?: ChatSlate
+			slateEditor?: ChatSlate;
 		};
 		_SEVENTV_state?: {
 			tabState?: {
@@ -324,8 +324,8 @@ declare module Twitch {
 		onChange: () => void;
 		addMark: (key: string, value: any) => void;
 		apply: (operation: object) => void;
-		deleteBackward: (unit: 'character' | 'word' | 'line' | 'block') => void;
-		deleteForward: (unit: 'character' | 'word' | 'line' | 'block') => void;
+		deleteBackward: (unit: "character" | "word" | "line" | "block") => void;
+		deleteForward: (unit: "character" | "word" | "line" | "block") => void;
 		deleteFragment: () => void;
 		insertBreak: () => void;
 		insertFragment: (fragment: ChatSlateLeaf[]) => void;
@@ -380,12 +380,18 @@ declare module Twitch {
 	export type ChatAutoCompleteProvider = {
 		autocompleteType: string;
 		canBeTriggeredByTab: boolean;
-		getMatches: (string: string, unk: unknown, index: number) => {
-			current: string;
-			element: React.ReactFragment;
-			replacement: string;
-			type: string;
-		}[] | undefined;
+		getMatches: (
+			string: string,
+			unk: unknown,
+			index: number,
+		) =>
+			| {
+					current: string;
+					element: React.ReactFragment;
+					replacement: string;
+					type: string;
+			  }[]
+			| undefined;
 		props: {
 			emotes: TwitchEmoteSet[];
 			isEmoteAnimationsEnabled: boolean;

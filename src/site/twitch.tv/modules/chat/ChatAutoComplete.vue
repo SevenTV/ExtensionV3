@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { log } from "@/common/Logger";
 import { getAutocompleteHandler, Selectors } from "@/site/twitch.tv";
 import { watch } from "vue";
 import { useTwitchStore } from "../../TwitchStore";
@@ -16,7 +15,7 @@ function findMatchingTokens(str: string, twitchSets?: Twitch.TwitchEmoteSet[]): 
 
 	const prefix = str.toLowerCase();
 
-	for (const [token, emote] of Object.entries(emoteMap.value)) {
+	for (const [token] of Object.entries(emoteMap.value)) {
 		if (token.toLowerCase().startsWith(prefix)) matches.add(token);
 	}
 
@@ -41,7 +40,7 @@ function handleTabPress(this: Twitch.ChatInputComponent, ev: KeyboardEvent): voi
 	const cursorLocation = slate.selection?.anchor;
 	if (!cursorLocation) return;
 
-	let currentNode: any = slate;
+	let currentNode: { children: Twitch.ChatSlateLeaf[] } & Partial<Twitch.ChatSlateLeaf> = slate;
 	for (const i of cursorLocation.path) {
 		if (!currentNode) break;
 		currentNode = currentNode.children[i];
@@ -76,21 +75,24 @@ function handleTabPress(this: Twitch.ChatInputComponent, ev: KeyboardEvent): voi
 
 	if (currentWord && currentWord != " ") {
 		let state = this._SEVENTV_state;
-		if (!state) state = {}; this._SEVENTV_state = state;
+		if (!state) {
+			state = {};
+			this._SEVENTV_state = state;
+		}
 
 		let replacement: string | null = null;
 
 		let matchIndex = 0;
 		let matches: string[];
-		if (!state.tabState
-			|| state.tabState.expectedPath != cursorLocation.path
-			|| state.tabState.expectedOffset != cursorLocation.offset
-			|| state.tabState.expectedWord != currentWord
+		if (
+			!state.tabState ||
+			state.tabState.expectedPath != cursorLocation.path ||
+			state.tabState.expectedOffset != cursorLocation.offset ||
+			state.tabState.expectedWord != currentWord
 		) {
 			matches = findMatchingTokens(currentWord, this.props.emotes);
 			replacement = matches[matchIndex];
-		}
-		else {
+		} else {
 			matches = state.tabState.matches;
 			matchIndex = state.tabState.index + 1;
 			matchIndex %= matches.length;
@@ -98,26 +100,25 @@ function handleTabPress(this: Twitch.ChatInputComponent, ev: KeyboardEvent): voi
 		}
 
 		if (replacement) {
-			slate.apply({type: "remove_text", path: cursorLocation.path, offset: wordStart, text: currentWord});
-			slate.apply({type: "insert_text", path: cursorLocation.path, offset: wordStart, text: replacement});
+			slate.apply({ type: "remove_text", path: cursorLocation.path, offset: wordStart, text: currentWord });
+			slate.apply({ type: "insert_text", path: cursorLocation.path, offset: wordStart, text: replacement });
 
 			const newOffset = wordStart + replacement.length;
 
-			const newCursor = {path: cursorLocation.path, offset: newOffset};
-			slate.apply({type: "set_selection", newProperties: {anchor: newCursor, focus: newCursor}});
+			const newCursor = { path: cursorLocation.path, offset: newOffset };
+			slate.apply({ type: "set_selection", newProperties: { anchor: newCursor, focus: newCursor } });
 
 			state.tabState = {
 				index: matchIndex,
 				matches: matches,
 				expectedOffset: newOffset,
 				expectedPath: cursorLocation.path,
-				expectedWord: replacement
+				expectedWord: replacement,
 			};
 
 			ev.preventDefault();
 			ev.stopImmediatePropagation();
-		}
-		else {
+		} else {
 			state.tabState = undefined;
 		}
 	}
@@ -125,103 +126,114 @@ function handleTabPress(this: Twitch.ChatInputComponent, ev: KeyboardEvent): voi
 
 const autoCompleteEmotes: Twitch.TwitchEmoteSet = {
 	id: TOKENS_SET_ID,
-	emotes: []
+	emotes: [],
 };
 
 //Fill in our set with tokens for Twitch's slate editor.
-watch(emoteMap, (map) => {
-	autoCompleteEmotes.emotes.length = 0;
+watch(
+	emoteMap,
+	(map) => {
+		autoCompleteEmotes.emotes.length = 0;
 
-	for (const [token, emote] of Object.entries(map)) {
-		autoCompleteEmotes.emotes.push({
-			setID: TOKENS_SET_ID,
-			// id: `7TV-${emote.id}`,
-			id: "115234",
-			token: token,
-			type: "7TV"
-		});
-	}
-}, {immediate: true, deep: true});
+		for (const [token] of Object.entries(map)) {
+			autoCompleteEmotes.emotes.push({
+				setID: TOKENS_SET_ID,
+				// id: `7TV-${emote.id}`,
+				id: "115234",
+				token: token,
+				type: "7TV",
+			});
+		}
+	},
+	{ immediate: true, deep: true },
+);
 
-watch(chatController, (controller) => {
-	if (!controller) return;
+watch(
+	chatController,
+	(controller) => {
+		if (!controller) return;
 
-	const inputEl = document.querySelector(Selectors.ChatInput) as HTMLInputElement;
-	if (!inputEl) return;
+		const inputEl = document.querySelector(Selectors.ChatInput) as HTMLInputElement;
+		if (!inputEl) return;
 
-	const acHandler = getAutocompleteHandler(inputEl);
-	if (!acHandler) return;
+		const acHandler = getAutocompleteHandler(inputEl);
+		if (!acHandler) return;
 
-	const input = acHandler.componentRef;
-	if (input) {
-		definePropertyProxy(input, "props", {
-			get: (obj, prop) => {
-				switch (prop) {
-					case "emotes": return Reflect.has(obj, prop) ? [autoCompleteEmotes, ...obj[prop]] : [autoCompleteEmotes];
-					default: return obj[prop];
-				}
-			}
-		});
+		const input = acHandler.componentRef;
+		if (input) {
+			definePropertyProxy(input, "props", {
+				get: (obj, prop) => {
+					switch (prop) {
+						case "emotes":
+							return Reflect.has(obj, prop) ? [autoCompleteEmotes, ...obj[prop]] : [autoCompleteEmotes];
+						default:
+							return obj[prop];
+					}
+				},
+			});
 
-		defineNamedEventHandler(inputEl, "AutoComplete", "keydown", handleTabPress.bind(input));
-	}
+			defineNamedEventHandler(inputEl, "AutoComplete", "keydown", handleTabPress.bind(input));
+		}
 
-	const mentionProvider = acHandler.providers.find(provider => provider.autocompleteType == "mention");
-	if (mentionProvider) {
-		mentionProvider.canBeTriggeredByTab = false;
-	}
+		const mentionProvider = acHandler.providers.find((provider) => provider.autocompleteType == "mention");
+		if (mentionProvider) {
+			mentionProvider.canBeTriggeredByTab = false;
+		}
 
-	const emoteProvider = acHandler.providers.find(provider => provider.autocompleteType == "emote");
-	if (emoteProvider) {
-		defineFunctionHook(emoteProvider, "getMatches", function(old, str: string, ...args: any[]) {
-			if (!str.startsWith(":") || str.length < 3) return;
+		const emoteProvider = acHandler.providers.find((provider) => provider.autocompleteType == "emote");
+		if (emoteProvider) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			defineFunctionHook(emoteProvider, "getMatches", function (old, str: string, ...args: any[]) {
+				if (!str.startsWith(":") || str.length < 3) return;
 
-			const results = old.call(this, str, ...args) ?? [];
+				const results = old.call(this, str, ...args) ?? [];
 
-			const emotes = emoteMap.value;
-			const tokens = findMatchingTokens(str.substring(1));
-			for (let i = tokens.length - 1; i > -1; i--) {
-				const token = tokens[i];
-				const emote = emotes[token];
+				const emotes = emoteMap.value;
+				const tokens = findMatchingTokens(str.substring(1));
+				for (let i = tokens.length - 1; i > -1; i--) {
+					const token = tokens[i];
+					const emote = emotes[token];
 
-				const host = emote?.data?.host ?? { url: "", files: [] };
-				const srcset = host.files
-					.filter(f => f.format === host.files[0].format)
-					.map((f, i) => `${host.url}/${f.name} ${i + 1}x`)
-					.join(", ");
+					const host = emote?.data?.host ?? { url: "", files: [] };
+					const srcset = host.files
+						.filter((f) => f.format === host.files[0].format)
+						.map((f, i) => `${host.url}/${f.name} ${i + 1}x`)
+						.join(", ");
 
-				results.unshift({
-					type: "emote",
-					current: str,
-					element: [
-						{
-							$$typeof: Symbol.for("react.element"),
-							ref: null,
-							key: `emote-img-${emote.id}`,
-							type: 'img',
-							props: {
-								style: {
-									padding: '0.5rem'
+					results.unshift({
+						type: "emote",
+						current: str,
+						element: [
+							{
+								$$typeof: Symbol.for("react.element"),
+								ref: null,
+								key: `emote-img-${emote.id}`,
+								type: "img",
+								props: {
+									style: {
+										padding: "0.5rem",
+									},
+									srcset: srcset,
 								},
-								srcset: srcset
-							}
-						},
-						{
-							$$typeof: Symbol.for("react.element"),
-							ref: null,
-							key: `emote-text-${emote.id}`,
-							type: 'span',
-							props: {
-								children: `${emote.name}`
-							}
-						}
-					],
-					replacement: token
-				});
-			}
+							},
+							{
+								$$typeof: Symbol.for("react.element"),
+								ref: null,
+								key: `emote-text-${emote.id}`,
+								type: "span",
+								props: {
+									children: `${emote.name}`,
+								},
+							},
+						],
+						replacement: token,
+					});
+				}
 
-			return results.length > 0 ? results : undefined;
-		});
-	}
-}, {immediate: true});
+				return results.length > 0 ? results : undefined;
+			});
+		}
+	},
+	{ immediate: true },
+);
 </script>

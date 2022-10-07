@@ -52,7 +52,7 @@ import { TransformWorkerMessageType } from "@/worker";
 const store = useStore();
 const chatStore = useTwitchStore();
 const { channel } = storeToRefs(store);
-const { messages, chatController } = storeToRefs(chatStore);
+const { messages } = storeToRefs(chatStore);
 
 const extMounted = ref(false);
 const controllerClass = getChatController()?.constructor?.prototype;
