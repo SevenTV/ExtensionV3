@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function definePropertyProxy<O extends object>(object: O, prop: string, handler: ProxyHandler<O>) {
-	let proxy: O | undefined;
+export function definePropertyProxy(object: any, prop: string, handler: ProxyHandler<any>) {
+	let proxy: any;
 	definePropertyHook(object, prop, {
 		value: (v) => {
 			if (v && typeof v == "object") {
