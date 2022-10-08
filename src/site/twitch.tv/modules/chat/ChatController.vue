@@ -38,6 +38,10 @@ import ChatData from "./ChatData.vue";
 import ChatList from "./ChatList.vue";
 import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/common/Reflection";
 
+const emit = defineEmits<{
+	(e: "hooked"): void;
+}>();
+
 const store = useStore();
 const chatStore = useTwitchStore();
 const { channel } = storeToRefs(store);
@@ -153,6 +157,7 @@ function setController(ctrl: Twitch.ChatControllerComponent) {
 							}
 
 							overwriteMessageContainer(this, scrollContainer);
+							emit("hooked");
 							extMounted.value = true;
 
 							log.debug("<ChatController>", "Chat controller mounted", `(${Date.now() - t}ms)`);
