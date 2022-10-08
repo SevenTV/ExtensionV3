@@ -34,8 +34,10 @@ export function defineFunctionHook<O>(
 export function definePropertyHook(
 	object: any,
 	prop: string,
-	hooks: { set?: (v: any) => any; get?: (v: any) => any; value?: (v: any) => void },
+	hooks: { set?: (newVal: any, oldVal: any) => any; get?: (v: any) => any; value?: (v: any) => void },
 ) {
+	if (!object) return;
+
 	const storeProp = `_SEVENTV_store_${prop}`;
 
 	if (!Reflect.has(object, storeProp)) {
@@ -47,7 +49,8 @@ export function definePropertyHook(
 	Reflect.defineProperty(object, prop, {
 		configurable: true,
 		set: (v) => {
-			const newV = hooks.set ? hooks.set(v) : v;
+			const oldV = object[storeProp];
+			const newV = hooks.set ? hooks.set(v, oldV) : v;
 
 			object[storeProp] = newV;
 
@@ -60,6 +63,8 @@ export function definePropertyHook(
 }
 
 export function unsetPropertyHook(object: any, prop: string) {
+	if (!object) return;
+
 	const storeProp = `_SEVENTV_store_${prop}`;
 
 	Reflect.deleteProperty(object, prop);
@@ -77,6 +82,8 @@ export function defineNamedEventHandler<K extends keyof HTMLElementEventMap>(
 	event: K,
 	handler: (ev: HTMLElementEventMap[K]) => void,
 ) {
+	if (!target) return;
+
 	const storeProp = `_SEVENTV_${namespace}_handler_${event}`;
 
 	const oldHandler = Reflect.get(target, storeProp);
@@ -91,6 +98,8 @@ export function unsetNamedEventHandler<K extends keyof HTMLElementEventMap>(
 	namespace: string,
 	event: K,
 ) {
+	if (!target) return;
+
 	const storeProp = `_SEVENTV_${namespace}_handler_${event}`;
 
 	const oldHandler = Reflect.get(target, storeProp);
