@@ -176,10 +176,19 @@ function setController(ctrl: Twitch.ChatControllerComponent) {
 }
 
 function unhookController() {
-	unsetPropertyHook(controller.value, "props");
-	unsetPropertyHook(controller.value?.props, "emoteSetsData");
-	unsetPropertyHook(controller.value?.props?.messageHandlerAPI, "handleMessage");
-	unsetPropertyHook(controller.value?.constructor.prototype, "componentDidUpdate");
+	if (controller.value) {
+		const ctrl = controller.value;
+		unsetPropertyHook(ctrl, "props");
+		unsetPropertyHook(ctrl.constructor.prototype, "componentDidUpdate");
+
+		if (ctrl.props) {
+			unsetPropertyHook(ctrl.props, "emoteSetsData");
+
+			if (ctrl.props.messageHandlerAPI) {
+				unsetPropertyHook(ctrl.props.messageHandlerAPI, "handleMessage");
+			}
+		}
+	}
 }
 
 // Take over the chat's native message container

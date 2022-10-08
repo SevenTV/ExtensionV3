@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export const PROP_STORE_ACCESSOR = Symbol("7TV.reflection.store");
+export const EVENT_STORE_ACCESSOR = Symbol("7TV.reflection.events");
+
 /**
  * Hooks the defined property on the passed object, whenever the property is accessed, a Proxy object will be returned instead.
  * Setting a hook will overwrite all previous hooks for the property.
@@ -7,7 +10,7 @@
  * @param prop Property to define as a proxy
  * @param handler Proxy handler for the defined property
  */
-export function definePropertyProxy<T>(object: T, prop: keyof T, handler: ProxyHandler<any>) {
+export function definePropertyProxy<T extends object>(object: T, prop: keyof T, handler: ProxyHandler<any>) {
 	let proxy: any;
 	definePropertyHook(object, prop, {
 		value: (v) => {
@@ -28,13 +31,13 @@ export function definePropertyProxy<T>(object: T, prop: keyof T, handler: ProxyH
  * @param prop Function to hook
  * @param callback Callback run whenever the hooked function is called, the original function is provided as the first argument to the callback.
  */
-export function defineFunctionHook<T>(
+export function defineFunctionHook<T extends object>(
 	object: T,
 	prop: keyof T,
 	callback: (this: T, old: ((...args: any[]) => any) | null, ...args: any[]) => any,
 ) {
 	let hooked: (...args: any[]) => any;
-	definePropertyHook(object, prop as keyof T, {
+	definePropertyHook(object, prop, {
 		value: (v) => {
 			const old = typeof v == "function" ? v : undefined;
 			hooked = function (this: T, ...args: any[]) {
@@ -51,40 +54,41 @@ export function defineFunctionHook<T>(
  * @param object Object to hook
  * @param prop Property to hook
  * @param hooks An object containing the hooks to call when the hooked property is set or accessed.
- * @param hooks.set Callback to call when the defined property is set, argument passed contains the stored value of the property, should return the desired value to set.
+ * @param hooks.set Callback to call when the defined property is set, arguments passed contain the current and previous stored values, should return the desired value to set.
  * @param hooks.get Callback to call when the defined property is accessed, argument passed contains the stored value of the property, returns the passed value to the accessor.
  * @param hooks.value Callback to call when the defined property is set similarly to the `set` hook, however the `value` hook also gets called initially for the current value upon hook definition.
- * @returns Property on the parent object where the base value is stored. Can be used to bypass getters and read the true value of a property.
  */
-export function definePropertyHook<T = any>(
+export function definePropertyHook<T extends object>(
 	object: T,
 	prop: keyof T,
 	hooks: { set?: (newVal: any, oldVal: any) => any; get?: (v: any) => any; value?: (v: any) => void },
 ) {
 	if (!object) return;
 
-	const storeProp = `_SEVENTV_store_${prop as string}`;
+	const store = getPropStore(object);
 
-	if (!Reflect.has(object as any, storeProp)) {
-		object[storeProp as keyof T] = object[prop];
+	if (!Reflect.has(store, prop)) {
+		Reflect.set(store, prop, object[prop]);
 	}
 
-	hooks.value?.(object[storeProp as keyof T]);
+	hooks.value?.(Reflect.get(store, prop));
 
-	Reflect.defineProperty(object as unknown as object, prop, {
+	Reflect.defineProperty(object, prop, {
 		configurable: true,
 		set: (v) => {
-			const oldV = object[storeProp as keyof T];
+			const oldV = Reflect.get(store, prop);
 			const newV = hooks.set ? hooks.set(v, oldV) : v;
 
-			object[storeProp as keyof T] = newV;
+			Reflect.set(store, prop, newV);
 
 			hooks.value?.(newV);
 		},
-		get: () => (hooks.get ? hooks.get(object[storeProp as keyof T]) : object[storeProp as keyof T]),
-	});
+		get: () => {
+			const v = Reflect.get(store, prop);
 
-	return storeProp;
+			return hooks.get ? hooks.get(v) : v;
+		},
+	});
 }
 
 /**
@@ -92,18 +96,54 @@ export function definePropertyHook<T = any>(
  * @param object Object to remove hook from
  * @param prop Property to unhook
  */
-export function unsetPropertyHook(object: any, prop: string) {
+export function unsetPropertyHook<T extends object>(object: T, prop: keyof T) {
 	if (!object) return;
 
-	const storeProp = `_SEVENTV_store_${prop}`;
+	const store = getPropStore(object);
 
 	Reflect.deleteProperty(object, prop);
 
-	if (Reflect.has(object, storeProp)) {
-		object[prop] = object[storeProp];
+	if (Reflect.has(store, prop)) {
+		const v = Reflect.get(store, prop);
 
-		Reflect.deleteProperty(object, storeProp);
+		Reflect.set(object, prop, v);
+
+		Reflect.deleteProperty(store, prop);
 	}
+}
+
+/**
+ * Gets the store where the true value of hooked properties should be stored.
+ * Creates one on the object if it does not exist.
+ * @param object Object
+ * @returns Store for true values
+ */
+export function getPropStore(object: object): object {
+	let store = Reflect.get(object, PROP_STORE_ACCESSOR);
+
+	if (!store) {
+		store = {};
+		Reflect.set(object, PROP_STORE_ACCESSOR, store);
+	}
+
+	return store;
+}
+
+/**
+ * Gets the store where named event listeners should be stored.
+ * Creates one on the object if it does not exist.
+ * @param object Object
+ * @returns Store for named event listeners
+ */
+export function getEventStore(object: object): object {
+	let store = Reflect.get(object, EVENT_STORE_ACCESSOR);
+
+	if (!store) {
+		store = {};
+		Reflect.set(object, EVENT_STORE_ACCESSOR, store);
+	}
+
+	return store;
 }
 
 /**
@@ -122,13 +162,14 @@ export function defineNamedEventHandler<K extends keyof HTMLElementEventMap>(
 ) {
 	if (!target) return;
 
-	const storeProp = `_SEVENTV_${namespace}_handler_${event}`;
+	const store = getEventStore(target);
+	const prop = `${namespace}:${event}`;
 
-	const oldHandler = Reflect.get(target, storeProp);
+	const oldHandler = Reflect.get(store, prop);
 	if (oldHandler) target.removeEventListener(event, oldHandler);
 
 	target.addEventListener(event, handler);
-	Reflect.set(target, storeProp, handler);
+	Reflect.set(store, prop, handler);
 }
 
 /**
@@ -144,10 +185,11 @@ export function unsetNamedEventHandler<K extends keyof HTMLElementEventMap>(
 ) {
 	if (!target) return;
 
-	const storeProp = `_SEVENTV_${namespace}_handler_${event}`;
+	const store = getEventStore(target);
+	const prop = `${namespace}:${event}`;
 
-	const oldHandler = Reflect.get(target, storeProp);
+	const oldHandler = Reflect.get(store, prop);
 	if (oldHandler) target.removeEventListener(event, oldHandler);
 
-	Reflect.deleteProperty(target, storeProp);
+	Reflect.deleteProperty(store, prop);
 }
