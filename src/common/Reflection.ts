@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function definePropertyProxy(object: any, prop: string, handler: ProxyHandler<any>) {
+export function definePropertyProxy<T>(object: T, prop: keyof T, handler: ProxyHandler<any>) {
 	let proxy: any;
 	definePropertyHook(object, prop, {
 		value: (v) => {
@@ -14,16 +14,16 @@ export function definePropertyProxy(object: any, prop: string, handler: ProxyHan
 	});
 }
 
-export function defineFunctionHook<O>(
-	object: O,
-	prop: string,
-	callback: (this: O, old: ((...args: any[]) => any) | null, ...args: any[]) => any,
+export function defineFunctionHook<T>(
+	object: T,
+	prop: keyof T,
+	callback: (this: T, old: ((...args: any[]) => any) | null, ...args: any[]) => any,
 ) {
 	let hooked: (...args: any[]) => any;
-	definePropertyHook(object, prop, {
+	definePropertyHook(object, prop as keyof T, {
 		value: (v) => {
 			const old = typeof v == "function" ? v : undefined;
-			hooked = function (this: O, ...args: any[]) {
+			hooked = function (this: T, ...args: any[]) {
 				return Reflect.apply(callback, this, [old, ...args]);
 			};
 		},
@@ -31,32 +31,32 @@ export function defineFunctionHook<O>(
 	});
 }
 
-export function definePropertyHook(
-	object: any,
-	prop: string,
+export function definePropertyHook<T = any>(
+	object: T,
+	prop: keyof T,
 	hooks: { set?: (newVal: any, oldVal: any) => any; get?: (v: any) => any; value?: (v: any) => void },
 ) {
 	if (!object) return;
 
-	const storeProp = `_SEVENTV_store_${prop}`;
+	const storeProp = `_SEVENTV_store_${prop as string}`;
 
-	if (!Reflect.has(object, storeProp)) {
-		object[storeProp] = object[prop];
+	if (!Reflect.has(object as any, storeProp)) {
+		object[storeProp as keyof T] = object[prop];
 	}
 
-	hooks.value?.(object[storeProp]);
+	hooks.value?.(object[storeProp as keyof T]);
 
-	Reflect.defineProperty(object, prop, {
+	Reflect.defineProperty(object as unknown as object, prop, {
 		configurable: true,
 		set: (v) => {
-			const oldV = object[storeProp];
+			const oldV = object[storeProp as keyof T];
 			const newV = hooks.set ? hooks.set(v, oldV) : v;
 
-			object[storeProp] = newV;
+			object[storeProp as keyof T] = newV;
 
 			hooks.value?.(newV);
 		},
-		get: () => (hooks.get ? hooks.get(object[storeProp]) : object[storeProp]),
+		get: () => (hooks.get ? hooks.get(object[storeProp as keyof T]) : object[storeProp as keyof T]),
 	});
 
 	return storeProp;
