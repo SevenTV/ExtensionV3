@@ -1,7 +1,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export const PROP_STORE_ACCESSOR = Symbol("7TV.reflection.store");
-export const EVENT_STORE_ACCESSOR = Symbol("7TV.reflection.events");
+export const PROP_STORE_ACCESSOR = Symbol("seventv.reflection.store");
+export const EVENT_STORE_ACCESSOR = Symbol("seventv.reflection.events");
+
+export function getNamedStore<T extends object>(object: T, storeSymbol: symbol) {
+	let store;
+	if (Object.hasOwnProperty.call(object, storeSymbol)) {
+		store = Reflect.get(object, storeSymbol);
+	} else {
+		store = {};
+		Reflect.set(object, storeSymbol, store);
+	}
+
+	return store;
+}
+
+/**
+ * Gets the store where the true value of hooked properties should be stored.
+ * Creates one on the object if it does not exist.
+ * @param object Object
+ * @returns Store for true values
+ */
+export function getPropStore<T extends object>(object: T): Record<keyof T, any> {
+	return getNamedStore(object, PROP_STORE_ACCESSOR);
+}
+
+/**
+ * Gets the store where named event listeners should be stored.
+ * Creates one on the object if it does not exist.
+ * @param object Object
+ * @returns Store for named event listeners
+ */
+export function getEventStore<T extends object>(object: T): Record<string, any> {
+	return getNamedStore(object, EVENT_STORE_ACCESSOR);
+}
 
 /**
  * Hooks the defined property on the passed object, whenever the property is accessed, a Proxy object will be returned instead.
@@ -63,8 +95,6 @@ export function definePropertyHook<T extends object>(
 	prop: keyof T,
 	hooks: { set?: (newVal: any, oldVal: any) => any; get?: (v: any) => any; value?: (v: any) => void },
 ) {
-	if (!object) return;
-
 	const store = getPropStore(object);
 
 	if (!Reflect.has(store, prop)) {
@@ -97,11 +127,9 @@ export function definePropertyHook<T extends object>(
  * @param prop Property to unhook
  */
 export function unsetPropertyHook<T extends object>(object: T, prop: keyof T) {
-	if (!object) return;
+	Reflect.deleteProperty(object, prop);
 
 	const store = getPropStore(object);
-
-	Reflect.deleteProperty(object, prop);
 
 	if (Reflect.has(store, prop)) {
 		const v = Reflect.get(store, prop);
@@ -110,40 +138,6 @@ export function unsetPropertyHook<T extends object>(object: T, prop: keyof T) {
 
 		Reflect.deleteProperty(store, prop);
 	}
-}
-
-/**
- * Gets the store where the true value of hooked properties should be stored.
- * Creates one on the object if it does not exist.
- * @param object Object
- * @returns Store for true values
- */
-export function getPropStore(object: object): object {
-	let store = Reflect.get(object, PROP_STORE_ACCESSOR);
-
-	if (!store) {
-		store = {};
-		Reflect.set(object, PROP_STORE_ACCESSOR, store);
-	}
-
-	return store;
-}
-
-/**
- * Gets the store where named event listeners should be stored.
- * Creates one on the object if it does not exist.
- * @param object Object
- * @returns Store for named event listeners
- */
-export function getEventStore(object: object): object {
-	let store = Reflect.get(object, EVENT_STORE_ACCESSOR);
-
-	if (!store) {
-		store = {};
-		Reflect.set(object, EVENT_STORE_ACCESSOR, store);
-	}
-
-	return store;
 }
 
 /**
@@ -160,8 +154,6 @@ export function defineNamedEventHandler<K extends keyof HTMLElementEventMap>(
 	event: K,
 	handler: (ev: HTMLElementEventMap[K]) => void,
 ) {
-	if (!target) return;
-
 	const store = getEventStore(target);
 	const prop = `${namespace}:${event}`;
 
@@ -183,8 +175,6 @@ export function unsetNamedEventHandler<K extends keyof HTMLElementEventMap>(
 	namespace: string,
 	event: K,
 ) {
-	if (!target) return;
-
 	const store = getEventStore(target);
 	const prop = `${namespace}:${event}`;
 
