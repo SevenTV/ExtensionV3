@@ -75,6 +75,8 @@ export function defineFunctionHook<T extends object>(
 	let currentSymbol: symbol;
 	definePropertyHook(object, prop, {
 		value: (v) => {
+			if (hooked !== undefined && v === hooked) return;
+
 			currentSymbol = Symbol();
 			const symbol = currentSymbol;
 			const old = typeof v == "function" ? v : undefined;
