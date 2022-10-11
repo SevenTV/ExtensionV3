@@ -79,7 +79,7 @@ export function defineFunctionHook<T extends object>(
 
 			currentSymbol = Symbol();
 			const symbol = currentSymbol;
-			const old = typeof v == "function" ? v : undefined;
+			const old = typeof v == "function" ? v : null;
 			hooked = function (this: T, ...args: any[]) {
 				if (symbol === currentSymbol) {
 					return Reflect.apply(callback, this, [old, ...args]);
