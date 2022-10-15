@@ -449,7 +449,7 @@ onUnmounted(() => {
 		padding: 0.5em;
 		border-radius: 0.33em;
 		color: #fff;
-		background-color: rgba(0, 0, 0, 0.5);
+		background-color: rgba(0, 0, 0, 0.5%);
 		backdrop-filter: blur(0.05em);
 	}
 }
