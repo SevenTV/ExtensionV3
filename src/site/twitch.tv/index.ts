@@ -62,7 +62,7 @@ export function getChatLine(el: HTMLElement) {
 	if (!node) return undefined;
 
 	return {
-		component: node?.return?.stateNode,
+		component: node?.return?.stateNode as Twitch.ChatLineComponent,
 		inst: node,
 		element: node?.stateNode,
 	};

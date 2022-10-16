@@ -1,4 +1,3 @@
-import React from "@/react";
 import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/common/Reflection";
 import { onUnmounted, reactive } from "vue";
 import { ObserverPromise } from "@/common/Async";
@@ -11,7 +10,7 @@ export const WRAPPER_ACCESSOR = Symbol.for("seventv.react.wrapper");
  * Get React root node.
  * @returns Node representing the root of the React VDOM tree
  */
-export function getRootVNode(): ReactVNode | undefined {
+export function getRootVNode(): ReactExtended.ReactVNode | undefined {
 	const element = document.querySelector(REACT_ROOT_SELECTOR);
 	if (!element) return undefined;
 
@@ -29,19 +28,19 @@ export function getRootVNode(): ReactVNode | undefined {
  * @returns Array of found components
  */
 export function findComponentParents(
-	node: ReactVNode,
+	node: ReactExtended.ReactVNode,
 	predicate: ReactComponentPredicate,
 	maxTraversal = 1000,
 	limit = Infinity,
-): AnyReactComponent[] {
-	const components: AnyReactComponent[] = [];
+): ReactExtended.AnyReactComponent[] {
+	const components: ReactExtended.AnyReactComponent[] = [];
 
-	let current: ReactVNode | null = node;
+	let current: ReactExtended.ReactVNode | null = node;
 
 	let travel = 0;
 	while (current && components.length < limit && travel <= maxTraversal) {
 		if (current.stateNode && current.stateNode instanceof Element == false) {
-			const component = current.stateNode as AnyReactComponent;
+			const component = current.stateNode as ReactExtended.AnyReactComponent;
 			if (predicate(component)) {
 				components.push(component);
 			}
@@ -63,15 +62,15 @@ export function findComponentParents(
  * @returns Array of found components
  */
 export function findComponentChildren(
-	node: ReactVNode,
+	node: ReactExtended.ReactVNode,
 	predicate: ReactComponentPredicate,
 	maxDepth = 1000,
 	limit = Infinity,
-): AnyReactComponent[] {
-	const components: AnyReactComponent[] = [];
+): ReactExtended.AnyReactComponent[] {
+	const components: ReactExtended.AnyReactComponent[] = [];
 
-	let current: ReactVNode | null = node;
-	const path: ReactVNode[] = [];
+	let current: ReactExtended.ReactVNode | null = node;
+	const path: ReactExtended.ReactVNode[] = [];
 
 	for (;;) {
 		if (components.length >= limit) break;
@@ -87,7 +86,7 @@ export function findComponentChildren(
 		}
 
 		if (current.stateNode && current.stateNode instanceof Element == false) {
-			const component = current.stateNode as AnyReactComponent;
+			const component = current.stateNode as ReactExtended.AnyReactComponent;
 			if (predicate(component)) {
 				components.push(component);
 			}
@@ -105,7 +104,7 @@ export function findComponentChildren(
  * @param el Element
  * @returns VDOM node for the passed element
  */
-export function getVNodeFromDOM(el: Node): ReactVNode | undefined {
+export function getVNodeFromDOM(el: Node): ReactExtended.ReactVNode | undefined {
 	for (const k in el) {
 		if (k.startsWith("__reactInternalInstance$")) {
 			return Reflect.get(el, k);
@@ -118,8 +117,8 @@ export function getVNodeFromDOM(el: Node): ReactVNode | undefined {
  * @param criteria Criteria to match for components
  * @returns Found components
  */
-export function awaitComponents(criteria: ComponentCriteria): PromiseLike<Set<React.Component>> {
-	const instances = new Set<React.Component>();
+export function awaitComponents(criteria: ComponentCriteria): PromiseLike<Set<ReactExtended.WritableComponent>> {
+	const instances = new Set<ReactExtended.WritableComponent>();
 
 	if (criteria.parentSelector) {
 		document.querySelectorAll(criteria.parentSelector).forEach((el) => {
@@ -134,7 +133,7 @@ export function awaitComponents(criteria: ComponentCriteria): PromiseLike<Set<Re
 	}
 
 	if (instances.size < 1) {
-		return new ObserverPromise<Set<React.Component>>(
+		return new ObserverPromise<Set<ReactExtended.WritableComponent>>(
 			(records, emit) => {
 				for (const record of records) {
 					record.addedNodes.forEach((node) => {
@@ -178,7 +177,7 @@ export function awaitComponents(criteria: ComponentCriteria): PromiseLike<Set<Re
  * @param options Options for the hook
  * @returns Hook object for component
  */
-export function defineComponentHook<C extends React.Component>(
+export function defineComponentHook<C extends ReactExtended.WritableComponent>(
 	criteria: ComponentCriteria,
 	options: HookOptions<C> = {},
 ): ReactComponentHook<C> {
@@ -292,7 +291,7 @@ export function defineComponentHook<C extends React.Component>(
  * @param hook Hook to deactivate
  * @see {@link defineComponentHook}
  */
-export function unhookComponent<C extends React.Component>(hook: ReactComponentHook<C>) {
+export function unhookComponent<C extends ReactExtended.WritableComponent>(hook: ReactComponentHook<C>) {
 	if (hook.watcher) hook.watcher.disconnect();
 
 	if (hook.cls) {
@@ -321,7 +320,7 @@ export function unhookComponent<C extends React.Component>(hook: ReactComponentH
  * @param name Tracked name for element
  * @returns React ref to be set on ReactNode
  */
-export function getTrackedReactRef<C extends React.Component>(hook: HookedInstance<C>, name: string) {
+export function getTrackedReactRef<C extends ReactExtended.WritableComponent>(hook: HookedInstance<C>, name: string) {
 	const ref: { current: Element | null } = { current: null };
 
 	definePropertyHook(ref, "current", {
@@ -341,11 +340,11 @@ export function getTrackedReactRef<C extends React.Component>(hook: HookedInstan
  * @returns Tracker node
  * @see {@link getTrackedReactRef}
  */
-export function getTrackedNode<C extends React.Component>(
+export function getTrackedNode<C extends ReactExtended.WritableComponent>(
 	hook: HookedInstance<C>,
 	name: string,
 	node?: React.ReactNode,
-): ReactRuntimeElement {
+): ReactExtended.ReactRuntimeElement {
 	return {
 		$$typeof: REACT_ELEMENT_SYMBOL,
 		key: null,
@@ -361,7 +360,7 @@ export function getTrackedNode<C extends React.Component>(
  * Helper Composable for using component hooks inside of Vue components
  * @see {@link defineComponentHook}
  */
-export function useComponentHook<C extends React.Component>(
+export function useComponentHook<C extends ReactExtended.WritableComponent>(
 	criteria: ComponentCriteria,
 	options?: HookOptions<C>,
 ): ReactComponentHook<C> {
@@ -377,7 +376,7 @@ interface ComponentCriteria {
 	predicate: ReactComponentPredicate;
 }
 
-interface HookOptions<C extends React.Component> {
+interface HookOptions<C extends ReactExtended.WritableComponent> {
 	replaceContents?: boolean;
 	trackRoot?: boolean;
 	hooks?: {
@@ -389,19 +388,19 @@ interface HookOptions<C extends React.Component> {
 	};
 }
 
-interface ComponentClass<C extends React.Component> {
+interface ComponentClass<C extends ReactExtended.WritableComponent> {
 	new (): C;
 	prototype: C;
 }
 
-export interface ReactComponentHook<C extends React.Component> {
+export interface ReactComponentHook<C extends ReactExtended.WritableComponent> {
 	cls: ComponentClass<C> | undefined;
 	instances: HookedInstance<C>[];
 	watcher?: ObserverPromise<Set<C>>;
 	unhooked: boolean;
 }
 
-export class HookedInstance<C extends React.Component> {
+export class HookedInstance<C extends ReactExtended.WritableComponent> {
 	public readonly identifier: symbol;
 	public readonly component: C;
 	public readonly domNodes: Record<string, Element>;
@@ -413,29 +412,4 @@ export class HookedInstance<C extends React.Component> {
 	}
 }
 
-export type ReactComponentPredicate = (component: AnyReactComponent) => boolean;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnyReactComponent = React.Component<any, any> & { [x: string]: any };
-
-export interface ReactVNode {
-	alternate: ReactVNode | null;
-	child: ReactVNode | null;
-	childExpirationTime: number | null;
-	effectTag: number | null;
-	elementType: React.ElementType | null;
-	expirationTime: number | null;
-	index: number | null;
-	key: React.Key | null;
-	mode: number | null;
-	return: ReactVNode | null;
-	sibling: ReactVNode | null;
-	stateNode: React.ReactInstance | null;
-	tag: number | null;
-	type: React.ElementType | null;
-}
-
-export interface ReactRuntimeElement extends React.ReactElement {
-	$$typeof: symbol;
-	ref: { current: Element | null } | null;
-}
+export type ReactComponentPredicate = (component: ReactExtended.AnyReactComponent) => boolean;

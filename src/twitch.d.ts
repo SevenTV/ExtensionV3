@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/prefer-namespace-keyword */
 declare module Twitch {
-	export type ChatLineComponent = React.Component<{
+	export type ChatLineComponent = ReactExtended.WritableComponent<{
 		badgeSets: BadgeSets;
 		channelID: string;
 		channelLogin: string;
@@ -40,7 +40,7 @@ declare module Twitch {
 		openViewerCard: (e: any) => void;
 	};
 
-	export type EmoteButton = React.Component<{}> & {
+	export type EmoteButton = ReactExtended.WritableComponent<{}> & {
 		props: {
 			onEmoteClick: (emote: {
 				emoteID: string;
@@ -52,7 +52,7 @@ declare module Twitch {
 		};
 	};
 
-	export type VideoMessageComponent = React.Component<{
+	export type VideoMessageComponent = ReactExtended.WritableComponent<{
 		badgeSets: BadgeSets;
 		context: VideoChatCommentContext;
 		currentUser: { id: string };
@@ -60,7 +60,7 @@ declare module Twitch {
 		isExpandedLayout: boolean;
 	}>;
 
-	export type RouterComponent = React.Component<{
+	export type RouterComponent = ReactExtended.WritableComponent<{
 		// React history object used for navigating.
 		history: {
 			action: string;
@@ -79,7 +79,7 @@ declare module Twitch {
 		};
 	}>;
 
-	export type UserComponent = React.Component<{
+	export type UserComponent = ReactExtended.WritableComponent<{
 		user: {
 			id: string;
 			login: string;
@@ -88,7 +88,7 @@ declare module Twitch {
 		};
 	}>;
 
-	export type ChatServiceComponent = React.Component<{
+	export type ChatServiceComponent = ReactExtended.WritableComponent<{
 		authToken: string;
 		currentUserLogin: string;
 		channelLogin: string;
@@ -108,7 +108,7 @@ declare module Twitch {
 		};
 	};
 
-	export type ChatControllerComponent = React.Component<{
+	export type ChatControllerComponent = ReactExtended.WritableComponent<{
 		authToken: string | undefined;
 		channelDisplayName: string;
 		channelID: string;
@@ -162,17 +162,17 @@ declare module Twitch {
 		onBadgesUpdated: (e: any) => void;
 	};
 
-	export type VideoChannelComponent = React.Component<{
+	export type VideoChannelComponent = ReactExtended.WritableComponent<{
 		channelID: string;
 		displayName: string;
 		channelLogin: string;
 	}>;
 
-	export type ChatScrollerComponent = React.Component<{}> & {
+	export type ChatScrollerComponent = ReactExtended.WritableComponent<{}> & {
 		onScroll: (e: Event) => void;
 	};
 
-	export type ChatComponent = React.Component<
+	export type ChatComponent = ReactExtended.WritableComponent<
 		{
 			authToken: string;
 			bitsConfig: BitsConfig;
@@ -199,7 +199,7 @@ declare module Twitch {
 		}
 	>;
 
-	export type VideoChatComponent = React.Component<{
+	export type VideoChatComponent = ReactExtended.WritableComponent<{
 		bitsConfig: BitsConfig;
 		blockedUsers: {
 			[key: string]: boolean;
@@ -212,7 +212,7 @@ declare module Twitch {
 		videoID: string;
 	}>;
 
-	export type ChatInputController = React.Component<{
+	export type ChatInputController = ReactExtended.WritableComponent<{
 		sendMessageErrorChecks: Record<
 			"duplicated-messages" | "message-throughput",
 			{
@@ -239,7 +239,7 @@ declare module Twitch {
 		};
 	};
 
-	export type ChatInputComponent = React.Component<{
+	export type ChatInputComponent = ReactExtended.WritableComponent<{
 		channelID: string;
 		channelLogin: string;
 		setInputValue: (v: string) => void;
@@ -255,7 +255,7 @@ declare module Twitch {
 		selectionStart: number;
 	};
 
-	export type ChatAutocompleteComponent = React.Component<{
+	export type ChatAutocompleteComponent = ReactExtended.WritableComponent<{
 		channelID: string;
 		channelLogin: string;
 		clearModifierTray: () => void;
@@ -289,7 +289,7 @@ declare module Twitch {
 		providers: Provider[];
 	};
 
-	export type Provider = React.Component<{
+	export type Provider = ReactExtended.WritableComponent<{
 		emotes: TwitchEmoteSet[];
 		isEmoteAnimationsEnabled: boolean;
 		registerAutocompleteProvider: (p: Provider) => void;
