@@ -227,7 +227,28 @@ function useHistory(backwards = true): boolean {
 			slate.apply({ type: "insert_node", path: [i], node: value[i] });
 		}
 
-		const newCursor = { path: [0], offset: 0 };
+		const lastChildPath: number[] = [];
+		let lastChild: Twitch.ChatSlateLeaf | undefined;
+		if (value.length > 0) {
+			const index = value.length - 1;
+
+			lastChildPath.push(index);
+			lastChild = value[index];
+
+			while (lastChild && lastChild.children && lastChild.children.length > 0) {
+				const index: number = lastChild.children.length - 1;
+
+				lastChildPath.push(index);
+				lastChild = lastChild.children[index];
+			}
+		}
+
+		let endOffset = 0;
+		if (lastChild && lastChild.type == "text" && lastChild.text) {
+			endOffset = lastChild.text.length;
+		}
+
+		const newCursor = { path: lastChildPath, offset: endOffset };
 		slate.apply({ type: "set_selection", newProperties: { anchor: newCursor, focus: newCursor } });
 
 		historyLocation.value = location;
