@@ -272,8 +272,8 @@ function getMatchesHook(this: unknown, native: ((...args: unknown[]) => object[]
 	const emotes = emoteMap.value;
 	const tokens = findMatchingTokens(str.substring(1));
 	for (let i = tokens.length - 1; i > -1; i--) {
-		const token = tokens[i];
-		const emote = emotes[token.token];
+		const token = tokens[i].token;
+		const emote = emotes[token];
 
 		const host = emote?.data?.host ?? { url: "", files: [] };
 		const srcset = host.files
