@@ -10,7 +10,7 @@ const inject = () => {
 	const style = document.createElement("link");
 	style.rel = "stylesheet";
 	style.type = "text/css";
-	style.href = chrome.runtime.getURL("styles.css");
+	style.href = chrome.runtime.getURL("assets/style.css");
 	style.setAttribute("charset", "utf-8");
 	style.setAttribute("content", "text/html");
 	style.setAttribute("http-equiv", "content-type");

@@ -32,6 +32,7 @@ export default defineConfig(({ mode }) => {
 		build: {
 			outDir: "dist",
 			emptyOutDir: true,
+			cssCodeSplit: false,
 			write: true,
 			rollupOptions: {
 				input: {
@@ -46,6 +47,7 @@ export default defineConfig(({ mode }) => {
 
 						return name;
 					},
+					assetFileNames: "assets/[name][extname]",
 					chunkFileNames: "assets/[name].js",
 				},
 			},
@@ -70,7 +72,7 @@ export default defineConfig(({ mode }) => {
 				},
 			},
 
-			{
+			/*{
 				name: "merge-css",
 				enforce: "post",
 				apply: "build",
@@ -92,7 +94,7 @@ export default defineConfig(({ mode }) => {
 						await fs.appendFile("dist/styles.css", await fs.readFile(`dist/assets/${file}`, "utf-8"));
 					}
 				},
-			},
+			},*/
 		],
 	};
 });
