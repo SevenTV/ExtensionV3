@@ -49,7 +49,7 @@ liveQuery(() =>
 		.first(),
 ).subscribe({
 	next(conn) {
-		if (!conn) return;
+		if (!conn?.emote_set.emotes) return;
 		setMap.map.set(sets.seventv_channel, conn.emote_set) 
 	},
 });
@@ -60,15 +60,16 @@ liveQuery(() =>
 		.where("name")
 		.anyOf([
 			`7TVSet#GLOBAL`,
-			`BttvSet#GLOBAL`,
-			`BttvSet#${id}`,
 			`FFZSet#GLOBAL`,
 			`FFZSet#${id}`,
+			`BttvSet#GLOBAL`,
+			`BttvSet#${id}`,
 		])
 ).subscribe({
 	next(conns) {
 		let i = 2;
 		conns.each(conn => {
+			if (!conn.emotes) return;
 			setMap.map.set(i, conn)
 			i++;
 		})
