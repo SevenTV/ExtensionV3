@@ -41,7 +41,7 @@ export async function getManifest(dev?: boolean, chunkResources?: string[]): Pro
 
 		web_accessible_resources: [
 			{
-				resources: ["site.js", "assets/style.css", ...chunkResources],
+				resources: ["site.js", "assets/style.css", ...(chunkResources ?? [])],
 				matches: ["*://*.twitch.tv/*"],
 			},
 		],
