@@ -3,19 +3,6 @@ const BTTV_ZeroWidth = [
 	'ReinDeer', 'CandyCane', 'cvMask', 'cvHazmat',
 ]
 
-export function convertSeventvGlobalConnection(data: SevenTV.EmoteSet): SevenTV.UserConnection {
-	return {
-		id: data.id,
-		platform: "TWITCH",
-		username: data.name,
-		display_name: data.name,
-		linked_at: 0,
-		emote_capacity: 50,
-		emote_set: data,
-		provider: "7TV"
-	};
-}
-
 export function convertTwitchEmoteSet(data: Twitch.TwitchEmoteSet): SevenTV.EmoteSet {
 	return {
 		id: data.id,
@@ -67,13 +54,13 @@ export function convertTwitchEmote(data: Partial<Twitch.TwitchEmote>): SevenTV.E
 	};
 }
 
-export function convertBttvEmoteSet(data: BTTV.EmoteSet): SevenTV.EmoteSet {
+export function convertBttvEmoteSet(data: BTTV.EmoteSet, channelID: string): SevenTV.EmoteSet {
 	return {
 		id: data.id,
-		name: "BttvSet#" + data.id,
+		name: "BttvSet#" + channelID,
 		immutable: true,
 		privileged: true,
-		tags: [],
+		tags: [data.type],
 		provider: "BTTV",
 		emotes: data.emotes.map((e) => ({
 			id: e.id,
@@ -111,23 +98,5 @@ export function convertBttvEmote(data: BTTV.Emote): SevenTV.Emote {
 				},
 			],
 		},
-	}
-}
-
-export function convertBttvUserConnection(data: BTTV.UserResponse, id: string): SevenTV.UserConnection {
-	return {
-		id: "BTTV#" + id,
-		platform: "TWITCH",
-		username: "",
-		display_name: "",
-		linked_at: 0,
-		emote_capacity: data.channelEmotes.length,
-		emote_set: convertBttvEmoteSet({
-			id: id,
-			channel: data.id,
-			type: "Channel",
-			emotes: data.channelEmotes
-		}),
-		provider: "BTTV"
 	}
 }

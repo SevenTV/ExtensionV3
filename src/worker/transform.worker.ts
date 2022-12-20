@@ -3,7 +3,7 @@
 import { log } from "@/common/Logger";
 import { TransformWorkerMessageType } from ".";
 import { db } from "@/db/IndexedDB";
-import { convertTwitchEmoteSet, convertBttvEmote, convertBttvEmoteSet } from "@/common/Transform";
+import { convertTwitchEmoteSet, convertBttvEmoteSet } from "@/common/Transform";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -25,14 +25,6 @@ w.onmessage = async (ev) => {
 			transformTwitch(data)
 			break;
 		}
-		case TransformWorkerMessageType.BTTV_EMOTES: {
-			transformBTTV(data)
-			break;
-		}
-		case TransformWorkerMessageType.FFZ_EMOTES: {
-			transformFFZ(data)
-			break;
-		}
 
 		default:
 			break;
@@ -52,13 +44,4 @@ function transformTwitch(data: Twitch.TwitchEmoteSet[] ){
 
 	// Store the emote sets in the database
 	db.emoteSets.bulkPut(sets);
-}
-
-function transformBTTV(data: BTTV.EmoteSet){
-	const set = convertBttvEmoteSet(data)
-	db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(set);
-}
-
-function transformFFZ(data: FFZ.Emote[]){
-	const set = Array(data.length);
 }

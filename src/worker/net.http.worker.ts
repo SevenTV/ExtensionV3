@@ -2,7 +2,7 @@
 // Fetches initial data from the API
 
 import { log } from "@/common/Logger";
-import { convertBttvUserConnection, convertSeventvGlobalConnection } from "@/common/Transform";
+import { convertBttvEmoteSet } from "@/common/Transform";
 import { db } from "@/db/IndexedDB";
 
 namespace API_BASE {
@@ -39,36 +39,75 @@ export const seventv = {
 		return Promise.resolve(data);
 	},
 
-	async loadGlobalConnection(): Promise<SevenTV.UserConnection> {
+	async loadGlobalSet(): Promise<SevenTV.EmoteSet> {
 		const resp = await doRequest(API_BASE.SEVENTV, "emote-sets/global").catch((err) => Promise.reject(err));
 		if (!resp || resp.status !== 200) {
 			return Promise.reject(resp);
 		}
 
-		const set = (await resp.json()) as SevenTV.EmoteSet;
-		const data = convertSeventvGlobalConnection(set);
+		const data = (await resp.json()) as SevenTV.EmoteSet;
 
-		db.userConnections.put(data).catch(err => {
-			db.userConnections.where("id").equals(data.id).modify(data);
-		});
+		data.provider = "7TV";
+
+		data.name = "7TVSet#GLOBAL"
+
+		db.emoteSets.put(data).catch(() =>
+			db.emoteSets.where({ id: data.id, provider: "7TV" }).modify(data)
+		)
 		return Promise.resolve(data);
 	}
 };
 
 export const betterttv = {
-	async loadUserConnection(channelID: string): Promise<SevenTV.UserConnection> {
+	async loadUserEmoteSet(channelID: string): Promise<SevenTV.EmoteSet> {
 		const resp = await doRequest(API_BASE.BTTV, `cached/users/twitch/${channelID}`).catch((err) => Promise.reject(err));
 		if (!resp || resp.status !== 200) {
 			return Promise.reject(resp);
 		}
 
-		const bttv_data = (await resp.json()) as any;
+		const bttv_data = (await resp.json()) as BTTV.UserResponse;
 
-		const data = convertBttvUserConnection(bttv_data, channelID)
+		const set = {
+			emotes: bttv_data.channelEmotes,
+			id: bttv_data.id,
+			type: "Channel",
+			channel: channelID
 
-		db.userConnections.put(data).catch(err => {
-			db.userConnections.where("id").equals(data.id).modify(data);
+		} as BTTV.EmoteSet;
+			
+
+		const data = convertBttvEmoteSet(set, channelID)
+
+		db.emoteSets.put(data).catch(() => {
+			db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(data);
 		});
+
+		return Promise.resolve(data);
+	},
+
+	async loadGlobalEmoteSet(): Promise<SevenTV.EmoteSet> {
+		const resp = await doRequest(API_BASE.BTTV, "cached/emotes/global").catch((err) => Promise.reject(err));
+		if (!resp || resp.status !== 200) {
+			return Promise.reject(resp);
+		}
+
+		const bttv_data = (await resp.json()) as BTTV.Emote[];
+
+		const set = {
+			emotes: bttv_data,
+			id: "GLOBAL",
+			type: "Global",
+			channel: "GLOBAL"
+
+		} as BTTV.EmoteSet;
+			
+
+		const data = convertBttvEmoteSet(set, set.id)
+
+		db.emoteSets.put(data).catch(() => {
+			db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(data);
+		});
+		
 		return Promise.resolve(data);
 	}
 };

@@ -57,8 +57,7 @@ w.onmessage = (ev) => {
 			// todo: make this better
 			if (state.local.channel) {
 				seventv.loadUserConnection("TWITCH", state.local.channel.id);
-				seventv.loadGlobalConnection();
-				betterttv.loadUserConnection(state.local.channel.id)
+				betterttv.loadUserEmoteSet(state.local.channel.id)
 			}
 
 			log.debug("<NetWorker>", "Local State Updated", JSON.stringify(state.local));
@@ -204,6 +203,10 @@ function becomePrimary(): void {
 
 	broadcastMessage(NetWorkerMessageType.STATE, {});
 	log.info("<Net>", "Elected as primary");
+
+	// Load global emote sets
+	seventv.loadGlobalSet();
+	betterttv.loadGlobalEmoteSet();
 }
 
 function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWorkerMessage<T>, to?: number): void {
