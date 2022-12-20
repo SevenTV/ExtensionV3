@@ -1,9 +1,10 @@
 // TransformWorker provides tools to convert and manipulate data without occupying the main thread.
 
 import { log } from "@/common/Logger";
-import { TransformWorkerMessage, TransformWorkerMessageType } from ".";
+import { TransformWorkerMessageType } from ".";
 import { db } from "@/db/IndexedDB";
-import { ConvertTwitchEmoteSet } from "@/common/Transform";
+import { convertTwitchEmoteSet, convertBttvEmote, convertBttvEmoteSet } from "@/common/Transform";
+import { BTTV, FFZ } from "@/providers";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -11,26 +12,26 @@ const w = self as unknown as DedicatedWorkerGlobalScope;
 log.setContextName("TransformWorker");
 
 w.onmessage = async (ev) => {
-	if (ev.data.source !== "SEVENTV") {
-		return; // not a message from us
-	}
 
-	switch (ev.data.type as TransformWorkerMessageType) {
+	// Return if message is not from us
+	if (ev.data.source !== "SEVENTV") return;
+
+	// Return if no input data was provided
+	if (!ev.data.data.input) return;
+
+	const data = ev.data.data.input;
+
+	switch (ev.data.type as TransformWorkerMessageType) {		
 		case TransformWorkerMessageType.TWITCH_EMOTES: {
-			const msg = ev.data as TransformWorkerMessage<TransformWorkerMessageType.TWITCH_EMOTES>;
-			if (!msg.data.input) return;
-
-			const sets = Array(msg.data.input.length);
-
-			for (let i = 0; i < msg.data.input.length; i++) {
-				sets[i] = ConvertTwitchEmoteSet(msg.data.input[i]);
-
-				// Update individual sets if they already exist in DB
-				db.emoteSets.where({ id: sets[i].id, provider: "TWITCH" }).modify(sets[i]);
-			}
-
-			// Store the emote sets in the database
-			db.emoteSets.bulkPut(sets);
+			transformTwitch(data)
+			break;
+		}
+		case TransformWorkerMessageType.BTTV_EMOTES: {
+			transformBTTV(data)
+			break;
+		}
+		case TransformWorkerMessageType.FFZ_EMOTES: {
+			transformFFZ(data)
 			break;
 		}
 
@@ -38,3 +39,27 @@ w.onmessage = async (ev) => {
 			break;
 	}
 };
+
+function transformTwitch(data: Twitch.TwitchEmoteSet[] ){
+	
+	const sets = Array(data.length);
+
+	for (let i = 0; i < data.length; i++) {
+		sets[i] = convertTwitchEmoteSet(data[i]);
+
+		// Update individual sets if they already exist in DB
+		db.emoteSets.where({ id: sets[i].id, provider: "TWITCH" }).modify(sets[i]);
+	}
+
+	// Store the emote sets in the database
+	db.emoteSets.bulkPut(sets);
+}
+
+function transformBTTV(data: BTTV.EmoteSet){
+	const set = convertBttvEmoteSet(data)
+	db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(set);
+}
+
+function transformFFZ(data: FFZ.Emote[]){
+	const set = Array(data.length);
+}

@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
-import { ConvertTwitchEmote } from "@/common/Transform";
+import { convertTwitchEmote } from "@/common/Transform";
 import ChatUserTag from "@/site/twitch.tv/modules/chat/components/ChatUserTag.vue";
 import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
 
@@ -46,6 +46,7 @@ const localEmoteMap = {} as { [key: string]: SevenTV.ActiveEmote };
 // Tokenize the message
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tokens = [] as MessageToken<any>[];
+console.log(emoteMap)
 
 if (props.msg && typeof props.msg.messageBody === "string") {
 	const split = (props.msg.messageBody ?? "").split(" ");
@@ -60,7 +61,7 @@ if (props.msg && typeof props.msg.messageBody === "string") {
 				localEmoteMap[emote.alt] = {
 					id: emote.emoteID,
 					name: emote.alt,
-					data: ConvertTwitchEmote({ id: emote.emoteID, token: emote.alt }),
+					data: convertTwitchEmote({ id: emote.emoteID, token: emote.alt }),
 					provider: "TWITCH",
 				} as SevenTV.ActiveEmote;
 			}
