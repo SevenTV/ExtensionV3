@@ -7,7 +7,19 @@ import vue from "@vitejs/plugin-vue";
 const r = (...args: string[]) => path.resolve(__dirname, ...args);
 
 const chunks = {
-	tw: ["./src/site/twitch.tv/TwitchSite.vue"],
+	composable: ["./src/composable/useModule.ts", "./src/composable/useSettings.ts", "./src/composable/useTooltip.ts"],
+	common: [
+		"./src/common/Async.ts",
+		"./src/common/Logger.ts",
+		"./src/common/Rand.ts",
+		"./src/common/Reflection.ts",
+		"./src/common/Transform.ts",
+		"./src/site/twitch.tv/ReactHooks.ts",
+	],
+	store: ["./src/store/main.ts"],
+	db: ["./src/db/IndexedDB.ts"],
+	tw_mod_chat: ["./src/site/twitch.tv/modules/chat/ChatModule.vue"],
+	tw_mod_chat_input: ["./src/site/twitch.tv/modules/chat-input/ChatInputModule.vue"],
 };
 
 // https://vitejs.dev/config/
