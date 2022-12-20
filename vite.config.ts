@@ -14,7 +14,7 @@ const chunks = {
 		"./src/common/Rand.ts",
 		"./src/common/Reflection.ts",
 		"./src/common/Transform.ts",
-		"./src/site/twitch.tv/ReactHooks.ts",
+		"./src/common/ReactHooks.ts",
 	],
 	store: ["./src/store/main.ts"],
 	db: ["./src/db/IndexedDB.ts"],
