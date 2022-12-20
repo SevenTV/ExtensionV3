@@ -4,6 +4,7 @@ const inject = () => {
 	const script = document.createElement("script");
 	script.src = chrome.runtime.getURL("site.js");
 	script.id = "seventv";
+	script.type = "module";
 
 	// Style
 	const style = document.createElement("link");

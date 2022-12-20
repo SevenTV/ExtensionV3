@@ -6,6 +6,10 @@ import vue from "@vitejs/plugin-vue";
 
 const r = (...args: string[]) => path.resolve(__dirname, ...args);
 
+const chunks = {
+	tw: ["./src/site/twitch.tv/TwitchSite.vue"],
+};
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
 	const isDev = mode === "dev";
@@ -36,14 +40,13 @@ export default defineConfig(({ mode }) => {
 					site: r("src/site/site.ts"),
 				},
 				output: {
-					manualChunks: {
-						tw: ["./src/site/twitch.tv/TwitchSite.vue"],
-					},
+					manualChunks: chunks,
 					entryFileNames: (info) => {
 						const name = path.basename(info.facadeModuleId.replace(".ts", ".js"));
 
 						return name;
 					},
+					chunkFileNames: "assets/[name].js",
 				},
 			},
 		},
@@ -56,7 +59,10 @@ export default defineConfig(({ mode }) => {
 				enforce: "post",
 				apply: "build",
 				async buildEnd() {
-					const man = await getManifest(isDev);
+					const man = await getManifest(
+						isDev,
+						Object.keys(chunks).map((key) => `assets/${key}.js`),
+					);
 
 					setTimeout(() => {
 						fs.writeJSON(r("dist/manifest.json"), man);
