@@ -25,20 +25,29 @@ watch(setMap, () => {
 	}
 });
 
-// Query 7TV Emotes
+const id = channel.value!.id
+// Query Emotes
 liveQuery(() =>
 	db.userConnections
-		.where({
-			id: channel.value?.id,
-		})
-		.first(),
+		.where("id")
+		.anyOf(
+			//7TV channel emotes
+			id,
+			//7TV global emotes
+			"62cdd34e72a832540de95857",
+			//BTTV channel emotes
+			"BTTV#" + id 
+		),
 ).subscribe({
-	next(conn) {
-		if (!conn) return;
-
-		for (const emote of conn.emote_set.emotes) {
-			twitchStore.emoteMap[emote.name] = emote;
-		}
+	next(conns) {
+		conns.each(conn => {
+			if (!conn) return;
+	
+			for (const emote of conn.emote_set.emotes) {
+				twitchStore.emoteMap[emote.name] = emote;
+			}
+		})
 	},
 });
+
 </script>

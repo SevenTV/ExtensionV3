@@ -46,7 +46,6 @@ const localEmoteMap = {} as { [key: string]: SevenTV.ActiveEmote };
 // Tokenize the message
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tokens = [] as MessageToken<any>[];
-console.log(emoteMap)
 
 if (props.msg && typeof props.msg.messageBody === "string") {
 	const split = (props.msg.messageBody ?? "").split(" ");

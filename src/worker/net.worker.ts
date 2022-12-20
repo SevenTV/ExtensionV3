@@ -1,6 +1,6 @@
 import { log } from "@/common/Logger";
 import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
-import { seventv } from "./net.http.worker";
+import { seventv, betterttv } from "./net.http.worker";
 import { ws } from "./net.socket.worker";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
@@ -57,6 +57,8 @@ w.onmessage = (ev) => {
 			// todo: make this better
 			if (state.local.channel) {
 				seventv.loadUserConnection("TWITCH", state.local.channel.id);
+				seventv.loadGlobalConnection();
+				betterttv.loadUserConnection(state.local.channel.id)
 			}
 
 			log.debug("<NetWorker>", "Local State Updated", JSON.stringify(state.local));

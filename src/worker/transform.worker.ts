@@ -4,7 +4,6 @@ import { log } from "@/common/Logger";
 import { TransformWorkerMessageType } from ".";
 import { db } from "@/db/IndexedDB";
 import { convertTwitchEmoteSet, convertBttvEmote, convertBttvEmoteSet } from "@/common/Transform";
-import { BTTV, FFZ } from "@/providers";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 

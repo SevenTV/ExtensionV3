@@ -1,4 +1,20 @@
-import { BTTV } from "@/providers";
+const BTTV_ZeroWidth = [
+	'SoSnowy', 'IceCold', 'SantaHat', 'TopHat',
+	'ReinDeer', 'CandyCane', 'cvMask', 'cvHazmat',
+]
+
+export function convertSeventvGlobalConnection(data: SevenTV.EmoteSet): SevenTV.UserConnection {
+	return {
+		id: data.id,
+		platform: "TWITCH",
+		username: data.name,
+		display_name: data.name,
+		linked_at: 0,
+		emote_capacity: 50,
+		emote_set: data,
+		provider: "7TV"
+	};
+}
 
 export function convertTwitchEmoteSet(data: Twitch.TwitchEmoteSet): SevenTV.EmoteSet {
 	return {
@@ -62,7 +78,7 @@ export function convertBttvEmoteSet(data: BTTV.EmoteSet): SevenTV.EmoteSet {
 		emotes: data.emotes.map((e) => ({
 			id: e.id,
 			name: e.code,
-			flags: e.code in BTTV.ZeroWidth ? 0 : SevenTV.EmoteFlags.ZERO_WIDTH,
+			flags: e.code in BTTV_ZeroWidth ? 0 : 256,
 			provider: "BTTV",
 			data: convertBttvEmote(e),
 		})),
@@ -73,7 +89,7 @@ export function convertBttvEmote(data: BTTV.Emote): SevenTV.Emote {
 	return {
 		id: data.id,
 		name: data.code,
-		flags: data.code in BTTV.ZeroWidth ? 0 : SevenTV.EmoteFlags.ZERO_WIDTH,
+		flags: data.code in BTTV_ZeroWidth ? 0 : 256,
 		tags: [],
 		lifecycle: 3,
 		listed: true,
@@ -95,5 +111,23 @@ export function convertBttvEmote(data: BTTV.Emote): SevenTV.Emote {
 				},
 			],
 		},
+	}
+}
+
+export function convertBttvUserConnection(data: BTTV.UserResponse, id: string): SevenTV.UserConnection {
+	return {
+		id: "BTTV#" + id,
+		platform: "TWITCH",
+		username: "",
+		display_name: "",
+		linked_at: 0,
+		emote_capacity: data.channelEmotes.length,
+		emote_set: convertBttvEmoteSet({
+			id: id,
+			channel: data.id,
+			type: "Channel",
+			emotes: data.channelEmotes
+		}),
+		provider: "BTTV"
 	}
 }
