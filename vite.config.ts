@@ -36,6 +36,9 @@ export default defineConfig(({ mode }) => {
 					site: r("src/site/site.ts"),
 				},
 				output: {
+					manualChunks: {
+						tw: ["./src/site/twitch.tv/TwitchSite.vue"],
+					},
 					entryFileNames: (info) => {
 						const name = path.basename(info.facadeModuleId.replace(".ts", ".js"));
 
