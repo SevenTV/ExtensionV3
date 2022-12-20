@@ -86,6 +86,7 @@ export const betterttv = {
 
 		const set = {
 			channelEmotes: bttv_data,
+			sharedEmotes: [] as BTTV.Emote[],
 			id: "GLOBAL"
 		} as BTTV.UserResponse;
 			
@@ -111,8 +112,6 @@ export const frankerfacez = {
 		const ffz_data = (await resp.json()) as FFZ.RoomResponse;			
 
 		const data = convertFFZEmoteSet(ffz_data, channelID)
-
-		console.log("UserData: ", data, ffz_data)
 
 		db.emoteSets.put(data).catch(() => {
 			db.emoteSets.where({ id: data.id, provider: "FFZ" }).modify(data);

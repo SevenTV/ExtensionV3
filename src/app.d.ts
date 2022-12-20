@@ -183,10 +183,10 @@ interface CurrentChannel {
 declare namespace BTTV {
     interface UserResponse {
         id: string;
-        bots: any[];
-        avatar: URL;
+        bots?: any[];
+        avatar?: URL;
         channelEmotes: BTTV.Emote[];
-        sharedEmotes: BTTV.Emote[];
+        sharedEmotes?: BTTV.Emote[];
     }
 
     interface EmoteSet {

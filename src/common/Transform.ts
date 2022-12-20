@@ -102,8 +102,6 @@ export function convertBttvEmote(data: BTTV.Emote): SevenTV.Emote {
 }
 
 export function convertFFZEmoteSet(data: FFZ.RoomResponse, channelID: string): SevenTV.EmoteSet {
-	console.log("data: ", data)
-	console.log(data.sets)
 	return {
 		id: channelID,
 		name: "FFZSet#" + channelID,
