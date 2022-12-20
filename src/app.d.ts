@@ -228,9 +228,9 @@ declare namespace FFZ {
             display_name: string;
         } | null;
         urls: {
-            '1': string;
-            '2': string;
-            '4': string;
+            '1'?: string;
+            '2'?: string;
+            '4'?: string;
         };
     }
 }

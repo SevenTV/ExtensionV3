@@ -1,6 +1,6 @@
 import { log } from "@/common/Logger";
 import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
-import { seventv, betterttv } from "./net.http.worker";
+import { seventv, betterttv, frankerfacez } from "./net.http.worker";
 import { ws } from "./net.socket.worker";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
@@ -57,7 +57,8 @@ w.onmessage = (ev) => {
 			// todo: make this better
 			if (state.local.channel) {
 				seventv.loadUserConnection("TWITCH", state.local.channel.id);
-				betterttv.loadUserEmoteSet(state.local.channel.id)
+				betterttv.loadUserEmoteSet(state.local.channel.id);
+				frankerfacez.loadUserEmoteSet(state.local.channel.id);
 			}
 
 			log.debug("<NetWorker>", "Local State Updated", JSON.stringify(state.local));
@@ -207,6 +208,7 @@ function becomePrimary(): void {
 	// Load global emote sets
 	seventv.loadGlobalSet();
 	betterttv.loadGlobalEmoteSet();
+	frankerfacez.loadGlobalEmoteSet();
 }
 
 function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWorkerMessage<T>, to?: number): void {

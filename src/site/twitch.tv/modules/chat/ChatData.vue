@@ -75,6 +75,4 @@ liveQuery(() =>
 	}
 });
 
-(window as any).db = db;
-
 </script>

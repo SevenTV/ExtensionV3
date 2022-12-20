@@ -2,7 +2,7 @@
 // Fetches initial data from the API
 
 import { log } from "@/common/Logger";
-import { convertBttvEmoteSet } from "@/common/Transform";
+import { convertBttvEmoteSet, convertFFZEmoteSet } from "@/common/Transform";
 import { db } from "@/db/IndexedDB";
 
 namespace API_BASE {
@@ -67,19 +67,10 @@ export const betterttv = {
 
 		const bttv_data = (await resp.json()) as BTTV.UserResponse;
 
-		const set = {
-			emotes: bttv_data.channelEmotes,
-			id: bttv_data.id,
-			type: "Channel",
-			channel: channelID
-
-		} as BTTV.EmoteSet;
-			
-
-		const data = convertBttvEmoteSet(set, channelID)
+		const data = convertBttvEmoteSet(bttv_data, channelID)
 
 		db.emoteSets.put(data).catch(() => {
-			db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(data);
+			db.emoteSets.where({ id: data.id, provider: "BTTV" }).modify(data);
 		});
 
 		return Promise.resolve(data);
@@ -94,18 +85,60 @@ export const betterttv = {
 		const bttv_data = (await resp.json()) as BTTV.Emote[];
 
 		const set = {
-			emotes: bttv_data,
-			id: "GLOBAL",
-			type: "Global",
-			channel: "GLOBAL"
-
-		} as BTTV.EmoteSet;
+			channelEmotes: bttv_data,
+			id: "GLOBAL"
+		} as BTTV.UserResponse;
 			
 
 		const data = convertBttvEmoteSet(set, set.id)
 
 		db.emoteSets.put(data).catch(() => {
 			db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(data);
+		});
+		
+		return Promise.resolve(data);
+	}
+};
+
+export const frankerfacez = {
+	async loadUserEmoteSet(channelID: string): Promise<SevenTV.EmoteSet> {
+		const resp = await doRequest(API_BASE.FFZ, `room/id/${channelID}`).catch((err) => Promise.reject(err));
+		if (!resp || resp.status !== 200) {
+			return Promise.reject(resp);
+		}
+
+		
+		const ffz_data = (await resp.json()) as FFZ.RoomResponse;			
+
+		const data = convertFFZEmoteSet(ffz_data, channelID)
+
+		console.log("UserData: ", data, ffz_data)
+
+		db.emoteSets.put(data).catch(() => {
+			db.emoteSets.where({ id: data.id, provider: "FFZ" }).modify(data);
+		});
+
+		return Promise.resolve(data);
+	},
+
+	async loadGlobalEmoteSet(): Promise<SevenTV.EmoteSet> {
+		const resp = await doRequest(API_BASE.FFZ, "set/global").catch((err) => Promise.reject(err));
+		if (!resp || resp.status !== 200) {
+			return Promise.reject(resp);
+		}
+
+		const ffz_data = (await resp.json()) as FFZ.RoomResponse;
+
+		const set = {
+			sets: [ffz_data.sets[0]],
+			id: "GLOBAL"
+		}
+
+		const data = convertFFZEmoteSet(ffz_data, set.id)
+
+		db.emoteSets.put(data).catch(() => {
+			console.log("error", data)
+			db.emoteSets.where({ id: set.id, provider: "FFZ" }).modify(data);
 		});
 		
 		return Promise.resolve(data);
