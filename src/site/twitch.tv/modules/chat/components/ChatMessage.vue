@@ -29,6 +29,7 @@
 import { storeToRefs } from "pinia";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { convertTwitchEmote } from "@/common/Transform";
+import { Regex } from "@/site/twitch.tv";
 import ChatUserTag from "@/site/twitch.tv/modules/chat/components/ChatUserTag.vue";
 import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
 
@@ -48,7 +49,7 @@ const localEmoteMap = {} as { [key: string]: SevenTV.ActiveEmote };
 const tokens = [] as MessageToken<any>[];
 
 if (props.msg && typeof props.msg.messageBody === "string") {
-	const split = (props.msg.messageBody ?? "").split(/( )/g);
+	const split = (props.msg.messageBody ?? "").split(Regex.MessageDelimiter);
 	const currentText = [] as string[];
 
 	// Local twitch emotes?

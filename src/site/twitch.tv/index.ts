@@ -89,6 +89,10 @@ export function getChatLines(container: HTMLElement, idList?: string[]) {
 	return lines;
 }
 
+export namespace Regex {
+	export const MessageDelimiter = new RegExp("( )", "g");
+}
+
 export namespace Selectors {
 	export const ROOT = "#root div";
 	export const NAV = "[data-a-target='top-nav-container']";
