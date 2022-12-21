@@ -112,9 +112,6 @@ type MessageTokenType = "text" | "emote";
 
 <style scoped lang="scss">
 .seventv-chat-message {
-	display: inline-block !important;
-	vertical-align: middle;
-	margin-left: 1em;
-	margin-right: 1em;
+	vertical-align: baseline;
 }
 </style>

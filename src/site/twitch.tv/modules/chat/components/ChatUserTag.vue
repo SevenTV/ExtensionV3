@@ -46,7 +46,7 @@ if (props.badges && twitchBadgeSets) {
 
 <style scoped lang="scss">
 .seventv-chat-user {
-	display: inline-block !important;
+	display: inline;
 	cursor: pointer;
 	word-break: break-all;
 }

@@ -52,6 +52,7 @@ img.chat-emote {
 	vertical-align: middle;
 	color: red;
 	font-weight: 900;
+	margin: -1rem 0;
 
 	&:hover {
 		cursor: pointer;

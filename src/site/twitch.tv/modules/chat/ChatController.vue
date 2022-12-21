@@ -388,7 +388,7 @@ onUnmounted(() => {
 	overflow-x: hidden !important;
 
 	.seventv-message-container {
-		padding-bottom: 1em;
+		padding: 1em 0;
 		line-height: 1.5em;
 	}
 
