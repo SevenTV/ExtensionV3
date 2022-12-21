@@ -1,5 +1,5 @@
 <template>
-	<template v-if="chatController.instances.length && false">
+	<template v-if="chatController.instances.length">
 		<ChatController v-if="dependenciesMet" :controller="chatController.instances[0]" @hooked="onHooked" />
 	</template>
 </template>
