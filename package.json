@@ -20,16 +20,16 @@
 		"vue": "^3.2.45"
 	},
 	"devDependencies": {
-		"@floating-ui/dom": "^1.0.2",
-		"@types/chrome": "^0.0.195",
+		"@floating-ui/dom": "^1.0.12",
+		"@types/chrome": "^0.0.205",
 		"@types/fs-extra": "^9.0.13",
-		"@types/node": "^18.7.13",
-		"@types/sharedworker": "^0.0.82",
-		"@typescript-eslint/eslint-plugin": "^5.34.0",
-		"@typescript-eslint/parser": "^5.34.0",
-		"@vitejs/plugin-vue": "^3.0.3",
+		"@types/node": "^18.11.17",
+		"@types/sharedworker": "^0.0.88",
+		"@typescript-eslint/eslint-plugin": "^5.47.0",
+		"@typescript-eslint/parser": "^5.47.0",
+		"@vitejs/plugin-vue": "^4.0.0",
 		"@vue/eslint-config-prettier": "^7.0.0",
-		"@vue/eslint-config-typescript": "^11.0.0",
+		"@vue/eslint-config-typescript": "^11.0.2",
 		"chokidar": "^3.5.3",
 		"dexie": "^3.2.2",
 		"eslint": "^8.22.0",
@@ -49,10 +49,10 @@
 		"stylelint-config-recommended-vue": "^1.4.0",
 		"stylelint-config-standard": "^28.0.0",
 		"terser": "^5.16.1",
-		"typescript": "^4.6.4",
-		"vite": "^3.0.7",
+		"typescript": "^4.9.4",
+		"vite": "^4.0.2",
 		"vite-plugin-chrome-extension": "^0.0.7",
-		"vue-tsc": "^0.39.5",
+		"vue-tsc": "^1.0.16",
 		"webextension-polyfill-ts": "^0.26.0"
 	}
 }
