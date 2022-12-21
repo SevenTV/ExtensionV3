@@ -3,7 +3,7 @@
 import { log } from "@/common/Logger";
 import { TransformWorkerMessageType } from ".";
 import { db } from "@/db/IndexedDB";
-import { convertTwitchEmoteSet, convertBttvEmoteSet } from "@/common/Transform";
+import { convertTwitchEmoteSet } from "@/common/Transform";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -11,7 +11,6 @@ const w = self as unknown as DedicatedWorkerGlobalScope;
 log.setContextName("TransformWorker");
 
 w.onmessage = async (ev) => {
-
 	// Return if message is not from us
 	if (ev.data.source !== "SEVENTV") return;
 
@@ -20,9 +19,9 @@ w.onmessage = async (ev) => {
 
 	const data = ev.data.data.input;
 
-	switch (ev.data.type as TransformWorkerMessageType) {		
+	switch (ev.data.type as TransformWorkerMessageType) {
 		case TransformWorkerMessageType.TWITCH_EMOTES: {
-			transformTwitch(data)
+			transformTwitch(data);
 			break;
 		}
 
@@ -31,8 +30,7 @@ w.onmessage = async (ev) => {
 	}
 };
 
-function transformTwitch(data: Twitch.TwitchEmoteSet[] ){
-	
+function transformTwitch(data: Twitch.TwitchEmoteSet[]) {
 	const sets = Array(data.length);
 
 	for (let i = 0; i < data.length; i++) {

@@ -13,7 +13,9 @@ namespace API_BASE {
 
 export const seventv = {
 	async loadUserConnection(platform: Platform, id: string): Promise<SevenTV.UserConnection> {
-		const resp = await doRequest(API_BASE.SEVENTV ,`users/${platform.toLowerCase()}/${id}`).catch((err) => Promise.reject(err));
+		const resp = await doRequest(API_BASE.SEVENTV, `users/${platform.toLowerCase()}/${id}`).catch((err) =>
+			Promise.reject(err),
+		);
 		if (!resp || resp.status !== 200) {
 			return Promise.reject(resp);
 		}
@@ -49,25 +51,25 @@ export const seventv = {
 
 		data.provider = "7TV";
 
-		data.name = "7TVSet#GLOBAL"
+		data.name = "7TVSet#GLOBAL";
 
-		db.emoteSets.put(data).catch(() =>
-			db.emoteSets.where({ id: data.id, provider: "7TV" }).modify(data)
-		)
+		db.emoteSets.put(data).catch(() => db.emoteSets.where({ id: data.id, provider: "7TV" }).modify(data));
 		return Promise.resolve(data);
-	}
+	},
 };
 
 export const betterttv = {
 	async loadUserEmoteSet(channelID: string): Promise<SevenTV.EmoteSet> {
-		const resp = await doRequest(API_BASE.BTTV, `cached/users/twitch/${channelID}`).catch((err) => Promise.reject(err));
+		const resp = await doRequest(API_BASE.BTTV, `cached/users/twitch/${channelID}`).catch((err) =>
+			Promise.reject(err),
+		);
 		if (!resp || resp.status !== 200) {
 			return Promise.reject(resp);
 		}
 
 		const bttv_data = (await resp.json()) as BTTV.UserResponse;
 
-		const data = convertBttvEmoteSet(bttv_data, channelID)
+		const data = convertBttvEmoteSet(bttv_data, channelID);
 
 		db.emoteSets.put(data).catch(() => {
 			db.emoteSets.where({ id: data.id, provider: "BTTV" }).modify(data);
@@ -87,18 +89,17 @@ export const betterttv = {
 		const set = {
 			channelEmotes: bttv_data,
 			sharedEmotes: [] as BTTV.Emote[],
-			id: "GLOBAL"
+			id: "GLOBAL",
 		} as BTTV.UserResponse;
-			
 
-		const data = convertBttvEmoteSet(set, set.id)
+		const data = convertBttvEmoteSet(set, set.id);
 
 		db.emoteSets.put(data).catch(() => {
-			db.emoteSets.where({ id: set.id, provider: "BTTV" }).modify(data);
+			db.emoteSets.where({ id: "BTTV#GLOBAL", provider: "BTTV" }).modify(data);
 		});
-		
+
 		return Promise.resolve(data);
-	}
+	},
 };
 
 export const frankerfacez = {
@@ -108,10 +109,9 @@ export const frankerfacez = {
 			return Promise.reject(resp);
 		}
 
-		
-		const ffz_data = (await resp.json()) as FFZ.RoomResponse;			
+		const ffz_data = (await resp.json()) as FFZ.RoomResponse;
 
-		const data = convertFFZEmoteSet(ffz_data, channelID)
+		const data = convertFFZEmoteSet(ffz_data, channelID);
 
 		db.emoteSets.put(data).catch(() => {
 			db.emoteSets.where({ id: data.id, provider: "FFZ" }).modify(data);
@@ -128,22 +128,16 @@ export const frankerfacez = {
 
 		const ffz_data = (await resp.json()) as FFZ.RoomResponse;
 
-		const set = {
-			sets: [ffz_data.sets[0]],
-			id: "GLOBAL"
-		}
-
-		const data = convertFFZEmoteSet(ffz_data, set.id)
+		const data = convertFFZEmoteSet({ sets: { emoticons: ffz_data.sets["3"] } }, "GLOBAL");
 
 		db.emoteSets.put(data).catch(() => {
-			console.log("error", data)
-			db.emoteSets.where({ id: set.id, provider: "FFZ" }).modify(data);
+			db.emoteSets.where({ id: "FFZ#GLOBAL", provider: "FFZ" }).modify(data);
 		});
-		
+
 		return Promise.resolve(data);
-	}
+	},
 };
 
 function doRequest(base: string, path: string): Promise<Response> {
 	return fetch(`${base}/${path}`, {});
-};
+}

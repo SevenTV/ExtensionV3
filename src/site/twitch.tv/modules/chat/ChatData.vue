@@ -9,11 +9,11 @@ import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 // This defines the priority of emotes in the emoteMap assuming all are present
 enum sets {
 	seventv_channel = 1,
-	seventv_global,
 	ffz_channel,
+	bttv_channel,
+	seventv_global,
 	ffz_global,
-	betterttv_channel,
-	betterttv_global,
+	bttv_global,
 }
 
 const { channel } = storeToRefs(useStore());
@@ -24,56 +24,41 @@ const setMap = reactive({
 
 // watch for changes and remap emotes
 watch(setMap, () => {
-
 	// Using temp to only fire one update
 	const temp = {} as Record<string, SevenTV.ActiveEmote>;
 
-	const test = [...setMap.map.entries()]
+	[...setMap.map.entries()]
 		.sort((a, b) => b[0] - a[0])
-		.map(pair => pair[1])
-		.forEach(set => 
-			set.emotes.forEach(emote => 
-				temp[emote.name] = emote
-			)
-		)
+		.map((pair) => pair[1])
+		.forEach((set) => set.emotes.forEach((emote) => (temp[emote.name] = emote)));
 	twitchStore.emoteMap = temp;
 });
 
-const id = channel.value!.id
+const id = channel.value?.id ?? "";
 
 // Query Emotes for 7tv channel
-liveQuery(() =>
-	db.userConnections
-		.where("id")
-		.equals(id)
-		.first(),
-).subscribe({
+liveQuery(() => db.userConnections.where("id").equals(id).first()).subscribe({
 	next(conn) {
 		if (!conn?.emote_set.emotes) return;
-		setMap.map.set(sets.seventv_channel, conn.emote_set) 
+		setMap.map.set(sets.seventv_channel, conn.emote_set);
 	},
 });
 
 //Query other global and 3rd party emoteSets
-liveQuery(() => 
-	db.emoteSets
-		.where("name")
-		.anyOf([
-			`7TVSet#GLOBAL`,
-			`FFZSet#GLOBAL`,
-			`FFZSet#${id}`,
-			`BttvSet#GLOBAL`,
-			`BttvSet#${id}`,
-		])
-).subscribe({
-	next(conns) {
-		let i = 2;
-		conns.each(conn => {
-			if (!conn.emotes) return;
-			setMap.map.set(i, conn)
-			i++;
-		})
-	}
-});
 
+useEmoteSetQuery(`FFZ#${id}`, sets.ffz_channel);
+useEmoteSetQuery(`BTTV#${id}`, sets.bttv_channel);
+useEmoteSetQuery("7TVSet#GLOBAL", sets.seventv_global);
+useEmoteSetQuery("FFZ#GLOBAL", sets.ffz_global);
+useEmoteSetQuery("BTTV#GLOBAL", sets.bttv_global);
+
+function useEmoteSetQuery(name: string, prio: number): void {
+	const ref = liveQuery(() => db.emoteSets.where({ name: name }).first()).subscribe({
+		next(conn) {
+			if (!conn?.emotes) return;
+			setMap.map.set(prio, conn);
+			ref.unsubscribe();
+		},
+	});
+}
 </script>

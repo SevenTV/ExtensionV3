@@ -181,56 +181,55 @@ interface CurrentChannel {
 }
 
 declare namespace BTTV {
-    interface UserResponse {
-        id: string;
-        bots?: any[];
-        avatar?: URL;
-        channelEmotes: BTTV.Emote[];
-        sharedEmotes?: BTTV.Emote[];
-    }
+	interface UserResponse {
+		id: string;
+		avatar?: URL;
+		channelEmotes: BTTV.Emote[];
+		sharedEmotes: BTTV.Emote[];
+	}
 
-    interface EmoteSet {
-        id: string;
-        channel: string;
-        type: SetType;
-        emotes: Emote[];
-    } 
+	interface EmoteSet {
+		id: string;
+		channel: string;
+		type: SetType;
+		emotes: Emote[];
+	}
 
-    interface Emote {
-        id: string;
-        code: string;
-        imageType: "png" | "gif";
-        userId: string;
-    }
+	interface Emote {
+		id: string;
+		code: string;
+		imageType: "png" | "gif";
+		userId: string;
+	}
 
-    type SetType = "Global" | "Channel" | "Shared"
+	type SetType = "Global" | "Channel" | "Shared";
 }
 
 declare namespace FFZ {
-    interface RoomResponse {
-        sets: {
-            [key: string]: {
-                emoticons: FFZ.Emote[];
-            }
-        };
-    }
+	interface RoomResponse {
+		sets: {
+			[key: string]: {
+				emoticons: FFZ.Emote[];
+			};
+		};
+	}
 
-    interface Emote {
-        id: number;
-        name: string;
-        height: number;
-        width: number;
-        public: boolean;
-        hidden: boolean;
-        owner: {
-            _id: number;
-            name: string;
-            display_name: string;
-        } | null;
-        urls: {
-            '1'?: string;
-            '2'?: string;
-            '4'?: string;
-        };
-    }
+	interface Emote {
+		id: number;
+		name: string;
+		height: number;
+		width: number;
+		public: boolean;
+		hidden: boolean;
+		owner: {
+			_id: number;
+			name: string;
+			display_name: string;
+		} | null;
+		urls: {
+			"1"?: string;
+			"2"?: string;
+			"4"?: string;
+		};
+	}
 }

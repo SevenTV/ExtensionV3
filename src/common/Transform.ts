@@ -1,7 +1,4 @@
-const BTTV_ZeroWidth = [
-	'SoSnowy', 'IceCold', 'SantaHat', 'TopHat',
-	'ReinDeer', 'CandyCane', 'cvMask', 'cvHazmat',
-]
+const BTTV_ZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane", "cvMask", "cvHazmat"];
 
 export function convertTwitchEmoteSet(data: Twitch.TwitchEmoteSet): SevenTV.EmoteSet {
 	return {
@@ -56,8 +53,8 @@ export function convertTwitchEmote(data: Partial<Twitch.TwitchEmote>): SevenTV.E
 
 export function convertBttvEmoteSet(data: BTTV.UserResponse, channelID: string): SevenTV.EmoteSet {
 	return {
-		id: data.id,
-		name: "BttvSet#" + channelID,
+		id: "BTTV#" + channelID,
+		name: "BTTV#" + channelID,
 		immutable: true,
 		privileged: true,
 		tags: [],
@@ -76,9 +73,9 @@ export function convertBttvEmote(data: BTTV.Emote): SevenTV.Emote {
 	return {
 		id: data.id,
 		name: data.code,
-		flags: BTTV_ZeroWidth.indexOf(data.code) > -1  ? 0 : 256,
+		flags: BTTV_ZeroWidth.indexOf(data.code) > -1 ? 0 : 256,
 		tags: [],
-		lifecycle: 3, 
+		lifecycle: 3,
 		listed: true,
 		owner: null,
 		host: {
@@ -98,28 +95,30 @@ export function convertBttvEmote(data: BTTV.Emote): SevenTV.Emote {
 				},
 			],
 		},
-	}
+	};
 }
 
 export function convertFFZEmoteSet(data: FFZ.RoomResponse, channelID: string): SevenTV.EmoteSet {
 	return {
-		id: channelID,
-		name: "FFZSet#" + channelID,
+		id: "FFZ#" + channelID,
+		name: "FFZ#" + channelID,
 		immutable: true,
 		privileged: true,
 		tags: [],
 		provider: "FFZ",
 		emotes: Object.values(data.sets).reduce((con, set) => {
-			const test =  set.emoticons.map(e => {
-				return {
-					id: e.id.toString(),
-					name: e.name,
-					flags: 0,
-					provider: "FFZ",
-					data: convertFFZEmote(e) as SevenTV.Emote,
-				};
-			}) as SevenTV.ActiveEmote[]
-			return [...con, ...test]
+			return [
+				...con,
+				...(set.emoticons.map((e) => {
+					return {
+						id: e.id.toString(),
+						name: e.name,
+						flags: 0,
+						provider: "FFZ",
+						data: convertFFZEmote(e) as SevenTV.Emote,
+					};
+				}) as SevenTV.ActiveEmote[]),
+			];
 		}, [] as SevenTV.ActiveEmote[]),
 	};
 }
@@ -135,12 +134,12 @@ export function convertFFZEmote(data: FFZ.Emote): SevenTV.Emote {
 		owner: null,
 		host: {
 			url: "//cdn.frankerfacez.com/emote/" + data.id,
-			files: Object.keys(data.urls).map(key => {
+			files: Object.keys(data.urls).map((key) => {
 				return {
 					name: key,
-					format: "PNG"
-				}
-			})
+					format: "PNG",
+				};
+			}),
 		},
-	}
+	};
 }
