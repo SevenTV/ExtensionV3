@@ -5,6 +5,7 @@ import { liveQuery } from "dexie";
 import { storeToRefs } from "pinia";
 import { reactive, watch } from "vue";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
+import { log } from "@/common/Logger";
 
 // This defines the priority of emotes in the emoteMap assuming all are present
 enum sets {
@@ -57,6 +58,7 @@ function useEmoteSetQuery(name: string, prio: number): void {
 		next(conn) {
 			if (!conn?.emotes) return;
 			setMap.map.set(prio, conn);
+			log.debug("Added emote set: ", name);
 			ref.unsubscribe();
 		},
 	});
