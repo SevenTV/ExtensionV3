@@ -1,5 +1,3 @@
-import { BTTV, FFZ } from "@/providers";
-
 export interface WorkerMessage<E, T> {
 	source: "SEVENTV";
 	type: E;
