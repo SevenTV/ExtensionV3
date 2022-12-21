@@ -48,7 +48,7 @@ const localEmoteMap = {} as { [key: string]: SevenTV.ActiveEmote };
 const tokens = [] as MessageToken<any>[];
 
 if (props.msg && typeof props.msg.messageBody === "string") {
-	const split = (props.msg.messageBody ?? "").split(" ");
+	const split = (props.msg.messageBody ?? "").split(/( )/g);
 	const currentText = [] as string[];
 
 	// Local twitch emotes?
@@ -75,14 +75,11 @@ if (props.msg && typeof props.msg.messageBody === "string") {
 		currentText.length = 0;
 	};
 
-	let i = 0;
 	while (split.length) {
 		const s = split.shift() ?? "";
 		if (s == "") continue;
 
 		const emote = localEmoteMap[s] || emoteMap.value[s];
-		const start = !split[i - 1];
-		const end = !split[i + 1];
 
 		if (emote) {
 			tokenOfCurrentText();
@@ -92,10 +89,8 @@ if (props.msg && typeof props.msg.messageBody === "string") {
 				value: emote,
 			} as MessageToken<"emote">);
 		} else {
-			currentText.push(start ? "" : " ", s, end ? "" : " ");
+			currentText.push(s);
 		}
-
-		i++;
 	}
 	tokenOfCurrentText();
 }
