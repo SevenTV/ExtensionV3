@@ -1,7 +1,7 @@
 <template>
 	<div v-for="msg of messages" :key="msg.id" :msg-id="msg.id" class="seventv-message-wrapper">
-		<template v-if="msg.seventv">
-			<ChatMessage :msg="msg" @open-viewer-card="openViewerCard" />
+		<template v-if="!!msg.seventv">
+			<ChatMessage :msg="msg" :controller="controller" @open-viewer-card="openViewerCard" />
 		</template>
 		<template v-else>
 			<ChatMessageUnhandled :msg="msg" />
@@ -48,10 +48,3 @@ const openViewerCard = (ev: MouseEvent, viewer: Twitch.ChatUser) => {
 	}, 30000);
 };
 </script>
-
-<style lang="scss">
-.seventv-message-wrapper:has(.seventv-chat-message) {
-	padding: 0.5rem 2rem;
-	overflow-wrap: anywhere;
-}
-</style>

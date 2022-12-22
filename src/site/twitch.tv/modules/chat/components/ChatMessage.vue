@@ -1,28 +1,37 @@
 <template>
-	<span v-if="msg" class="seventv-chat-message">
-		<!-- Chat Author -->
-		<template v-if="msg.user && msg.user.userDisplayName">
-			<ChatUserTag
-				v-if="msg.user"
-				:user="msg.user"
-				:badges="msg.badges"
-				@click="emit('open-viewer-card', $event, msg.user)"
-			/>
-			<span>: </span>
-		</template>
+	<div v-if="!!msg.seventv" class="seventv-message-wrapper">
+		<BanSlider
+			v-if:="msg.seventv && props.controller?.props.isCurrentUserModerator && props.msg?.user?.userType !== 'mod'"
+			:msg="msg"
+			:controller="controller"
+		/>
+		<span class="seventv-chat-message-container">
+			<span class="seventv-chat-message">
+				<!-- Chat Author -->
+				<template v-if="msg.user && msg.user.userDisplayName">
+					<ChatUserTag
+						v-if="msg.user"
+						:user="msg.user"
+						:badges="msg.badges"
+						@click="emit('open-viewer-card', $event, msg.user)"
+					/>
+					<span>: </span>
+				</template>
 
-		<!-- Message Content -->
-		<span class="seventv-chat-message-body">
-			<span v-for="(t, index) of tokens" :key="index" class="message-token" :token-type="t.type">
-				<template v-if="t.type === 'text'">
-					{{ t.value }}
-				</template>
-				<template v-else-if="t.type === 'emote'">
-					<ChatEmote :emote="(t.value as SevenTV.ActiveEmote)" format="WEBP" />
-				</template>
+				<!-- Message Content -->
+				<span class="seventv-chat-message-body">
+					<span v-for="(t, index) of tokens" :key="index" class="message-token" :token-type="t.type">
+						<template v-if="t.type === 'text'">
+							{{ t.value }}
+						</template>
+						<template v-else-if="t.type === 'emote'">
+							<ChatEmote :emote="(t.value as SevenTV.ActiveEmote)" format="WEBP" />
+						</template>
+					</span>
+				</span>
 			</span>
 		</span>
-	</span>
+	</div>
 </template>
 
 <script setup lang="ts">
@@ -32,6 +41,7 @@ import { convertTwitchEmote } from "@/common/Transform";
 import { Regex } from "@/site/twitch.tv";
 import ChatUserTag from "@/site/twitch.tv/modules/chat/components/ChatUserTag.vue";
 import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
+import BanSlider from "@/site/twitch.tv/modules/chat/components/BanSlider.vue";
 
 const emit = defineEmits<{
 	(e: "open-viewer-card", ev: MouseEvent, viewer: Twitch.ChatUser): void;
@@ -39,6 +49,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
+	controller?: Twitch.ChatControllerComponent;
 }>();
 
 const { emoteMap } = storeToRefs(useTwitchStore());
@@ -111,6 +122,14 @@ type MessageTokenType = "text" | "emote";
 </script>
 
 <style scoped lang="scss">
+.seventv-message-wrapper {
+	display: -webkit-inline-box;
+}
+.seventv-chat-message-container {
+	display: block;
+	padding: 0.5rem 2rem;
+	overflow-wrap: anywhere;
+}
 .seventv-chat-message {
 	vertical-align: baseline;
 }
