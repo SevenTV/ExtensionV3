@@ -59,7 +59,7 @@ export const sendDummyMessage = (controller: Twitch.ChatControllerComponent) => 
 };
 
 // Temporary solution
-const darkTheme = getChatController()?.props.theme ?? true;
+const darkTheme = getChatController()?.props.theme === 1;
 
 const calculated = new Map<boolean, Map<string, string>>();
 calculated.set(true, new Map<string, string>());
