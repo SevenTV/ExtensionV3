@@ -1,7 +1,7 @@
 <template>
-	<Teleport v-if="extMounted && channel && channel.id" :to="containerEl">
+	<Teleport v-if="channel && channel.id" :to="containerEl">
 		<div id="seventv-message-container" class="seventv-message-container">
-			<ChatList :controller="controller.component" :messages="chatStore.messages" />
+			<ChatList :messages="chatStore.messages" />
 		</div>
 
 		<!-- Data Logic -->
@@ -15,44 +15,23 @@
 		>
 			<span>{{ scroll.buffer.length }}{{ scroll.buffer.length >= lineLimit ? "+" : "" }} new messages</span>
 		</div>
-
-		<!-- Custom Scrollbar -->
-		<div
-			v-if="scroll.visible"
-			class="seventv-scrollbar"
-			:class="{ 'seventv-scrollbar--visible': scroll.visible }"
-			:style="{ height: `${bounds.height}px` }"
-		>
-			<div
-				class="seventv-scrollbar-thumb"
-				:style="{
-					top: `${containerEl.scrollHeight - containerEl.clientHeight}px`,
-				}"
-			/>
-		</div>
 	</Teleport>
 </template>
 
 <script setup lang="ts">
-import { getChatLines, Selectors } from "@/site/twitch.tv";
-import { ref, reactive, nextTick, onUnmounted, watch, toRef } from "vue";
+import { ref, reactive, nextTick, onUnmounted, watch, toRef, watchEffect, onMounted } from "vue";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
-import { registerCardOpeners, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
 import { getRandomInt } from "@/common/Rand";
-import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/common/Reflection";
-import { HookedInstance } from "@/common/ReactHooks";
+import { defineFunctionHook, definePropertyHook } from "@/common/Reflection";
+import { defineComponentHook, HookedInstance } from "@/common/ReactHooks";
 import ChatData from "./ChatData.vue";
 import ChatList from "./ChatList.vue";
 
 const props = defineProps<{
-	controller: HookedInstance<Twitch.ChatControllerComponent>;
-}>();
-
-const emit = defineEmits<{
-	(e: "hooked"): void;
+	list: HookedInstance<Twitch.ChatListComponent>;
 }>();
 
 const store = useStore();
@@ -60,18 +39,15 @@ const chatStore = useTwitchStore();
 const { channel } = storeToRefs(store);
 const { messages, lineLimit } = storeToRefs(chatStore);
 
-const controller = toRef(props, "controller");
-
-const extMounted = ref(false);
+const list = toRef(props, "list");
 
 const el = document.createElement("seventv-container");
 el.id = "seventv-chat-controller";
+
 const containerEl = ref<HTMLElement>(el);
 const replacedEl = ref<Element | null>(null);
 
 const bounds = ref<DOMRect>(el.getBoundingClientRect());
-
-log.debug("<ChatController>", "Hook started");
 
 watch(channel, (channel) => {
 	if (!channel) {
@@ -81,120 +57,76 @@ watch(channel, (channel) => {
 	log.info("<ChatController>", `Joining #${channel.username}`);
 });
 
-defineFunctionHook(
-	controller.value.component,
-	"componentDidUpdate", // eslint-disable-next-line @typescript-eslint/no-explicit-any
-	function (this: Twitch.ChatControllerComponent, old, ...args: any[]) {
-		// Update current channel
-		if (
-			store.setChannel({
-				id: this.props.channelID,
-				username: this.props.channelLogin,
-				display_name: this.props.channelDisplayName,
-			})
-		) {
-			messages.value = [];
-			scroll.paused = false;
-			scroll.buffer.length = 0;
-		}
+// Handle scrolling
+const scroll = reactive({
+	init: false,
+	sys: true,
+	visible: true,
+	paused: false, // whether or not scrolling is paused
+	buffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
+});
 
-		// Put placeholder to teleport our message list
-		if (document.getElementById("seventv-chat-controller")) {
-			return;
-		}
+const dataSets = reactive({
+	badges: false,
+});
 
-		const t = Date.now();
+onMounted(async () => {
+	// Keep track of props
+	definePropertyHook(list.value.component, "props", {
+		value(v: typeof list.value.component.props) {
+			if (!dataSets.badges) {
+				// Find message to grab some data
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const msgItem = (v.children[0] as any | undefined)?.props as Twitch.ChatLineComponent["props"];
+				if (!msgItem?.badgeSets?.count) return;
 
-		// Attach to chat
-		const parentEl = document.querySelector(".chat-room__content");
-		if (parentEl && !parentEl.contains(el)) {
-			const replace = parentEl.querySelector(Selectors.ChatList);
-			if (replace) {
-				parentEl.insertBefore(el, replace);
+				chatStore.twitchBadgeSets = msgItem.badgeSets;
 
-				replacedEl.value = replace;
-
-				// Hide the original chat list
-				replace.classList.add("seventv-checked");
+				dataSets.badges = true;
 			}
-		}
+		},
+	});
 
-		const scrollContainer = document.querySelector<HTMLDivElement>(Selectors.ChatScrollableContainer);
-
-		// Send dummy message
-		sendDummyMessage(this);
-
-		if (scrollContainer) {
-			const observer = new MutationObserver((entries) => {
-				for (let i = 0; i < entries.length; i++) {
-					const rec = entries[i];
-
-					rec.addedNodes.forEach((node) => {
-						if (!(node instanceof HTMLElement) || !node.classList.contains("chat-line__message")) {
-							return;
-						}
-
-						// Finalize all chat hooks
-						if (!registerCardOpeners()) {
-							return;
-						}
-
-						// Hook chat line
-						const line = getChatLines(scrollContainer, ["seventv-hook-message"])[0];
-						if (line && line.component) {
-							const component = line.component;
-							definePropertyHook(component, "props", {
-								value: (v: typeof component["props"]) => {
-									// store twitch badge sets
-									definePropertyHook(v, "badgeSets", {
-										value: (v: typeof component["props"]["badgeSets"]) => {
-											if (v.count === 0) return;
-
-											chatStore.twitchBadgeSets = v;
-
-											unsetPropertyHook(component, "props");
-											unsetPropertyHook(component.props, "badgeSets");
-										},
-									});
-								},
-							});
-						}
-
-						overwriteMessageContainer(this, scrollContainer);
-						emit("hooked");
-						extMounted.value = true;
-
-						log.debug("<ChatController>", "Chat controller mounted", `(${Date.now() - t}ms)`);
-						observer.disconnect(); // work is done, stop the mutation observer
+	// Use chatcontroller to handle resets on channel swaps
+	defineComponentHook<Twitch.ChatControllerComponent>(
+		{
+			parentSelector: ".chat-shell",
+			predicate: (n) => n.pushMessage && n.props?.messageHandlerAPI,
+		},
+		{
+			hooks: {
+				update: (c) => {
+					// Update current channel
+					const channelUpdated = store.setChannel({
+						id: c.component.props.channelID,
+						username: c.component.props.channelLogin,
+						display_name: c.component.props.channelDisplayName,
 					});
-				}
-			});
+					if (!channelUpdated) return;
 
-			// start looking for our system message
-			// we need its component to be mounted to get the constructor to message-specific hooks
-			observer.observe(scrollContainer, {
-				childList: true,
-			});
+					messages.value = [];
+					scroll.paused = false;
+					scroll.buffer.length = 0;
+				},
+			},
+		},
+	);
+});
 
-			log.debug("<ChatController>", "Spawning MutationObserver");
-		}
+watchEffect(() => {
+	if (!list.value.domNodes) return;
 
-		return old?.apply(this, args);
-	},
-);
+	const rootNode = list.value.domNodes.root;
+	if (!rootNode) return;
 
-// Take over the chat's native message container
-const handledMessageTypes = [0, 2];
-const overwriteMessageContainer = (
-	scopedController: Twitch.ChatControllerComponent,
-	scrollContainer: HTMLDivElement,
-) => {
-	// Hook the handleMessage method
-	// We will use our custom renderer for all supported types
-	// if a message type is unsupported, we will instead render it as native
-	// and then move it into our context.
+	rootNode.classList.add("seventv-chat-list");
+
+	containerEl.value = rootNode as HTMLElement;
+
+	if (!list.value.component?.props?.messageHandlerAPI) return;
+
 	defineFunctionHook(
-		scopedController.props.messageHandlerAPI,
+		list.value.component.props.messageHandlerAPI,
 		"handleMessage",
 		function (old, msg: Twitch.ChatMessage) {
 			const t = Date.now() + getRandomInt(0, 1000);
@@ -206,56 +138,13 @@ const overwriteMessageContainer = (
 			const ok = onMessage(msgData);
 			if (ok) return ""; // message was rendered by the extension
 
-			if (!old) return; // we cant continue since there is no native renderer to call.
-
-			// message type is not supported:
-			// render is natively
-			const o = new MutationObserver((x) => {
-				for (let i = 0; i < x.length; i++) {
-					const rec = x[i];
-
-					rec.addedNodes.forEach((node) => {
-						if (!(node instanceof HTMLElement)) return;
-
-						const unhandledID = `seventv-unhandled-msg-ref-${msgData.t}`;
-						msgData.seventv = false;
-						msgData.id = unhandledID;
-						chatStore.pushMessage(msgData);
-
-						nextTick(() => {
-							const wrapper = document.getElementById(unhandledID);
-							if (wrapper) {
-								wrapper.appendChild(node as Node);
-							}
-
-							scrollToLive();
-						});
-
-						o.disconnect();
-						clearTimeout(timeout);
-					});
-				}
-			});
-
-			o.observe(scrollContainer, {
-				childList: true,
-			});
-			const timeout = setTimeout(() => o.disconnect(), 1250);
-
-			old.call(this, msg);
+			return old?.call(this, msg);
 		},
 	);
-};
-
-// Handle scrolling
-const scroll = reactive({
-	init: false,
-	sys: true,
-	visible: true,
-	paused: false, // whether or not scrolling is paused
-	buffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
 });
 
+// Take over the chat's native message container
+const handledMessageTypes = [0, 2];
 const onMessage = (msg: Twitch.ChatMessage): boolean => {
 	if (msg.id === "seventv-hook-message" || !handledMessageTypes.includes(msg.type)) {
 		return false;
@@ -351,7 +240,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-#seventv-chat-controller {
+seventv-container.seventv-chat-list {
 	display: flex;
 	flex-direction: column !important;
 	-webkit-box-flex: 1 !important;

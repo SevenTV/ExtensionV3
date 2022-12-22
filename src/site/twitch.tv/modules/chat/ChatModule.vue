@@ -1,6 +1,6 @@
 <template>
-	<template v-if="chatController.instances.length">
-		<ChatController v-if="dependenciesMet" :controller="chatController.instances[0]" @hooked="onHooked" />
+	<template v-for="inst of chatList.instances" :key="inst.identifier">
+		<ChatController v-if="dependenciesMet" :list="inst" />
 	</template>
 </template>
 
@@ -14,17 +14,16 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 	depends_on: [],
 });
 
-const chatController = useComponentHook<Twitch.ChatControllerComponent>(
+const chatList = useComponentHook<Twitch.ChatListComponent>(
 	{
-		parentSelector: ".chat-shell",
-		predicate: (n) => n.pushMessage && n.props?.messageHandlerAPI,
+		parentSelector: ".chat-list--default",
+		predicate: (n) => n.scrollRef,
 	},
 	{
 		trackRoot: true,
+		replaceContents: true,
 	},
 );
 
-function onHooked() {
-	markAsReady();
-}
+markAsReady();
 </script>
