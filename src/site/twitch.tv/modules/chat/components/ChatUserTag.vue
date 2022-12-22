@@ -1,5 +1,5 @@
 <template>
-	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: colour }">
+	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: color }">
 		<!--Badge List -->
 		<span v-if="badges.length" class="seventv-chat-user-badge-list">
 			<ChatBadge v-for="(badge, index) of badges" :key="index" :badge="badge" />
@@ -17,7 +17,7 @@
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { ref } from "vue";
 import ChatBadge from "./ChatBadge.vue";
-import { normalizeColour } from "@/site/twitch.tv/modules/chat/components/helper";
+import { normalizeColor } from "@/site/twitch.tv/modules/chat/components/helper";
 const props = defineProps<{
 	user: Twitch.ChatUser;
 	badges?: Record<string, string>;
@@ -26,7 +26,11 @@ const props = defineProps<{
 const { twitchBadgeSets } = useTwitchStore();
 const badges = ref([] as Twitch.ChatBadge[]);
 
-const colour = "#" + normalizeColour(props.user.color, true);
+const color = ref(props.user.color);
+
+// Get these from twitch settings
+const readableColors = true;
+color.value = normalizeColor(color.value, readableColors);
 
 if (props.badges && twitchBadgeSets) {
 	for (const [key, value] of Object.entries(props.badges)) {

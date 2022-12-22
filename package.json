@@ -17,6 +17,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
+		"color2k": "^2.0.0",
 		"vue": "^3.2.45"
 	},
 	"devDependencies": {
