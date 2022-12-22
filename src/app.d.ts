@@ -46,7 +46,10 @@ declare namespace SevenTV {
 		privileged: boolean;
 		emotes: ActiveEmote[];
 
+		// Non-structural
+
 		provider?: Provider;
+		priority?: number;
 	}
 
 	interface ActiveEmote {
@@ -77,7 +80,7 @@ declare namespace SevenTV {
 		display_name: string;
 		linked_at: number;
 		emote_capacity: number;
-		emote_set: EmoteSet;
+		emote_set: EmoteSet | null;
 
 		provider?: Provider;
 		user?: User;
