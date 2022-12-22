@@ -17,7 +17,7 @@
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { ref } from "vue";
 import ChatBadge from "./ChatBadge.vue";
-import { normalizeColor } from "@/site/twitch.tv/modules/chat/components/helper";
+import { normalizeUsername } from "@/site/twitch.tv/modules/chat/ChatBackend";
 const props = defineProps<{
 	user: Twitch.ChatUser;
 	badges?: Record<string, string>;
@@ -30,7 +30,7 @@ const color = ref(props.user.color);
 
 // Get these from twitch settings
 const readableColors = true;
-color.value = normalizeColor(color.value, readableColors);
+color.value = normalizeUsername(color.value, readableColors);
 
 if (props.badges && twitchBadgeSets) {
 	for (const [key, value] of Object.entries(props.badges)) {
