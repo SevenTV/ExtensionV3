@@ -1,10 +1,5 @@
 <template>
-	<div v-if="!!msg.seventv" class="seventv-message-wrapper">
-		<BanSlider
-			v-if:="msg.seventv && props.controller?.props.isCurrentUserModerator && props.msg?.user?.userType !== 'mod'"
-			:msg="msg"
-			:controller="controller"
-		/>
+	<BanSlider :msg="msg" :controller="controller">
 		<span class="seventv-chat-message-container">
 			<span class="seventv-chat-message">
 				<!-- Chat Author -->
@@ -31,7 +26,7 @@
 				</span>
 			</span>
 		</span>
-	</div>
+	</BanSlider>
 </template>
 
 <script setup lang="ts">
@@ -122,9 +117,6 @@ type MessageTokenType = "text" | "emote";
 </script>
 
 <style scoped lang="scss">
-.seventv-message-wrapper {
-	display: -webkit-inline-box;
-}
 .seventv-chat-message-container {
 	display: block;
 	padding: 0.5rem 2rem;
