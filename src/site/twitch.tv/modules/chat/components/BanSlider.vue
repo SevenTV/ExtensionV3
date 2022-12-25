@@ -1,5 +1,13 @@
 <template>
-	<div v-if="shouldModerate" :class="transition" :style="{ transform: 'translateX(' + data.pos + ')' }">
+	<div
+		v-if="shouldModerate"
+		class="seventv-ban-slider"
+		:style="{
+			transform: 'translateX(' + data.pos + ')',
+			transition: transition ? 'transform 0.3s ease' : 'none',
+			boxShadow: tracking ? 'black 0px 0.1rem 0.2rem' : 'none',
+		}"
+	>
 		<div class="ban-background" :style="{ backgroundColor: data.color, width: data.pos }">
 			<span class="text" :style="{ opacity: data.banVis }">
 				{{ data.text }}
@@ -33,41 +41,42 @@ const props = defineProps<{
 const shouldModerate = ref(
 	(props.controller?.props.isCurrentUserModerator &&
 		props.msg.badges &&
+		!("moderator" in props.msg.badges) &&
 		!("broadcaster" in props.msg.badges) &&
 		!("staff" in props.msg.badges)) ??
 		false,
 );
 
-const transition = ref("");
+const transition = ref(false);
+const tracking = ref(false);
 
 const data = ref(new sliderData(0));
 let initial = 0;
-let tracking = false;
 
 const handleDown = (e: PointerEvent) => {
 	e.stopPropagation();
 	initial = e.pageX;
-	tracking = true;
+	tracking.value = true;
 	(e.target as HTMLElement).setPointerCapture(e.pointerId);
 };
 
 const handleRelease = (e: PointerEvent): void => {
-	tracking = false;
+	tracking.value = false;
 
 	if (data.value.command && props.controller) {
 		const message = data.value.command.replace("{user}", props.msg.user.userLogin).replace("{id}", props.msg.id);
 		props.controller.sendMessage(message);
 	}
 
-	transition.value = "transition";
-	setTimeout(() => (transition.value = ""), 300);
+	transition.value = true;
+	setTimeout(() => (transition.value = false), 300);
 
 	data.value = new sliderData(0);
 	(e.target as HTMLElement).releasePointerCapture(e.pointerId);
 };
 
 const update = (e: PointerEvent): void => {
-	if (!tracking) return;
+	if (!tracking.value) return;
 	e.preventDefault();
 
 	const calcPos = Math.max(Math.min(e.pageX - initial, maxVal), -60);
