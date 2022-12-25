@@ -1,6 +1,6 @@
 <template>
 	<div
-		v-if="shouldModerate"
+		v-if="shouldModerate(props.msg)"
 		class="seventv-ban-slider"
 		:style="{
 			transform: 'translateX(' + data.pos + ')',
@@ -31,21 +31,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { sliderData, maxVal } from "./BanSliderBackend";
+import { sliderData, maxVal, executeModAction, shouldModerate } from "./BanSliderBackend";
 
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
-	controller?: Twitch.ChatControllerComponent;
 }>();
-
-const shouldModerate = ref(
-	(props.controller?.props.isCurrentUserModerator &&
-		props.msg.badges &&
-		!("moderator" in props.msg.badges) &&
-		!("broadcaster" in props.msg.badges) &&
-		!("staff" in props.msg.badges)) ??
-		false,
-);
 
 const transition = ref(false);
 const tracking = ref(false);
@@ -63,9 +53,8 @@ const handleDown = (e: PointerEvent) => {
 const handleRelease = (e: PointerEvent): void => {
 	tracking.value = false;
 
-	if (data.value.command && props.controller) {
-		const message = data.value.command.replace("{user}", props.msg.user.userLogin).replace("{id}", props.msg.id);
-		props.controller.sendMessage(message);
+	if (data.value.command) {
+		executeModAction(data.value.command, props.msg.user.userLogin, props.msg.id);
 	}
 
 	transition.value = true;

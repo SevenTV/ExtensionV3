@@ -1,5 +1,5 @@
 <template>
-	<BanSlider :msg="msg" :controller="controller">
+	<BanSlider :msg="msg">
 		<span class="seventv-chat-message-container">
 			<span class="seventv-chat-message">
 				<!-- Chat Author -->
