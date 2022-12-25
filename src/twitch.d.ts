@@ -478,6 +478,11 @@ declare module Twitch {
 		replies: [];
 	}
 
+	export interface Message {
+		id: string;
+		type: number;
+	}
+
 	export interface ChatMessage {
 		badgeDynamicData: {};
 		badges: Record<string, string>;
@@ -490,7 +495,7 @@ declare module Twitch {
 		message: string | ChatMessage;
 		messageBody: string;
 		messageParts: ChatMessage.Part[];
-		messageType: messageType;
+		messageType: number;
 		type: number;
 		reply: unknown;
 		user: ChatUser;
@@ -545,15 +550,15 @@ declare module Twitch {
 			type: "text" | "emote" | "twitch-emote" | "link" | "mention";
 			content?: string | { [key: string]: any };
 		}
-
-		export interface ModerationMessage {
-			duration: number;
-			id: string;
-			moderationType: number;
-			reason: string;
-			type: number;
-			userLogin: string;
-		}
+	}
+	export interface ModerationMessage {
+		duration: number;
+		id: string;
+		moderationType: number;
+		reason: string;
+		type: number;
+		userLogin: string;
+		targetMessageID?: string;
 	}
 
 	export interface ChatUser {
@@ -581,65 +586,5 @@ declare module Twitch {
 		};
 		__typename?: string;
 		srcSet?: string;
-	}
-
-	export const enum messageType {
-		Message = 0,
-		ExtensionMessage,
-		Moderation,
-		ModerationAction,
-		TargetedModerationAction,
-		AutoMod,
-		SubscriberOnlyMode,
-		FollowerOnlyMode,
-		SlowMode,
-		EmoteOnlyMode,
-		R9KMode,
-		Connected,
-		Disconnected,
-		Reconnect,
-		Hosting,
-		Unhost,
-		Hosted,
-		Subscription,
-		Resubscription,
-		GiftPaidUpgrade,
-		AnonGiftPaidUpgrade,
-		PrimePaidUpgrade,
-		PrimeCommunityGiftReceivedEvent,
-		ExtendSubscription,
-		SubGift,
-		AnonSubGift,
-		Clear,
-		RoomMods,
-		RoomState,
-		Raid,
-		Unraid,
-		Notice,
-		Info,
-		BadgesUpdated,
-		Purchase,
-		BitsCharity,
-		CrateGift,
-		RewardGift,
-		SubMysteryGift,
-		AnonSubMysteryGift,
-		StandardPayForward,
-		CommunityPayForward,
-		FirstCheerMessage,
-		FirstMessageHighlight,
-		BitsBadgeTierMessage,
-		InlinePrivateCallout,
-		ChannelPointsReward,
-		CommunityChallengeContribution,
-		LiveMessageSeparator,
-		RestrictedLowTrustUserMessage,
-		CommunityIntroduction,
-		Shoutout,
-		AnnouncementMessage,
-		MidnightSquid,
-		CharityDonation,
-		MessageIdUpdate,
-		PinnedChat,
 	}
 }

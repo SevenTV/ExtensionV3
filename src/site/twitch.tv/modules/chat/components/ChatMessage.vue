@@ -1,7 +1,7 @@
 <template>
 	<BanSlider :msg="msg">
 		<span class="seventv-chat-message-container">
-			<span class="seventv-chat-message">
+			<span class="seventv-chat-message" :class="props.msg.banned || props.msg.deleted ? 'deleted' : ''">
 				<!-- Chat Author -->
 				<template v-if="msg.user && msg.user.userDisplayName">
 					<ChatUserTag
@@ -124,5 +124,10 @@ type MessageTokenType = "text" | "emote";
 }
 .seventv-chat-message {
 	vertical-align: baseline;
+}
+
+.deleted:not(:hover) {
+	opacity: 0.5;
+	text-decoration: line-through;
 }
 </style>
