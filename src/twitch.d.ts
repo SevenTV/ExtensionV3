@@ -490,7 +490,7 @@ declare module Twitch {
 		message: string | ChatMessage;
 		messageBody: string;
 		messageParts: ChatMessage.Part[];
-		messageType: number;
+		messageType: messageType;
 		type: number;
 		reply: unknown;
 		user: ChatUser;
@@ -581,5 +581,65 @@ declare module Twitch {
 		};
 		__typename?: string;
 		srcSet?: string;
+	}
+
+	export const enum messageType {
+		Message = 0,
+		ExtensionMessage,
+		Moderation,
+		ModerationAction,
+		TargetedModerationAction,
+		AutoMod,
+		SubscriberOnlyMode,
+		FollowerOnlyMode,
+		SlowMode,
+		EmoteOnlyMode,
+		R9KMode,
+		Connected,
+		Disconnected,
+		Reconnect,
+		Hosting,
+		Unhost,
+		Hosted,
+		Subscription,
+		Resubscription,
+		GiftPaidUpgrade,
+		AnonGiftPaidUpgrade,
+		PrimePaidUpgrade,
+		PrimeCommunityGiftReceivedEvent,
+		ExtendSubscription,
+		SubGift,
+		AnonSubGift,
+		Clear,
+		RoomMods,
+		RoomState,
+		Raid,
+		Unraid,
+		Notice,
+		Info,
+		BadgesUpdated,
+		Purchase,
+		BitsCharity,
+		CrateGift,
+		RewardGift,
+		SubMysteryGift,
+		AnonSubMysteryGift,
+		StandardPayForward,
+		CommunityPayForward,
+		FirstCheerMessage,
+		FirstMessageHighlight,
+		BitsBadgeTierMessage,
+		InlinePrivateCallout,
+		ChannelPointsReward,
+		CommunityChallengeContribution,
+		LiveMessageSeparator,
+		RestrictedLowTrustUserMessage,
+		CommunityIntroduction,
+		Shoutout,
+		AnnouncementMessage,
+		MidnightSquid,
+		CharityDonation,
+		MessageIdUpdate,
+		PinnedChat,
 	}
 }
