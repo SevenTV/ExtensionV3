@@ -91,6 +91,7 @@ export function getChatLines(container: HTMLElement, idList?: string[]) {
 
 export namespace Regex {
 	export const MessageDelimiter = new RegExp("( )", "g");
+	export const SevenTVLink = new RegExp("^https?:\\/\\/(?:www\\.)?7tv.app\\/emotes\\/(?<emoteID>[0-9a-f]{24})", "gi");
 }
 
 export namespace Selectors {
@@ -178,4 +179,18 @@ export const enum moderationType {
 	ban = 0,
 	timeout,
 	delete,
+}
+
+export const enum messagePartType {
+	Text = 0,
+	ModeratedText,
+	FlaggedSegment,
+	CurrentUserHighlight,
+	Mention,
+	Link,
+	Emote,
+	ClipLink,
+	VideoLink,
+	SevenTVEmote = 700,
+	SevenTVLink,
 }

@@ -15,14 +15,59 @@
 
 				<!-- Message Content -->
 				<span class="seventv-chat-message-body">
-					<span v-for="(t, index) of tokens" :key="index" class="message-token" :token-type="t.type">
-						<template v-if="t.type === 'text'">
-							{{ t.value }}
-						</template>
-						<template v-else-if="t.type === 'emote'">
-							<ChatEmote :emote="(t.value as SevenTV.ActiveEmote)" format="WEBP" />
-						</template>
-					</span>
+					<template v-for="(part, index) of tokenizer.getParts()" :key="index">
+						<span v-if="part.type === messagePartType.Text" class="text-part">
+							{{ part.content }}
+						</span>
+
+						<span v-else-if="part.type === messagePartType.ModeratedText" class="moderated-text-part">
+							{{ part.content }}
+						</span>
+
+						<span v-else-if="part.type === messagePartType.CurrentUserHighlight" class="mention-part">
+							{{ part.content }}
+						</span>
+
+						<span
+							v-else-if="part.type === messagePartType.Mention"
+							:class="part.content.currentUserMentionRelation === 1 ? 'mention-part' : 'text-part'"
+						>
+							{{ part.content }}
+						</span>
+
+						<a v-else-if="part.type === messagePartType.Link" :href="part.content.url" class="link-part">
+							{{ part.content.displayText }}
+						</a>
+
+						<span v-else-if="part.type === messagePartType.Emote"> !This should not appear! </span>
+
+						<a
+							v-else-if="part.type === messagePartType.ClipLink"
+							:href="part.content.url"
+							class="link-part"
+						>
+							{{ part.content.displayText }}
+						</a>
+
+						<a
+							v-else-if="part.type === messagePartType.VideoLink"
+							:href="part.content.url"
+							class="link-part"
+						>
+							{{ part.content.displayText }}
+						</a>
+
+						<span v-else-if="part.type === messagePartType.SevenTVEmote" class="emote-part">
+							<ChatEmote :emote="part.content" />
+						</span>
+						<a
+							v-else-if="part.type === messagePartType.SevenTVLink"
+							:href="part.content.url"
+							class="link-part"
+						>
+							{{ part.content.displayText }}
+						</a>
+					</template>
 				</span>
 			</span>
 		</span>
@@ -30,13 +75,12 @@
 </template>
 
 <script setup lang="ts">
-import { storeToRefs } from "pinia";
-import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
-import { convertTwitchEmote } from "@/common/Transform";
-import { Regex } from "@/site/twitch.tv";
 import ChatUserTag from "@/site/twitch.tv/modules/chat/components/ChatUserTag.vue";
 import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
 import BanSlider from "@/site/twitch.tv/modules/chat/components/BanSlider.vue";
+import { Tokenizer } from "./Tokienizer";
+import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
+import { messagePartType } from "@/site/twitch.tv";
 
 const emit = defineEmits<{
 	(e: "open-viewer-card", ev: MouseEvent, viewer: Twitch.ChatUser): void;
@@ -47,73 +91,9 @@ const props = defineProps<{
 	controller?: Twitch.ChatControllerComponent;
 }>();
 
-const { emoteMap } = storeToRefs(useTwitchStore());
-const localEmoteMap = {} as { [key: string]: SevenTV.ActiveEmote };
-
 // Tokenize the message
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const tokens = [] as MessageToken<any>[];
 
-if (props.msg && typeof props.msg.messageBody === "string") {
-	const split = (props.msg.messageBody ?? "").split(Regex.MessageDelimiter);
-	const currentText = [] as string[];
-
-	// Local twitch emotes?
-	props.msg.messageParts
-		.filter((p) => p.type === 6)
-		.forEach((p) => {
-			const emote = p.content as Twitch.ChatMessage.EmoteRef;
-			if (Object.keys(emote).length) {
-				localEmoteMap[emote.alt] = {
-					id: emote.emoteID,
-					name: emote.alt,
-					data: convertTwitchEmote({ id: emote.emoteID, token: emote.alt }),
-					provider: "TWITCH",
-				} as SevenTV.ActiveEmote;
-			}
-		});
-
-	const tokenOfCurrentText = () => {
-		tokens.push({
-			type: "text",
-			value: currentText.join(" "),
-		} as MessageToken<"text">);
-
-		currentText.length = 0;
-	};
-
-	while (split.length) {
-		const s = split.shift() ?? "";
-		if (s == "") continue;
-
-		const emote = localEmoteMap[s] || emoteMap.value[s];
-
-		if (emote) {
-			tokenOfCurrentText();
-
-			tokens.push({
-				type: "emote",
-				value: emote,
-			} as MessageToken<"emote">);
-		} else {
-			currentText.push(s);
-		}
-	}
-	tokenOfCurrentText();
-}
-
-interface MessageToken<T extends MessageTokenType> {
-	type: T;
-	value: MessageTokenValue<T>;
-}
-
-type MessageTokenValue<T extends MessageTokenType> = {
-	text: string;
-	emote: SevenTV.ActiveEmote;
-	[key: string]: unknown;
-}[T];
-
-type MessageTokenType = "text" | "emote";
+const tokenizer = new Tokenizer(props.msg.messageParts, useTwitchStore().emoteMap);
 </script>
 
 <style scoped lang="scss">
@@ -121,9 +101,23 @@ type MessageTokenType = "text" | "emote";
 	display: block;
 	padding: 0.5rem 2rem;
 	overflow-wrap: anywhere;
+
+	&:has(.mention-part) {
+		background-color: red;
+	}
 }
+
+.emote-part {
+	display: inline-flex;
+	vertical-align: middle;
+}
+
 .seventv-chat-message {
 	vertical-align: baseline;
+}
+
+.mentio-part {
+	font-weight: bold;
 }
 
 .deleted:not(:hover) {
