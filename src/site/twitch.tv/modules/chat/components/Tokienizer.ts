@@ -1,4 +1,4 @@
-import { Regex, messagePartType } from "@/site/twitch.tv";
+import { Regex, MessagePartType } from "@/site/twitch.tv";
 import { convertTwitchEmote } from "@/common/Transform";
 
 export class Tokenizer {
@@ -9,15 +9,15 @@ export class Tokenizer {
 		this.emoteMap = emoteMap;
 		for (const part of parts) {
 			switch (part.type) {
-				case messagePartType.Text:
-				case messagePartType.ModeratedText:
+				case MessagePartType.TEXT:
+				case MessagePartType.MODERATEDTEXT:
 					this.tokenizeText(part.content as string);
 
 					break;
-				case messagePartType.Emote:
+				case MessagePartType.EMOTE:
 					this.newParts.push(twitchEmoteToPart(part.content as Twitch.ChatMessage.Part.EmoteContent));
 					break;
-				case messagePartType.Link:
+				case MessagePartType.LINK:
 					this.newParts.push(matchLink(part.content as Twitch.ChatMessage.Part.LinkContent));
 					break;
 				default:
@@ -49,7 +49,7 @@ export class Tokenizer {
 		if (
 			(emote.data?.flags ?? 0) & 256 &&
 			this.newParts.at(-1)?.content == " " &&
-			this.newParts.at(-2)?.type == messagePartType.SevenTVEmote
+			this.newParts.at(-2)?.type == MessagePartType.SEVENTVEMOTE
 		) {
 			// Remove the " " space element
 			this.newParts.pop();
@@ -72,14 +72,14 @@ function matchLink(content: { displayText: string; url: string }): Twitch.ChatMe
 	const match = content.url.match(Regex.SevenTVLink);
 	if (match) return linkToSevenTVLink(content, match[0]);
 	return {
-		type: messagePartType.Link,
+		type: MessagePartType.LINK,
 		content: content,
 	};
 }
 
 function stringToPart(content: string): Twitch.ChatMessage.Part {
 	return {
-		type: messagePartType.Text,
+		type: MessagePartType.TEXT,
 		content: content,
 	};
 }
@@ -87,7 +87,7 @@ function stringToPart(content: string): Twitch.ChatMessage.Part {
 // Use type instead
 function linkToSevenTVLink(content: Twitch.ChatMessage.Part.LinkContent, emoteID: string): Twitch.ChatMessage.Part {
 	return {
-		type: messagePartType.SevenTVLink,
+		type: MessagePartType.SEVENTVLINK,
 		content: {
 			...content,
 			emoteID: emoteID,
@@ -97,7 +97,7 @@ function linkToSevenTVLink(content: Twitch.ChatMessage.Part.LinkContent, emoteID
 
 function twitchEmoteToPart(emote: Twitch.ChatMessage.Part.EmoteContent): Twitch.ChatMessage.Part {
 	return {
-		type: messagePartType.SevenTVEmote,
+		type: MessagePartType.SEVENTVEMOTE,
 		content: {
 			id: emote.emoteID,
 			name: emote.alt,
@@ -111,14 +111,14 @@ function twitchEmoteToPart(emote: Twitch.ChatMessage.Part.EmoteContent): Twitch.
 function sevenTVEmoteToPart(emote: SevenTV.ActiveEmote, zeroWidth?: SevenTV.ActiveEmote): Twitch.ChatMessage.Part {
 	if (!zeroWidth)
 		return {
-			type: messagePartType.SevenTVEmote,
+			type: MessagePartType.SEVENTVEMOTE,
 			content: emote,
 		};
 
 	const arr = emote.overlaid ?? [];
 	arr.push(zeroWidth);
 	return {
-		type: messagePartType.SevenTVEmote,
+		type: MessagePartType.SEVENTVEMOTE,
 		content: {
 			...emote,
 			overlaid: arr,

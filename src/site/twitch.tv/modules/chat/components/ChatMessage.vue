@@ -16,33 +16,33 @@
 				<!-- Message Content -->
 				<span class="seventv-chat-message-body">
 					<template v-for="(part, index) of tokenizer.getParts()" :key="index">
-						<span v-if="part.type === messagePartType.Text" class="text-part">
+						<span v-if="part.type === MessagePartType.TEXT" class="text-part">
 							{{ part.content }}
 						</span>
 
-						<span v-else-if="part.type === messagePartType.ModeratedText" class="moderated-text-part">
+						<span v-else-if="part.type === MessagePartType.MODERATEDTEXT" class="moderated-text-part">
 							{{ part.content }}
 						</span>
 
-						<span v-else-if="part.type === messagePartType.CurrentUserHighlight" class="mention-part">
+						<span v-else-if="part.type === MessagePartType.CURRENTUSERHIGHLIGHT" class="mention-part">
 							{{ part.content }}
 						</span>
 
 						<span
-							v-else-if="part.type === messagePartType.Mention"
+							v-else-if="part.type === MessagePartType.MENTION"
 							:class="part.content.currentUserMentionRelation === 1 ? 'mention-part' : 'text-part'"
 						>
 							{{ "@" + part.content.recipient }}
 						</span>
 
-						<a v-else-if="part.type === messagePartType.Link" :href="part.content.url" class="link-part">
+						<a v-else-if="part.type === MessagePartType.LINK" :href="part.content.url" class="link-part">
 							{{ part.content.displayText }}
 						</a>
 
-						<span v-else-if="part.type === messagePartType.Emote"> !This should not appear! </span>
+						<span v-else-if="part.type === MessagePartType.EMOTE"> !This should not appear! </span>
 
 						<a
-							v-else-if="part.type === messagePartType.ClipLink"
+							v-else-if="part.type === MessagePartType.CLIPLINK"
 							:href="part.content.url"
 							class="link-part"
 						>
@@ -50,18 +50,18 @@
 						</a>
 
 						<a
-							v-else-if="part.type === messagePartType.VideoLink"
+							v-else-if="part.type === MessagePartType.VIDEOLINK"
 							:href="part.content.url"
 							class="link-part"
 						>
 							{{ part.content.displayText }}
 						</a>
 
-						<span v-else-if="part.type === messagePartType.SevenTVEmote" class="emote-part">
+						<span v-else-if="part.type === MessagePartType.SEVENTVEMOTE" class="emote-part">
 							<ChatEmote :emote="part.content" />
 						</span>
 						<a
-							v-else-if="part.type === messagePartType.SevenTVLink"
+							v-else-if="part.type === MessagePartType.SEVENTVLINK"
 							:href="part.content.url"
 							class="link-part"
 						>
@@ -80,7 +80,7 @@ import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
 import BanSlider from "@/site/twitch.tv/modules/chat/components/BanSlider.vue";
 import { Tokenizer } from "./Tokienizer";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
-import { messagePartType } from "@/site/twitch.tv";
+import { MessagePartType } from "@/site/twitch.tv";
 
 const emit = defineEmits<{
 	(e: "open-viewer-card", ev: MouseEvent, viewer: Twitch.ChatUser): void;

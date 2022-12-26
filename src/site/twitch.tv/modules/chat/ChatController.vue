@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { getChatController, getChatLines, Selectors, messageType, moderationType } from "@/site/twitch.tv";
+import { getChatController, getChatLines, Selectors, MessageType, ModerationType } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch } from "vue";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { registerCardOpeners, sendDummyMessage } from "@/site/twitch.tv/modules/chat/ChatBackend";
@@ -287,11 +287,11 @@ const onMessage = (msg: Twitch.Message): boolean => {
 	}
 
 	switch (msg.type) {
-		case messageType.Message:
+		case MessageType.MESSAGE:
 			onChatMessage(msg as Twitch.ChatMessage);
 			break;
 
-		case messageType.Moderation:
+		case MessageType.MODERATION:
 			onModerationMessage(msg as Twitch.ModerationMessage);
 			break;
 
@@ -321,7 +321,7 @@ function onChatMessage(msg: Twitch.ChatMessage) {
 }
 
 function onModerationMessage(msg: Twitch.ModerationMessage) {
-	if (msg.moderationType == moderationType.delete) {
+	if (msg.moderationType == ModerationType.DELETE) {
 		const found = chatStore.messages.find((m) => m.id == msg.targetMessageID);
 		if (found) found.deleted = true;
 	} else {
