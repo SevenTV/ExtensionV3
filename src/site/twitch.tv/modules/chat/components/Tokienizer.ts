@@ -46,7 +46,11 @@ export class Tokenizer {
 
 	private handleFoundEmote(emote: SevenTV.ActiveEmote) {
 		// Check if emote is zeroWidth and the preceding non space element is an emote
-		if ((emote.data?.flags ?? 0) & 256 && this.newParts.at(-2)?.type == messagePartType.SevenTVEmote) {
+		if (
+			(emote.data?.flags ?? 0) & 256 &&
+			this.newParts.at(-1)?.content == " " &&
+			this.newParts.at(-2)?.type == messagePartType.SevenTVEmote
+		) {
 			// Remove the " " space element
 			this.newParts.pop();
 
