@@ -113,8 +113,9 @@ const tokenizer = new Tokenizer(props.msg.messageParts, useTwitchStore().emoteMa
 }
 
 .emote-part {
-	display: inline-flex;
+	display: inline-grid;
 	vertical-align: middle;
+	margin: -1rem 0;
 }
 
 .seventv-chat-message {

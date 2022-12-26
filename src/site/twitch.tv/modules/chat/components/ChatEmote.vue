@@ -1,18 +1,16 @@
 <template>
-	<div class="emote-container" :alt="emote.name">
-		<img
-			ref="imgRef"
-			class="chat-emote"
-			:srcset="getSrcSet(props.emote)"
-			:alt="emote.name"
-			@click="openCard"
-			@mouseenter="show(imgRef)"
-			@mouseleave="hide()"
-		/>
-		<template v-for="(e, index) of emote.overlaid" :key="index">
-			<img class="chat-emote zero-width-emote" :srcset="getSrcSet(e)" :alt="' ' + e.name" />
-		</template>
-	</div>
+	<img
+		ref="imgRef"
+		class="chat-emote"
+		:srcset="getSrcSet(props.emote)"
+		:alt="emote.name"
+		@click="openCard"
+		@mouseenter="show(imgRef)"
+		@mouseleave="hide()"
+	/>
+	<template v-for="(e, index) of emote.overlaid" :key="index">
+		<img class="chat-emote zero-width-emote" :srcset="getSrcSet(e)" :alt="' ' + e.name" />
+	</template>
 </template>
 
 <script setup lang="ts">
@@ -54,10 +52,6 @@ const openCard = (ev: MouseEvent) => {
 </script>
 
 <style scoped lang="scss">
-.emote-container {
-	display: grid;
-	margin: -0.6rem 0;
-}
 img.chat-emote {
 	font-weight: 900;
 	grid-column: 1;
