@@ -78,7 +78,7 @@
 import ChatUserTag from "@/site/twitch.tv/modules/chat/components/ChatUserTag.vue";
 import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
 import BanSlider from "@/site/twitch.tv/modules/chat/components/BanSlider.vue";
-import { Tokenizer } from "./Tokienizer";
+import { Tokenizer } from "./Tokenizer";
 import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
 import { MessagePartType } from "@/site/twitch.tv";
 
