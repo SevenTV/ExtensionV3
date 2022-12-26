@@ -32,7 +32,7 @@
 							v-else-if="part.type === messagePartType.Mention"
 							:class="part.content.currentUserMentionRelation === 1 ? 'mention-part' : 'text-part'"
 						>
-							{{ part.content }}
+							{{ "@" + part.content.recipient }}
 						</span>
 
 						<a v-else-if="part.type === messagePartType.Link" :href="part.content.url" class="link-part">
@@ -103,7 +103,12 @@ const tokenizer = new Tokenizer(props.msg.messageParts, useTwitchStore().emoteMa
 	overflow-wrap: anywhere;
 
 	&:has(.mention-part) {
-		background-color: red;
+		display: block;
+		padding: 0.5rem 2rem;
+		overflow-wrap: anywhere;
+		box-shadow: inset 0 0 0.2rem 0.2rem red;
+		background-color: #ff000040;
+		border-radius: 0.4rem;
 	}
 }
 
@@ -116,7 +121,8 @@ const tokenizer = new Tokenizer(props.msg.messageParts, useTwitchStore().emoteMa
 	vertical-align: baseline;
 }
 
-.mentio-part {
+.mention-part {
+	padding: 0.2rem;
 	font-weight: bold;
 }
 
