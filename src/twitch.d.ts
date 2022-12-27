@@ -233,20 +233,21 @@ declare module Twitch {
 		chatConnectionAPI: {
 			sendMessage: Function;
 		};
+		onSendMessage: (
+			value: string,
+			reply: {
+				parentDeleted: boolean;
+				parentDisplayName: string;
+				parentMessageBodsy: string;
+				parentMsgId: string;
+				parentUid: string;
+				parentUserLogin: string;
+			},
+		) => any;
+		showEmotePicker: (v: any) => void;
 	}> & {
-		props: {
-			onSendMessage: (
-				value: string,
-				reply: {
-					parentDeleted: boolean;
-					parentDisplayName: string;
-					parentMessageBodsy: string;
-					parentMsgId: string;
-					parentUid: string;
-					parentUserLogin: string;
-				},
-			) => any;
-		};
+		onEmotePickerButtonClick: () => void;
+		onEmotePickerToggle: () => void;
 	};
 
 	export type ChatInputComponent = ReactExtended.WritableComponent<
