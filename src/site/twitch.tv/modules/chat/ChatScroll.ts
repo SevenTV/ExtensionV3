@@ -1,9 +1,9 @@
 import { nextTick, reactive, Ref } from "vue";
-import { useEventListener, usePointer } from "@vueuse/core";
-import { useChatStore } from "@/site/twitch.tv/TwitchStore";
+import { useEventListener } from "@vueuse/core";
+import { useChatStore } from "@/site/twitch.tv/ChatStore";
 
 const data = reactive({
-	userScroll: false,
+	userInput: 0,
 	init: false,
 	sys: true,
 	visible: true,
@@ -12,13 +12,14 @@ const data = reactive({
 });
 
 export function useChatScroll(container: Ref<HTMLElement>, bounds: Ref<DOMRect>) {
-	usePointer({ target: container });
-
 	const chatStore = useChatStore();
 
 	// Detect User Input
-	useEventListener(container, "wheel", () => (data.userScroll = true));
+	useEventListener(container, "wheel", () => data.userInput++);
 
+	/**
+	 * Scrolls the chat to the bottom
+	 */
 	function scrollToLive() {
 		if (!container.value || data.paused) {
 			return;
@@ -33,10 +34,16 @@ export function useChatScroll(container: Ref<HTMLElement>, bounds: Ref<DOMRect>)
 		bounds.value = container.value.getBoundingClientRect();
 	}
 
+	/**
+	 * Pauses the scrolling of the chat
+	 */
 	function pauseScrolling(): void {
 		data.paused = true;
 	}
 
+	/**
+	 * Unpauses the scrolling of the chat
+	 */
 	function unpauseScrolling(): void {
 		data.paused = false;
 		data.init = true;
@@ -56,7 +63,7 @@ export function useChatScroll(container: Ref<HTMLElement>, bounds: Ref<DOMRect>)
 		const h = Math.floor(container.value.scrollHeight - bounds.value.height);
 
 		// Whether or not the scrollbar is at the bottom
-		const live = top >= h - 3;
+		const live = top >= h - 1;
 
 		if (data.init) {
 			return;
@@ -66,13 +73,14 @@ export function useChatScroll(container: Ref<HTMLElement>, bounds: Ref<DOMRect>)
 			return;
 		}
 
-		if (data.userScroll) {
+		if (data.userInput > 0) {
+			data.userInput = 0;
 			pauseScrolling();
+		}
 
-			// Check if the user has scrolled back down to live mode
-			if (live) {
-				unpauseScrolling();
-			}
+		// Check if the user has scrolled back down to live mode
+		if (live) {
+			unpauseScrolling();
 		}
 	});
 
