@@ -39,7 +39,7 @@ const props = defineProps<{
 const store = useStore();
 const chatStore = useChatStore();
 const { channel } = storeToRefs(store);
-const { messages, lineLimit } = storeToRefs(chatStore);
+const { lineLimit } = storeToRefs(chatStore);
 
 const { list, controller } = toRefs(props);
 
@@ -71,6 +71,8 @@ const scroll = reactive({
 const dataSets = reactive({
 	badges: false,
 });
+
+const currentChannel = ref<CurrentChannel | null>(null);
 
 watchEffect(() => {
 	if (!list.value.domNodes) return;
@@ -117,19 +119,21 @@ watchEffect(() => {
 		},
 	});
 
-	defineFunctionHook(controller.value.component, "componentDidUpdate", function (this) {
-		// Update current channel
-		const channelUpdated = store.setChannel({
-			id: this.props.channelID,
-			username: this.props.channelLogin,
-			display_name: this.props.channelDisplayName,
-		});
-		if (!channelUpdated) return;
-
-		messages.value = [];
-		scroll.paused = false;
-		scroll.buffer.length = 0;
+	definePropertyHook(controller.value.component, "props", {
+		value(v: typeof controller.value.component.props) {
+			currentChannel.value = {
+				id: v.channelID,
+				username: v.channelLogin,
+				display_name: v.channelDisplayName,
+			};
+		},
 	});
+});
+
+watchEffect(() => {
+	if (currentChannel.value) {
+		store.setChannel(currentChannel.value);
+	}
 });
 
 const nodeMap = new Map<string, Element>();
