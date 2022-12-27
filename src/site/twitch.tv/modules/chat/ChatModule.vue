@@ -35,7 +35,7 @@ const chatList = useComponentHook<Twitch.ChatListComponent>(
 );
 
 const chatController = useComponentHook<Twitch.ChatControllerComponent>({
-	parentSelector: ".chat-shell",
+	parentSelector: ".chat-shell, .stream-chat",
 	predicate: (n) => n.pushMessage && n.props?.messageHandlerAPI,
 });
 
