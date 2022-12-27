@@ -30,6 +30,7 @@ import { defineFunctionHook, definePropertyHook } from "@/common/Reflection";
 import { HookedInstance } from "@/common/ReactHooks";
 import ChatData from "./ChatData.vue";
 import ChatList from "./ChatList.vue";
+import { useChatScroll } from "./ChatScroll";
 
 const props = defineProps<{
 	list: HookedInstance<Twitch.ChatListComponent>;
@@ -60,13 +61,15 @@ watch(channel, (channel) => {
 });
 
 // Handle scrolling
-const scroll = reactive({
-	init: false,
-	sys: true,
-	visible: true,
-	paused: false, // whether or not scrolling is paused
-	buffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
-});
+// const scroll = reactive({
+// 	init: false,
+// 	sys: true,
+// 	visible: true,
+// 	paused: false, // whether or not scrolling is paused
+// 	buffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
+// });
+
+const { scroll, scrollToLive, unpauseScrolling } = useChatScroll(containerEl, bounds);
 
 const dataSets = reactive({
 	badges: false,
@@ -206,59 +209,6 @@ function onModerationMessage(msg: Twitch.ModerationMessage) {
 	}
 }
 
-const scrollToLive = () => {
-	if (!containerEl.value || scroll.paused) {
-		return;
-	}
-
-	scroll.sys = true;
-
-	containerEl.value.scrollTo({
-		top: containerEl.value?.scrollHeight,
-	});
-	bounds.value = containerEl.value.getBoundingClientRect();
-};
-
-function unpauseScrolling(): void {
-	scroll.paused = false;
-	scroll.init = true;
-
-	chatStore.messages.push(...scroll.buffer);
-	scroll.buffer.length = 0;
-
-	nextTick(() => {
-		scroll.init = false;
-		scrollToLive();
-	});
-}
-
-function pauseScrolling(): void {
-	scroll.paused = true;
-}
-
-// Listen for scroll events
-containerEl.value.addEventListener("scroll", () => {
-	const top = Math.floor(containerEl.value.scrollTop);
-	const h = Math.floor(containerEl.value.scrollHeight - bounds.value.height);
-
-	// Whether or not the scrollbar is at the bottom
-	const live = top >= h - 3;
-
-	if (scroll.init) {
-		return;
-	}
-	if (scroll.sys) {
-		scroll.sys = false;
-		return;
-	}
-
-	// Check if the user has scrolled back down to live mode
-	pauseScrolling();
-	if (live) {
-		unpauseScrolling();
-	}
-});
-
 // Apply new boundaries when the window is resized
 const resizeObserver = new ResizeObserver(() => {
 	bounds.value = containerEl.value.getBoundingClientRect();
@@ -333,7 +283,7 @@ seventv-container.seventv-chat-list {
 		padding: 0.5em;
 		border-radius: 0.33em;
 		color: #fff;
-		background-color: rgba(0, 0, 0, 0.5%);
+		background-color: rgba(0, 0, 0, 50%);
 		backdrop-filter: blur(0.05em);
 	}
 }
