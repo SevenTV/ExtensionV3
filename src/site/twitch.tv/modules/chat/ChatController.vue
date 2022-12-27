@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { MessageType, ModerationType } from "@/site/twitch.tv";
 import { ref, reactive, nextTick, onUnmounted, watch, watchEffect, toRefs } from "vue";
-import { useTwitchStore } from "@/site/twitch.tv/TwitchStore";
+import { useChatStore } from "@/site/twitch.tv/TwitchStore";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
@@ -37,7 +37,7 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
-const chatStore = useTwitchStore();
+const chatStore = useChatStore();
 const { channel } = storeToRefs(store);
 const { messages, lineLimit } = storeToRefs(chatStore);
 
@@ -130,6 +130,30 @@ watchEffect(() => {
 		scroll.paused = false;
 		scroll.buffer.length = 0;
 	});
+});
+
+const nodeMap = new Map<string, Element>();
+
+watch(list.value.domNodes, (nodes) => {
+	const missingIds = new Set<string>(nodeMap.keys());
+
+	for (const [nodeId, node] of Object.entries(nodes)) {
+		if (nodeId === "root") continue;
+		missingIds.delete(nodeId);
+
+		if (nodeMap.has(nodeId)) continue;
+
+		chatStore.pushMessage({
+			id: nodeId + "-unhandled",
+			element: node,
+		} as Twitch.ChatMessage);
+
+		nodeMap.set(nodeId, node);
+	}
+
+	for (const nodeId of missingIds) {
+		nodeMap.delete(nodeId);
+	}
 });
 
 // Take over the chat's native message container
@@ -255,6 +279,10 @@ seventv-container.seventv-chat-list {
 	flex-grow: 1 !important;
 	overflow: auto !important;
 	overflow-x: hidden !important;
+
+	> seventv-container {
+		display: none;
+	}
 
 	.seventv-message-container {
 		padding: 1em 0;

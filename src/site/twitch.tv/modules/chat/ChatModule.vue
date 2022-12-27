@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { useComponentHook } from "@/common/ReactHooks";
+import { getTrackedNode, useComponentHook } from "@/common/ReactHooks";
 import { useModule } from "@/composable/useModule";
 import { computed } from "vue";
 import ChatController from "./ChatController.vue";
@@ -22,7 +22,15 @@ const chatList = useComponentHook<Twitch.ChatListComponent>(
 	},
 	{
 		trackRoot: true,
-		replaceContents: true,
+		hooks: {
+			render: function (inst) {
+				const nodes = inst.component.props.children.map((vnode) =>
+					vnode.key ? getTrackedNode(inst, vnode.key as string, vnode) : null,
+				);
+
+				return nodes;
+			},
+		},
 	},
 );
 

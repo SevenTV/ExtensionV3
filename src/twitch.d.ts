@@ -160,7 +160,7 @@ declare module Twitch {
 
 	export type ChatListComponent = ReactExtended.WritableComponent<{
 		channelID: string;
-		children: object[];
+		children: ReactExtended.ReactRuntimeElement[];
 		currentUserLogin: string;
 		hasNewerLeft: boolean;
 		messageHandlerAPI: MessageHandlerAPI;

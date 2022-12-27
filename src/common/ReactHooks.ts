@@ -329,7 +329,11 @@ export function getTrackedReactRef<C extends ReactExtended.WritableComponent>(ho
 
 	definePropertyHook(ref, "current", {
 		value: (v) => {
-			hook.domNodes[name] = v;
+			if (v == null) {
+				delete hook.domNodes[name];
+			} else {
+				hook.domNodes[name] = v;
+			}
 		},
 	});
 
