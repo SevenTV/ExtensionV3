@@ -139,7 +139,7 @@ onUnmounted(() => {
 	display: flex;
 	justify-content: space-evenly;
 	box-shadow: 0 1px 2px black;
-	background: rgba(217, 217, 217, 0.03);
+	background: rgba(217, 217, 217, 3%);
 	border-radius: 0.6rem 0.6rem 0 0;
 }
 
@@ -148,10 +148,10 @@ onUnmounted(() => {
 	padding: 1rem;
 	cursor: pointer;
 	user-select: none;
-	box-shadow: inset 0px 1px 1px black;
+	box-shadow: inset 0 1px 1px black;
 
 	&[selected="true"] {
-		background: hsla(0, 0%, 100%, 0.16);
+		background: hsla(0deg, 0%, 100%, 16%);
 		box-shadow: 1px 1px 4px black;
 		border-radius: 0.2rem;
 	}
@@ -185,7 +185,7 @@ onUnmounted(() => {
 	cursor: pointer;
 
 	&:hover {
-		background: hsla(0, 0%, 100%, 0.16);
+		background: hsla(0deg, 0%, 100%, 16%);
 	}
 }
 
@@ -208,7 +208,7 @@ onUnmounted(() => {
 .sidebar {
 	width: 4rem;
 	height: 100%;
-	background: rgba(217, 217, 217, 0.03);
+	background: rgba(217, 217, 217, 3%);
 	border-left: 1px solid black;
 }
 </style>
