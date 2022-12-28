@@ -4,9 +4,10 @@ import { useStore } from "@/store/main";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { useLiveQuery } from "@/composable/useLiveQuery";
 import { storeToRefs } from "pinia";
+import { toRefs } from "vue";
 
 const { channel } = storeToRefs(useStore());
-const chatAPI = useChatAPI();
+const { emoteMap } = toRefs(useChatAPI());
 const id = channel.value?.id ?? "";
 
 // query the channel's emote set bindings
@@ -36,7 +37,7 @@ useLiveQuery(
 			o[emote.name] = emote;
 		}
 
-		chatAPI.emoteMap.value = o;
+		emoteMap.value = o;
 	},
 );
 </script>
