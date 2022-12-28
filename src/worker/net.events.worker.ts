@@ -4,8 +4,10 @@
 import { log } from "@/common/Logger";
 import { getRandomInt } from "@/common/Rand";
 import { db } from "@/db/IndexedDB";
+import { NetWorkerMessageType } from ".";
 import { handleDispatchedEvent } from "./event-handlers/handler";
 import { EventContext, Payload, WebSocketPayload } from "./events";
+import { isPrimary, primaryExists, sendToPrimary } from "./net.worker";
 
 export class EventAPI {
 	private socket: WebSocket | null = null;
@@ -76,15 +78,30 @@ export class EventAPI {
 	}
 
 	sendMessage(msg: WebSocketPayload<unknown>): void {
-		if (!this.socket) {
+		// retry if we're no primary has been selected or the socket isn't ready
+		if (!primaryExists() || (isPrimary() && !this.socket)) {
 			setTimeout(() => this.sendMessage(msg), 100);
 			return;
 		}
 
+		// if we are not primary, delegate this to the primary
+		if (!isPrimary()) {
+			sendToPrimary(NetWorkerMessageType.MESSAGE, msg);
+		}
+
+		log.debug("<Net/EventAPI>", "Sending message with op:", msg.op.toString());
+
+		if (!this.socket) return;
 		this.socket.send(JSON.stringify(msg));
 	}
 
 	pushMessage(msg: WebSocketPayload<unknown>): void {
+		if (msg.op >= 32) {
+			this.sendMessage(msg);
+
+			return;
+		}
+
 		this.onMessage(msg);
 	}
 

@@ -20,6 +20,9 @@ const state = {
 	primary: false,
 } as NetWorkerInstance;
 
+export const primaryExists = () => Object.values(instances).some((i) => i.primary);
+export const isPrimary = () => state.primary;
+
 // Listen to global messages
 let electionTimeout = 0;
 
@@ -223,6 +226,13 @@ function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWo
 		to,
 		data,
 	});
+}
+
+export function sendToPrimary<T extends NetWorkerMessageType>(t: T, data: TypedNetWorkerMessage<T>): void {
+	const primaryInst = Object.values(instances).find((inst) => inst.primary);
+	if (!primaryInst) return;
+
+	broadcastMessage(t, data, primaryInst.id);
 }
 
 function setInstanceTimeout(inst: NetWorkerInstance): void {

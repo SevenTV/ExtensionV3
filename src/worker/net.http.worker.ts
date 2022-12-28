@@ -87,7 +87,6 @@ export const seventv = {
 				});
 		}
 
-		log.debug("subscribe to 7tv emote set", set.name);
 		ws.subscribe("emote_set.*", { object_id: set.id });
 
 		return Promise.resolve(set);
