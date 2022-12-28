@@ -1,38 +1,34 @@
 <template>
 	<Teleport :to="containerEl">
-		<template v-if="visible">
-			<div class="emote-menu-container">
-				<div class="emote-menu">
-					<div class="header">
-						<div
-							v-for="(e, provider) of filteredEmoteMaps"
-							:key="provider"
-							class="provider-icon"
-							:class="{ active: provider == active }"
-							@click="active = provider"
-						>
-							{{ provider }}
-						</div>
+		<div class="emote-menu-container" :style="{ display: visible ? '' : 'none' }">
+			<div class="emote-menu">
+				<div class="header">
+					<div
+						v-for="(e, provider) of filteredEmoteMaps"
+						:key="provider"
+						class="provider-icon"
+						:class="{ active: provider == active }"
+						@click="active = provider"
+					>
+						{{ provider }}
 					</div>
-					<template v-for="(emoteSet, provider) of filteredEmoteMaps" :key="provider">
-						<template v-if="active == provider">
-							<div class="body">
-								<div class="scroll-area">
-									<div class="emote-area">
-										<template v-for="(emote, code) in emoteSet" :key="code">
-											<div class="emote-container" :class="`ratio-${determineRatio(emote)}`">
-												<ChatEmote :emote="emote" />
-											</div>
-										</template>
-									</div>
-								</div>
-								<div class="sidebar"></div>
-							</div>
-						</template>
-					</template>
 				</div>
+				<template v-for="(emoteSet, provider) of filteredEmoteMaps" :key="provider">
+					<div class="body" :style="{ display: provider == active ? 'flex' : 'none' }">
+						<div class="scroll-area">
+							<div class="emote-area">
+								<template v-for="(emote, code) in emoteSet" :key="code">
+									<div class="emote-container" :class="`ratio-${determineRatio(emote)}`">
+										<ChatEmote :emote="emote" />
+									</div>
+								</template>
+							</div>
+						</div>
+						<div class="sidebar"></div>
+					</div>
+				</template>
 			</div>
-		</template>
+		</div>
 	</Teleport>
 </template>
 
@@ -109,29 +105,38 @@ onUnmounted(() => {
 
 .header {
 	display: flex;
+	justify-content: space-evenly;
+	box-shadow: 0 1px 2px black;
+	background: rgba(217, 217, 217, 0.03);
+}
+
+.provider-icon {
+	margin: 0.5rem;
+	padding: 1rem;
+	cursor: pointer;
+	user-select: none;
 }
 
 .active {
 	background: hsla(0, 0%, 100%, 0.16);
+	box-shadow: 1px 1px 4px black;
+	border-radius: 0.2rem;
 }
 
 .body {
 	display: flex;
-	height: 30em;
-}
-
-.provider-icon {
-	margin: 1em 0.2em;
+	height: 40rem;
 }
 
 .scroll-area {
-	width: 100%;
+	width: 28rem;
 	overflow-y: scroll;
 }
 
 .emote-area {
 	display: inline-flex;
 	flex-wrap: wrap;
+	margin: 0.5rem;
 }
 
 .emote-container {
@@ -159,7 +164,9 @@ onUnmounted(() => {
 }
 
 .sidebar {
-	// width: 4rem;
+	width: 4rem;
 	height: 100%;
+	background: rgba(217, 217, 217, 0.03);
+	border-left: 1px solid black;
 }
 </style>
