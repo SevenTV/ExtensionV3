@@ -1,5 +1,5 @@
-import { nextTick, reactive, Ref, toRefs } from "vue";
-import { useEventListener } from "@vueuse/core";
+import { nextTick, reactive, ref, Ref, toRefs, watchEffect } from "vue";
+import UiScrollableVue from "@/ui/UiScrollable.vue";
 
 const data = reactive({
 	// Message Data
@@ -20,7 +20,15 @@ const data = reactive({
 
 let flushTimeout: number | undefined;
 
-export function useChatAPI(container?: Ref<HTMLElement>, bounds?: Ref<DOMRect>) {
+export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> | undefined>, bounds?: Ref<DOMRect>) {
+	const container = ref<HTMLElement | null>(null);
+
+	watchEffect(() => {
+		if (scroller?.value?.container) {
+			container.value = scroller.value.container;
+		}
+	});
+
 	function addMessage(message: Twitch.ChatMessage): void {
 		if (data.paused) {
 			// if scrolling is paused, buffer the message
@@ -71,13 +79,11 @@ export function useChatAPI(container?: Ref<HTMLElement>, bounds?: Ref<DOMRect>) 
 	 * Scrolls the chat to the bottom
 	 */
 	function scrollToLive(): void {
-		if (!container?.value || !bounds?.value || data.paused) return;
+		if (!container.value || !bounds?.value || data.paused) return;
 
 		data.sys = true;
 
-		container.value.scrollTo({
-			top: container.value.scrollHeight,
-		});
+		container.value.scrollTo({ top: container.value.scrollHeight });
 
 		bounds.value = container.value.getBoundingClientRect();
 	}
@@ -105,48 +111,54 @@ export function useChatAPI(container?: Ref<HTMLElement>, bounds?: Ref<DOMRect>) 
 		});
 	}
 
-	// Handle system scroll
-	if (container && bounds) {
-		// Detect User Input
-		useEventListener(container, "wheel", () => data.userInput++);
+	function onScroll() {
+		if (!container.value || !bounds?.value) return;
 
-		useEventListener(container, "scroll", () => {
-			const top = Math.floor(container.value.scrollTop);
-			const h = Math.floor(container.value.scrollHeight - bounds.value.height);
+		const top = Math.floor(container.value.scrollTop);
+		const h = Math.floor(container.value.scrollHeight - bounds.value.height);
 
-			// Whether or not the scrollbar is at the bottom
-			const live = top >= h - 1;
+		// Whether or not the scrollbar is at the bottom
+		const live = top >= h - 1;
 
-			if (data.init) {
-				return;
-			}
-			if (data.sys) {
-				data.sys = false;
-				return;
-			}
+		if (data.init) {
+			return;
+		}
+		if (data.sys) {
+			data.sys = false;
+			return;
+		}
 
-			if (data.userInput > 0) {
-				data.userInput = 0;
-				pauseScrolling();
-			}
+		if (data.userInput > 0) {
+			data.userInput = 0;
+			pauseScrolling();
+		}
 
-			// Check if the user has scrolled back down to live mode
-			if (live) {
-				unpauseScrolling();
-			}
-		});
+		// Check if the user has scrolled back down to live mode
+		if (live) {
+			unpauseScrolling();
+		}
 	}
 
-	const { messages, lineLimit, emoteMap, twitchBadgeSets } = toRefs(data);
+	function onWheel() {
+		data.userInput++;
+	}
+
+	const { messages, lineLimit, emoteMap, twitchBadgeSets, sys, init, scrollBuffer, paused } = toRefs(data);
 
 	return {
 		messages: messages,
 		lineLimit: lineLimit,
 		emoteMap: emoteMap,
 		twitchBadgeSets: twitchBadgeSets,
-		scroll: data,
-		scrollToLive,
 
+		scrollSys: sys,
+		scrollInit: init,
+		scrollBuffer: scrollBuffer,
+		scrollPaused: paused,
+
+		scrollToLive,
+		onScroll,
+		onWheel,
 		addMessage,
 		pauseScrolling,
 		unpauseScrolling,

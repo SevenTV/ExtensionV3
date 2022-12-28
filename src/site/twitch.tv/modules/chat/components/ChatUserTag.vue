@@ -38,6 +38,8 @@ if (props.badges && twitchBadgeSets.value) {
 		const badgeID = value;
 
 		for (const setGroup of [twitchBadgeSets.value.channelsBySet, twitchBadgeSets.value.globalsBySet]) {
+			if (!setGroup) continue;
+
 			const set = setGroup.get(setID);
 			if (!set) continue;
 

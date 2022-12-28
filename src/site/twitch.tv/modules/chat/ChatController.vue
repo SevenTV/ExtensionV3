@@ -1,22 +1,21 @@
 <template>
 	<Teleport v-if="channel && channel.id" :to="containerEl">
-		<div id="seventv-message-container" class="seventv-message-container">
-			<ChatList :messages="messages" :controller="controller.component" />
-		</div>
+		<UiScrollable ref="scroller" @container-scroll="chatAPI.onScroll" @container-wheel="chatAPI.onWheel">
+			<div id="seventv-message-container" class="seventv-message-container">
+				<ChatList :messages="messages" :controller="controller.component" />
+			</div>
+		</UiScrollable>
 
 		<!-- Data Logic -->
 		<ChatData />
 
 		<!-- New Messages during Scrolling Pause -->
 		<div
-			v-if="scroll.paused && scroll.scrollBuffer.length > 0"
+			v-if="scrollPaused && scrollBuffer.length > 0"
 			class="seventv-message-buffer-notice"
 			@click="chatAPI.unpauseScrolling"
 		>
-			<span
-				>{{ scroll.scrollBuffer.length }}{{ scroll.scrollBuffer.length >= lineLimit ? "+" : "" }} new
-				messages</span
-			>
+			<span>{{ scrollBuffer.length }}{{ scrollBuffer.length >= lineLimit ? "+" : "" }} new messages</span>
 		</div>
 	</Teleport>
 </template>
@@ -33,6 +32,7 @@ import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/com
 import { HookedInstance } from "@/common/ReactHooks";
 import ChatData from "./ChatData.vue";
 import ChatList from "./ChatList.vue";
+import UiScrollable from "@/ui/UiScrollable.vue";
 
 const props = defineProps<{
 	list: HookedInstance<Twitch.ChatListComponent>;
@@ -52,6 +52,8 @@ const replacedEl = ref<Element | null>(null);
 
 const bounds = ref<DOMRect>(el.getBoundingClientRect());
 
+const scroller = ref<InstanceType<typeof UiScrollable> | undefined>();
+
 watch(channel, (channel) => {
 	if (!channel) {
 		return;
@@ -60,8 +62,8 @@ watch(channel, (channel) => {
 	log.info("<ChatController>", `Joining #${channel.username}`);
 });
 
-const chatAPI = useChatAPI(containerEl, bounds);
-const { scroll, messages, lineLimit, twitchBadgeSets } = chatAPI;
+const chatAPI = useChatAPI(scroller, bounds);
+const { scrollBuffer, scrollPaused, messages, lineLimit, twitchBadgeSets } = chatAPI;
 
 const dataSets = reactive({
 	badges: false,
