@@ -297,7 +297,16 @@ onUnmounted(() => {
 			position: relative;
 			width: 0.4rem;
 			background-color: var(--theme-background-scrollbar-thumb);
-			clip-path: polygon(50% 0, 100% 3%, 100% 97%, 50% 100%, 0 97%, 0 3%);
+
+			$clipAngle: 0.15em;
+			clip-path: polygon(
+				50% 0,
+				100% $clipAngle,
+				100% calc(100% - $clipAngle),
+				50% 100%,
+				0 calc(100% - $clipAngle),
+				0 $clipAngle
+			);
 
 			&:hover {
 				background-color: var(--theme-background-scrollbar-thumb-pressed);
