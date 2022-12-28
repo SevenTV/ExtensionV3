@@ -18,7 +18,11 @@
 						<div class="scroll-area">
 							<div class="emote-area">
 								<template v-for="(emote, code) in emoteSet" :key="code">
-									<div class="emote-container" :class="`ratio-${determineRatio(emote)}`">
+									<div
+										class="emote-container"
+										:class="`ratio-${determineRatio(emote)}`"
+										@click="insertText(code)"
+									>
 										<ChatEmote :emote="emote" />
 									</div>
 								</template>
@@ -49,6 +53,14 @@ containerEl.value = document.querySelector(".chat-input__textarea") ?? undefined
 const visible = ref(false);
 
 const filteredEmoteMaps = ref({} as Record<SevenTV.Provider, Record<string, SevenTV.ActiveEmote>>);
+const active = ref("7TV" as SevenTV.Provider);
+
+const insertText = (text: string) => {
+	const inputRef = props.instance.component.autocompleteInputRef;
+	const current = inputRef.getValue();
+
+	inputRef.setValue(current + (current.endsWith(" ") ? "" : " ") + text);
+};
 
 watch(useChatAPI().emoteMap, (emoteMap) => {
 	const temp = {} as Record<SevenTV.Provider, Record<string, SevenTV.ActiveEmote>>;
@@ -60,8 +72,6 @@ watch(useChatAPI().emoteMap, (emoteMap) => {
 	filteredEmoteMaps.value = temp;
 });
 
-const active = ref("7TV" as SevenTV.Provider);
-
 function determineRatio(emote: SevenTV.ActiveEmote) {
 	const { width, height } = emote.data?.host.files.at(-1) ?? {};
 
@@ -70,7 +80,7 @@ function determineRatio(emote: SevenTV.ActiveEmote) {
 	const ratio = width / height;
 
 	if (ratio <= 1) return 1;
-	else if (ratio <= 2) return 2;
+	else if (ratio <= 2.125) return 2;
 	return 3;
 }
 
@@ -145,6 +155,7 @@ onUnmounted(() => {
 	border-radius: 0.5rem;
 	height: 4rem;
 	margin: 0.25rem;
+	cursor: pointer;
 
 	&:hover {
 		background: hsla(0, 0%, 100%, 0.16);
