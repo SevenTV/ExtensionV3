@@ -196,6 +196,7 @@ function onThumbMove(ev: MouseEvent) {
 defineExpose({
 	container,
 	scrollbar,
+	isActive,
 });
 
 onMounted(() => {

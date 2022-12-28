@@ -27,6 +27,10 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		if (scroller?.value?.container) {
 			container.value = scroller.value.container;
 		}
+
+		if (scroller?.value?.isActive) {
+			data.userInput++;
+		}
 	});
 
 	function addMessage(message: Twitch.ChatMessage): void {
