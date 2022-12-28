@@ -1,7 +1,7 @@
 <template>
 	<Teleport v-if="channel && channel.id" :to="containerEl">
 		<div id="seventv-message-container" class="seventv-message-container">
-			<ChatList :messages="chatStore.messages" :controller="controller.component" />
+			<ChatList :messages="messages" :controller="controller.component" />
 		</div>
 
 		<!-- Data Logic -->
@@ -9,19 +9,22 @@
 
 		<!-- New Messages during Scrolling Pause -->
 		<div
-			v-if="scroll.paused && scroll.buffer.length > 0"
+			v-if="scroll.paused && scroll.scrollBuffer.length > 0"
 			class="seventv-message-buffer-notice"
-			@click="unpauseScrolling"
+			@click="chatAPI.unpauseScrolling"
 		>
-			<span>{{ scroll.buffer.length }}{{ scroll.buffer.length >= lineLimit ? "+" : "" }} new messages</span>
+			<span
+				>{{ scroll.scrollBuffer.length }}{{ scroll.scrollBuffer.length >= lineLimit ? "+" : "" }} new
+				messages</span
+			>
 		</div>
 	</Teleport>
 </template>
 
 <script setup lang="ts">
 import { MessageType, ModerationType } from "@/site/twitch.tv";
-import { ref, reactive, nextTick, onUnmounted, watch, watchEffect, toRefs } from "vue";
-import { useChatStore } from "@/site/twitch.tv/ChatStore";
+import { ref, reactive, onUnmounted, watch, watchEffect, toRefs } from "vue";
+import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { log } from "@/common/Logger";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
@@ -30,7 +33,6 @@ import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/com
 import { HookedInstance } from "@/common/ReactHooks";
 import ChatData from "./ChatData.vue";
 import ChatList from "./ChatList.vue";
-import { useChatScroll } from "./ChatScroll";
 
 const props = defineProps<{
 	list: HookedInstance<Twitch.ChatListComponent>;
@@ -38,9 +40,7 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
-const chatStore = useChatStore();
 const { channel } = storeToRefs(store);
-const { lineLimit } = storeToRefs(chatStore);
 
 const { list, controller } = toRefs(props);
 
@@ -60,7 +60,8 @@ watch(channel, (channel) => {
 	log.info("<ChatController>", `Joining #${channel.username}`);
 });
 
-const { scroll, scrollToLive, unpauseScrolling } = useChatScroll(containerEl, bounds);
+const chatAPI = useChatAPI(containerEl, bounds);
+const { scroll, messages, lineLimit, twitchBadgeSets } = chatAPI;
 
 const dataSets = reactive({
 	badges: false,
@@ -127,7 +128,7 @@ definePropertyHook(list.value.component, "props", {
 			const msgItem = (v.children[0] as any | undefined)?.props as Twitch.ChatLineComponent["props"];
 			if (!msgItem?.badgeSets?.count) return;
 
-			chatStore.twitchBadgeSets = msgItem.badgeSets;
+			twitchBadgeSets.value = msgItem.badgeSets;
 
 			dataSets.badges = true;
 		}
@@ -157,7 +158,7 @@ watch(list.value.domNodes, (nodes) => {
 
 		if (nodeMap.has(nodeId)) continue;
 
-		chatStore.pushMessage({
+		chatAPI.addMessage({
 			id: nodeId + "-unhandled",
 			element: node,
 		} as Twitch.ChatMessage);
@@ -189,27 +190,17 @@ const onMessage = (msg: Twitch.Message): boolean => {
 };
 
 function onChatMessage(msg: Twitch.ChatMessage) {
-	if (scroll.paused) {
-		// if scrolling is paused, buffer the message
-		scroll.buffer.push(msg as Twitch.ChatMessage);
-		if (scroll.buffer.length > lineLimit.value) scroll.buffer.shift();
-		return true;
-	}
 	// Add message to store
 	// it will be rendered on the next tick
-	chatStore.pushMessage(msg as Twitch.ChatMessage);
-	nextTick(() => {
-		// autoscroll on new message
-		scrollToLive();
-	});
+	chatAPI.addMessage(msg as Twitch.ChatMessage);
 }
 
 function onModerationMessage(msg: Twitch.ModerationMessage) {
 	if (msg.moderationType == ModerationType.DELETE) {
-		const found = chatStore.messages.find((m) => m.id == msg.targetMessageID);
+		const found = messages.value.find((m) => m.id == msg.targetMessageID);
 		if (found) found.deleted = true;
 	} else {
-		chatStore.messages.forEach((m) => {
+		messages.value.forEach((m) => {
 			if (!m.seventv || m.user.userLogin != msg.userLogin) return;
 			m.banned = true;
 		});
