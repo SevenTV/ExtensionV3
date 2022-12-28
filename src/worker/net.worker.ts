@@ -1,7 +1,8 @@
 import { log } from "@/common/Logger";
 import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
 import { seventv, betterttv, frankerfacez, onChannelChange } from "./net.http.worker";
-import { ws } from "./net.socket.worker";
+import { ws } from "./net.events.worker";
+import { WebSocketPayload } from "./events";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -192,7 +193,7 @@ function becomePrimary(): void {
 	// Connect to the WebSocket
 	ws.connect();
 	ws.getSocket()?.addEventListener("message", (ev: MessageEvent) => {
-		const msg = JSON.parse(ev.data) as SevenTV.EventAPI.WebSocketPayload<unknown>;
+		const msg = JSON.parse(ev.data) as WebSocketPayload<unknown>;
 
 		// push the message to self
 		ws.pushMessage(msg);
