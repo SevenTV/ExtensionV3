@@ -168,7 +168,6 @@ onUnmounted(() => {
 
 .scroll-area {
 	width: 28rem;
-	overflow-y: scroll;
 }
 
 .emote-area {
