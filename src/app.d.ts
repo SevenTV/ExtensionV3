@@ -62,6 +62,7 @@ declare namespace SevenTV {
 
 		provider?: Provider;
 		overlaid?: ActiveEmote[];
+		ratio?: number;
 	}
 
 	interface User {
