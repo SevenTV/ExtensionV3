@@ -261,9 +261,9 @@ onUnmounted(() => {
 	overflow: hidden;
 	position: relative;
 
-	--theme-background-scrollbar-thumb: rgb(255, 0, 0);
-	--theme-background-scrollbar: rgb(94, 126, 255);
-	--theme-background-scrollbar-thumb-pressed: rgb(74, 236, 76);
+	--theme-background-scrollbar-thumb: rgb(84, 84, 84);
+	--theme-background-scrollbar: rgb(50, 53, 66);
+	--theme-background-scrollbar-thumb-pressed: rgb(110, 110, 110);
 
 	.scrollable-contents {
 		height: 100%;
@@ -296,8 +296,8 @@ onUnmounted(() => {
 		.scrollbar-thumb {
 			position: relative;
 			width: 0.4rem;
-			border-radius: 9999rem;
 			background-color: var(--theme-background-scrollbar-thumb);
+			clip-path: polygon(50% 0, 100% 3%, 100% 97%, 50% 100%, 0 97%, 0 3%);
 
 			&:hover {
 				background-color: var(--theme-background-scrollbar-thumb-pressed);
