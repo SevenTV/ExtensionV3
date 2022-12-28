@@ -71,7 +71,7 @@ function insertText(text: string) {
 	const inputRef = props.instance.component.autocompleteInputRef;
 	const current = inputRef.getValue();
 
-	inputRef.setValue(current + (current.endsWith(" ") ? "" : " ") + text);
+	inputRef.setValue(current + (current.endsWith(" ") ? "" : " ") + text + " ");
 }
 
 watch(useChatAPI().emoteMap, (emoteMap) => {
@@ -140,6 +140,7 @@ onUnmounted(() => {
 	justify-content: space-evenly;
 	box-shadow: 0 1px 2px black;
 	background: rgba(217, 217, 217, 0.03);
+	border-radius: 0.6rem 0.6rem 0 0;
 }
 
 .provider-icon {
