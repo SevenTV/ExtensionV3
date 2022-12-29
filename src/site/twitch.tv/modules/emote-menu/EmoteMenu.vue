@@ -1,6 +1,6 @@
 <template>
 	<Teleport :to="containerEl">
-		<div ref="menuRef" class="emote-menu-container" :visible="isVisible">
+		<div class="emote-menu-container" :visible="isVisible">
 			<div class="emote-menu">
 				<!-- Emote Menu Header -->
 				<div class="header">
@@ -42,7 +42,7 @@ const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatInputController>;
 }>();
 
-const containerEl = ref<Element>();
+const containerEl = ref();
 containerEl.value = document.querySelector(".chat-input__textarea") ?? undefined;
 
 const isVisible = ref(false);
@@ -54,8 +54,6 @@ providers.value.set("TWITCH", []);
 providers.value.set("7TV", []);
 providers.value.set("FFZ", []);
 providers.value.set("BTTV", []);
-
-const menuRef = ref(null);
 
 function sortEmotes(a: SevenTV.ActiveEmote, b: SevenTV.ActiveEmote) {
 	const ra = determineRatio(a);
@@ -111,26 +109,19 @@ useLiveQuery(
 	},
 );
 
-let unsub: () => void;
+let unsub: (() => void) | undefined;
+
+function toggleEmoteMenu() {
+	if (unsub) unsub();
+	if (!isVisible.value) unsub = onClickOutside(containerEl, toggleEmoteMenu);
+
+	isVisible.value = !isVisible.value;
+}
 
 onMounted(() => {
 	const component = props.instance.component;
 
-	defineFunctionHook(component, "onEmotePickerToggle", function () {
-		if (isVisible.value) {
-			unsub();
-			isVisible.value = false;
-			return;
-		}
-
-		isVisible.value = true;
-
-		unsub =
-			onClickOutside(menuRef, () => {
-				isVisible.value = false;
-				unsub();
-			}) ?? unsub;
-	});
+	defineFunctionHook(component, "onEmotePickerToggle", toggleEmoteMenu);
 });
 
 onUnmounted(() => {
@@ -138,7 +129,7 @@ onUnmounted(() => {
 
 	unsetPropertyHook(component, "onEmotePickerToggle");
 
-	unsub();
+	if (unsub) unsub();
 });
 </script>
 
