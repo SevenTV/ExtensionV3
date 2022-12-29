@@ -32,14 +32,12 @@ useLiveQuery(
 	(sets) => {
 		if (!sets) return;
 
-		const t = {} as Record<SevenTV.Provider, Record<string, SevenTV.EmoteSet>>;
+		const t = emoteProviders.value;
 		for (const set of sets) {
 			const provider = (set.provider?.replace("/G", "") ?? "UNKNOWN") as SevenTV.Provider;
 			if (!t[provider]) t[provider] = {};
 			t[provider][set.id] = set;
 		}
-
-		emoteProviders.value = t;
 
 		const o = {} as Record<SevenTV.ObjectID, SevenTV.ActiveEmote>;
 		for (const emote of sets.flatMap((set) => set.emotes)) {

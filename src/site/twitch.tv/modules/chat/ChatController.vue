@@ -30,10 +30,10 @@ import { useStore } from "@/store/main";
 import { getRandomInt } from "@/common/Rand";
 import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/common/Reflection";
 import { HookedInstance } from "@/common/ReactHooks";
-import { TransformWorkerMessageType } from "@/worker";
 import ChatData from "./ChatData.vue";
 import ChatList from "./ChatList.vue";
 import UiScrollable from "@/ui/UiScrollable.vue";
+import { convertTwitchEmoteSet } from "@/common/Transform";
 
 const props = defineProps<{
 	list: HookedInstance<Twitch.ChatListComponent>;
@@ -149,17 +149,15 @@ definePropertyHook(controller.value.component, "props", {
 		chatAPI.isModerator.value = v.isCurrentUserModerator;
 		chatAPI.isVIP.value = v.isCurrentUserVIP;
 
-		// Bind twitch emotes
-		definePropertyHook(v, "emoteSetsData", {
-			value: (v: typeof controller.value.component.props.emoteSetsData) => {
-				if (!v || !v.emoteSets) return;
-				// Send the twitch emotes to the transform worker
-				// These can later be fetched from IDB by components
-				store.sendTransformRequest(TransformWorkerMessageType.TWITCH_EMOTES, {
-					input: v.emoteSets,
-				});
-			},
-		});
+		const data = v.emoteSetsData;
+		if (!data || !data.emoteSets || data.loading) return;
+
+		const temp = {} as Record<string, SevenTV.EmoteSet>;
+		for (const set of data.emoteSets) {
+			temp[set.id] = convertTwitchEmoteSet(set);
+		}
+
+		chatAPI.emoteProviders.value.TWITCH = temp;
 	},
 });
 

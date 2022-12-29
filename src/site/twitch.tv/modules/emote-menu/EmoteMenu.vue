@@ -32,8 +32,6 @@ import { HookedInstance } from "@/common/ReactHooks";
 import { defineFunctionHook, unsetPropertyHook } from "@/common/Reflection";
 import { useChatAPI } from "../../ChatAPI";
 import { determineRatio } from "./EmoteMenuBackend";
-import { useLiveQuery } from "@/composable/useLiveQuery";
-import { db } from "@/db/IndexedDB";
 import Logo from "@/common/Logo.vue";
 import EmoteTab from "./EmoteTab.vue";
 import { onClickOutside } from "@vueuse/core";
@@ -63,50 +61,22 @@ function sortEmotes(a: SevenTV.ActiveEmote, b: SevenTV.ActiveEmote) {
 
 function sortSets(a: SevenTV.EmoteSet, b: SevenTV.EmoteSet) {
 	// Place global at the bottom
-	if (a.provider?.endsWith("/G")) return 1;
-	if (b.provider?.endsWith("/G")) return -1;
+	if (a.provider?.endsWith("/G") || a.name == "Other emotes") return 1;
+	if (b.provider?.endsWith("/G") || b.name == "Other emotes") return -1;
 
 	// Sort by id ?
-	return a.owner?.display_name.localeCompare(b.owner?.display_name ?? "") ?? 0;
+	return a.name.localeCompare(b.name);
 }
 
-watch(useChatAPI().emoteProviders, (emoteProvider) => {
+watch(useChatAPI().emoteProviders.value, (emoteProvider) => {
 	for (const [p, sets] of Object.entries(emoteProvider)) {
-		const sorted = Object.values(sets)
-			.sort(sortSets)
-			.map((s) => {
-				s.emotes.sort(sortEmotes);
-				return s;
-			});
-		providers.value.set(p as SevenTV.Provider, sorted);
+		const temp = new Map<string, SevenTV.EmoteSet>();
+		for (const [, set] of Object.entries(sets))
+			temp.has(set.name) ? temp.get(set.name)?.emotes.concat(set.emotes) : temp.set(set.name, set);
+		temp.forEach((s) => s.emotes.sort(sortEmotes));
+		providers.value.set(p as SevenTV.Provider, Array.from(temp.values()).sort(sortSets));
 	}
 });
-
-useLiveQuery(
-	() => db.emoteSets.where({ provider: "TWITCH" }).sortBy("id"),
-	undefined,
-	(sets) => {
-		if (!sets) return;
-
-		const temp = {} as Record<string, SevenTV.EmoteSet>;
-		for (const set of sets) {
-			const cur = temp[set.name];
-
-			if (!cur) temp[set.name] = set;
-			else cur.emotes.concat(set.emotes).sort(sortEmotes);
-		}
-
-		const sorted = Object.entries(temp)
-			.sort(([a], [b]) => {
-				if (a == "Other emotes") return 1;
-				if (b == "Other emotes") return -1;
-				return a.localeCompare(b);
-			})
-			.map(([, s]) => s);
-
-		providers.value.set("TWITCH", sorted);
-	},
-);
 
 let unsub: (() => void) | undefined;
 
@@ -155,11 +125,11 @@ onUnmounted(() => {
 	background: rgba(217, 217, 217, 3%);
 	box-shadow: 0 1px 2px rgb(0 0 0 / 15%);
 	border-radius: 0.6rem 0.6rem 0 0;
-	justify-content: space-evenly;
+	justify-content: space-between;
+	padding: 0.75rem;
 }
 
 .provider {
-	margin: 0.2rem;
 	padding: 0.5rem;
 	cursor: pointer;
 	display: flex;
