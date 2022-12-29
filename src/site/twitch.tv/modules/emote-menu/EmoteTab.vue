@@ -8,7 +8,7 @@
 							<img v-if="emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
 							<Logo v-else class="logo" :provider="emoteSet.provider" />
 						</div>
-						{{ emoteSet.owner.display_name }}
+						{{ emoteSet.name }}
 					</div>
 					<div class="emote-set">
 						<template v-for="emote of emoteSet.emotes" :key="emote.name">

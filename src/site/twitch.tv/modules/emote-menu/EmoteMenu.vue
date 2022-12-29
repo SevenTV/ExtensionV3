@@ -90,10 +90,9 @@ useLiveQuery(
 
 		const temp = {} as Record<string, SevenTV.EmoteSet>;
 		for (const set of sets) {
-			const name = set.owner?.display_name ?? "Other emotes";
-			const cur = temp[name];
+			const cur = temp[set.name];
 
-			if (!cur) temp[name] = set;
+			if (!cur) temp[set.name] = set;
 			else cur.emotes.concat(set.emotes).sort(sortEmotes);
 		}
 
