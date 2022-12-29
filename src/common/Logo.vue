@@ -1,32 +1,24 @@
 <template>
-	<template v-if="p == 'TWITCH'">
-		<LogoTWITCH />
-	</template>
-	<template v-else-if="p == 'FFZ'">
-		<LogoFFZ />
-	</template>
-	<template v-else-if="p == 'BTTV'">
-		<LogoBTTV />
-	</template>
-	<template v-else>
-		<Logo7TV />
-	</template>
+	<component :is="c" />
 </template>
 
 <script setup lang="ts">
 import Logo7TV from "@/assets/svg/Logo7TV.vue";
 import LogoFFZ from "@/assets/svg/LogoFFZ.vue";
 import LogoBTTV from "@/assets/svg/LogoBTTV.vue";
-import LogoTWITCH from "@/assets/svg/LogoTWITCH.vue";
-import { ref } from "vue";
+import LogoTwitch from "@/assets/svg/LogoTwitch.vue";
 
-const props = defineProps<{
-	provider?: SevenTV.Provider;
-}>();
+const props = withDefaults(
+	defineProps<{
+		provider: SevenTV.Provider;
+	}>(),
+	{ provider: "7TV" },
+);
 
-const p = ref(props.provider);
-
-if (p.value) {
-	p.value = p.value.replace("/G", "") as SevenTV.Provider;
-}
+const c = {
+	"7TV": Logo7TV,
+	FFZ: LogoFFZ,
+	BTTV: LogoBTTV,
+	TWITCH: LogoTwitch,
+}[props.provider.replace("/G", "")];
 </script>

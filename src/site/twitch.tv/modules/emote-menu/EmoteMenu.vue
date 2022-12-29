@@ -48,6 +48,7 @@ const selectedProvider = ref("TWITCH" as SevenTV.Provider);
 
 const providers = ref(new Map<SevenTV.Provider, SevenTV.EmoteSet[]>());
 
+// Determine order
 providers.value.set("TWITCH", []);
 providers.value.set("7TV", []);
 providers.value.set("FFZ", []);
