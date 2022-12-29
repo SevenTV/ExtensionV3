@@ -100,6 +100,10 @@ export const seventv = {
 
 		const set = (await resp.json()) as SevenTV.EmoteSet;
 
+		//override owner
+		set.owner.display_name = "Global emotes";
+		set.owner.avatar_url = "";
+
 		set.provider = "7TV/G" as SevenTV.Provider;
 
 		db.emoteSets.put(set).catch(() => db.emoteSets.where({ id: set.id, provider: "7TV" }).modify(set));
@@ -170,6 +174,7 @@ export const betterttv = {
 			channelEmotes: bttv_data,
 			sharedEmotes: [] as BTTV.Emote[],
 			id: "GLOBAL",
+			avatar: "",
 		} as BTTV.UserResponse;
 
 		const set = convertBttvEmoteSet(data, data.id);

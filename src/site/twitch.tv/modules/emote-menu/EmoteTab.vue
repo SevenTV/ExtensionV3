@@ -4,8 +4,11 @@
 			<template v-for="(emoteSet, i) of emoteSets" :key="i">
 				<div :ref="'set-' + i.toString()" class="emote-set-container">
 					<div class="set-header">
-						<div class="set-icon-header"></div>
-						{{ emoteSet.name }}
+						<div class="set-header-icon">
+							<img v-if="emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
+							<Logo v-else class="logo" :provider="emoteSet.provider" />
+						</div>
+						{{ emoteSet.owner.display_name }}
 					</div>
 					<div class="emote-set">
 						<template v-for="emote of emoteSet.emotes" :key="emote.name">
@@ -26,7 +29,8 @@
 		<template v-for="(emoteSet, i) of emoteSets" :key="i">
 			<div
 				v-if="emoteSet.emotes.length"
-				class="set-icon"
+				class="set-sidebar-icon"
+				:selected="selectedSet == i"
 				@click="
 					{
 						selectedSet = i;
@@ -34,7 +38,8 @@
 					}
 				"
 			>
-				{{ emoteSet.id.slice(0, 4) }}
+				<img v-if="emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
+				<Logo v-else class="logo" :provider="emoteSet.provider" />
 			</div>
 		</template>
 	</div>
@@ -43,6 +48,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { determineRatio } from "./EmoteMenuBackend";
+import Logo from "@/common/Logo.vue";
 import ChatEmote from "../chat/components/ChatEmote.vue";
 import UiScrollable from "@/ui/UiScrollable.vue";
 
@@ -81,16 +87,16 @@ const selectedSet = ref(0);
 	position: sticky;
 	top: 0;
 	display: flex;
-	background: #252528;
-	box-shadow: 0 1px 2px black;
+	background: #18181b;
+	box-shadow: 0 1px 3px #000;
 }
 
-.set-icon-header {
+.set-header-icon {
 	height: 2rem;
 	width: 2rem;
-	background-color: green;
 	border-radius: 0.5rem;
 	margin-right: 1rem;
+	overflow: clip;
 }
 
 .emote-container {
@@ -127,5 +133,30 @@ const selectedSet = ref(0);
 	height: 100%;
 	background: rgba(217, 217, 217, 3%);
 	border-left: 1px solid black;
+	overflow-y: scroll;
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		width: 0;
+		height: 0;
+	}
+}
+
+.set-sidebar-icon {
+	width: 2.8rem;
+	height: 2.8rem;
+	margin: 0.5rem auto;
+	border-radius: 0.5rem;
+	overflow: clip;
+	cursor: pointer;
+
+	&[selected="true"] {
+		background: hsla(0deg, 0%, 100%, 16%);
+	}
+}
+
+.logo {
+	width: 100%;
+	height: 100%;
 }
 </style>

@@ -1,16 +1,17 @@
 <template>
 	<Teleport :to="containerEl">
-		<div class="emote-menu-container" :visible="isVisible">
+		<div ref="menuRef" class="emote-menu-container" :visible="isVisible">
 			<div class="emote-menu">
 				<!-- Emote Menu Header -->
 				<div class="header">
 					<div
 						v-for="provider of providers.keys()"
 						:key="provider"
-						class="provider-icon"
+						class="provider"
 						:selected="provider == selectedProvider"
 						@click="selectedProvider = provider"
 					>
+						<Logo class="logo" :provider="provider" />
 						{{ provider }}
 					</div>
 				</div>
@@ -33,7 +34,9 @@ import { useChatAPI } from "../../ChatAPI";
 import { determineRatio } from "./EmoteMenuBackend";
 import { useLiveQuery } from "@/composable/useLiveQuery";
 import { db } from "@/db/IndexedDB";
+import Logo from "@/common/Logo.vue";
 import EmoteTab from "./EmoteTab.vue";
+import { onClickOutside } from "@vueuse/core";
 
 const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatInputController>;
@@ -52,6 +55,8 @@ providers.value.set("7TV", []);
 providers.value.set("FFZ", []);
 providers.value.set("BTTV", []);
 
+const menuRef = ref(null);
+
 function sortEmotes(a: SevenTV.ActiveEmote, b: SevenTV.ActiveEmote) {
 	const ra = determineRatio(a);
 	const rb = determineRatio(b);
@@ -60,13 +65,11 @@ function sortEmotes(a: SevenTV.ActiveEmote, b: SevenTV.ActiveEmote) {
 
 function sortSets(a: SevenTV.EmoteSet, b: SevenTV.EmoteSet) {
 	// Place global at the bottom
-	if (b.id.endsWith("/G")) return 1;
-
-	// Place personals? at top;
-	if (a.id.endsWith("/P")) return 1;
+	if (a.provider?.endsWith("/G")) return 1;
+	if (b.provider?.endsWith("/G")) return -1;
 
 	// Sort by id ?
-	return a.id.localeCompare(b.id);
+	return a.owner?.display_name.localeCompare(b.owner?.display_name ?? "") ?? 0;
 }
 
 watch(useChatAPI().emoteProviders, (emoteProvider) => {
@@ -82,23 +85,51 @@ watch(useChatAPI().emoteProviders, (emoteProvider) => {
 });
 
 useLiveQuery(
-	() => db.emoteSets.where({ provider: "TWITCH" }).sortBy("name"),
+	() => db.emoteSets.where({ provider: "TWITCH" }).sortBy("id"),
 	undefined,
 	(sets) => {
 		if (!sets) return;
 
-		const g = sets.shift();
-		if (g) sets.push(g);
+		const temp = {} as Record<string, SevenTV.EmoteSet>;
+		for (const set of sets) {
+			const name = set.owner?.display_name ?? "Other emotes";
+			const cur = temp[name];
 
-		providers.value.set("TWITCH", sets);
+			if (!cur) temp[name] = set;
+			else cur.emotes.concat(set.emotes).sort(sortEmotes);
+		}
+
+		const sorted = Object.entries(temp)
+			.sort(([a], [b]) => {
+				if (a == "Other emotes") return 1;
+				if (b == "Other emotes") return -1;
+				return a.localeCompare(b);
+			})
+			.map(([, s]) => s);
+
+		providers.value.set("TWITCH", sorted);
 	},
 );
+
+let unsub: () => void;
 
 onMounted(() => {
 	const component = props.instance.component;
 
 	defineFunctionHook(component, "onEmotePickerToggle", function () {
-		isVisible.value = !isVisible.value;
+		if (isVisible.value) {
+			unsub();
+			isVisible.value = false;
+			return;
+		}
+
+		isVisible.value = true;
+
+		unsub =
+			onClickOutside(menuRef, () => {
+				isVisible.value = false;
+				unsub();
+			}) ?? unsub;
 	});
 });
 
@@ -106,6 +137,8 @@ onUnmounted(() => {
 	const component = props.instance.component;
 
 	unsetPropertyHook(component, "onEmotePickerToggle");
+
+	unsub();
 });
 </script>
 
@@ -129,24 +162,31 @@ onUnmounted(() => {
 
 .header {
 	display: flex;
-	justify-content: space-evenly;
-	box-shadow: 0 1px 2px black;
 	background: rgba(217, 217, 217, 3%);
+	box-shadow: 0 1px 2px rgb(0 0 0 / 15%);
 	border-radius: 0.6rem 0.6rem 0 0;
+	justify-content: space-evenly;
 }
 
-.provider-icon {
-	margin: 0.5rem;
-	padding: 1rem;
+.provider {
+	margin: 0.2rem;
+	padding: 0.5rem;
 	cursor: pointer;
+	display: flex;
 	user-select: none;
-	box-shadow: inset 0 1px 1px black;
+	justify-content: center;
 
 	&[selected="true"] {
 		background: hsla(0deg, 0%, 100%, 16%);
-		box-shadow: 1px 1px 4px black;
 		border-radius: 0.2rem;
 	}
+}
+
+.logo {
+	width: 2rem;
+	height: 2rem;
+	color: white;
+	margin-right: 0.5rem;
 }
 
 .body {
