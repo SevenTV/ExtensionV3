@@ -11,7 +11,7 @@
 						{{ emoteSet.name }}
 					</div>
 					<div class="emote-set">
-						<template v-for="emote of emoteSet.emotes" :key="emote.name">
+						<template v-for="emote of emoteSet.emotes" :key="emote.id">
 							<div
 								class="emote-container"
 								:class="`ratio-${determineRatio(emote)}`"
