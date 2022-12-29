@@ -3,7 +3,7 @@ const BTTV_ZeroWidth = ["SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", 
 export function convertTwitchEmoteSet(data: Twitch.TwitchEmoteSet): SevenTV.EmoteSet {
 	return {
 		id: data.id,
-		name: "TwitchSet#" + data.id,
+		name: "TwitchSet#" + data.owner ?? data.id,
 		immutable: true,
 		privileged: true,
 		tags: [],
