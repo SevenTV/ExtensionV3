@@ -80,18 +80,6 @@ export const seventv = {
 
 		data.emote_set = null;
 
-		if (data.user) {
-			db.users
-				.where("id")
-				.equals(data.id)
-				.modify(data.user)
-				.catch(() => {
-					db.users
-						.add(data.user as SevenTV.User)
-						.catch((err) => log.error("<Net/Http>", "failed to add user to database", err));
-				});
-		}
-
 		ws.subscribe("emote_set.*", { object_id: set.id });
 
 		return Promise.resolve(set);

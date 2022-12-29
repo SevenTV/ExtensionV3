@@ -13,7 +13,7 @@ log.setContextName("NetWorker");
 // Set up a BroadcastChannel to communicate with the workers
 const bc = new BroadcastChannel("SEVENTV#Network");
 
-const PING_INTERVAL = 6000;
+const PING_INTERVAL = 1000;
 const instances = {} as Record<string, NetWorkerInstance>;
 const state = {
 	id: 0,

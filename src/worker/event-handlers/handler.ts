@@ -1,3 +1,4 @@
+import { log } from "@/common/Logger";
 import type { ChangeMap, EventContext, ObjectTypeOfKind } from "../events";
 import { onEmoteSetUpdate } from "./emote_set.update.handler";
 
@@ -17,8 +18,19 @@ export function iterateChangeMap<T extends SevenTV.ObjectKind>(cm: ChangeMap<T>,
 	for (const v of Object.values(h)) {
 		const hook = v as ChangeMapHook;
 
-		for (const x of cm.pulled ?? []) hook.pulled?.(x.value, x.old_value);
-		for (const x of cm.pushed ?? []) hook.pushed?.(x.value, x.old_value);
+		for (const x of cm.pulled ?? []) {
+			hook.pulled?.(x.value, x.old_value);
+			log.debug("Net/EventAPI", `PULL (${cm.kind}) ${cm.id}/${String(x.key)}`, JSON.stringify(x.old_value));
+		}
+		for (const x of cm.pushed ?? []) {
+			hook.pushed?.(x.value, x.old_value);
+			log.debug("Net/EventAPI", `PUSH (${cm.kind}) ${cm.id}/${String(x.key)}`, JSON.stringify(x.value));
+		}
+
+		if (typeof cm.object === "object") {
+			hook.object?.(cm.object);
+			log.debug("Net/EventAPI", `OBJECT (${cm.kind}) ${cm.id}`, JSON.stringify(cm.object));
+		}
 	}
 }
 
@@ -30,4 +42,5 @@ export type ChangeMapHandler<T extends SevenTV.ObjectKind> = {
 export interface ChangeMapHook {
 	pulled?: (newValue: any, oldValue: any) => void;
 	pushed?: (newValue: any, oldValue: any) => void;
+	object?: (value: any) => void;
 }
