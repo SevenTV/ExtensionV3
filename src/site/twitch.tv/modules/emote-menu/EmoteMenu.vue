@@ -118,9 +118,14 @@ watch(
 	{ immediate: true },
 );
 
+let t: number;
+
 definePropertyHook(props.instance.component.autocompleteInputRef, "state", {
 	value(v: typeof props.instance.component.autocompleteInputRef.state) {
-		filter.value = v.value.split(" ").at(-1) ?? "";
+		clearTimeout(t);
+		t = setTimeout(() => {
+			filter.value = v.value.split(" ").at(-1) ?? "";
+		}, 20);
 	},
 });
 
