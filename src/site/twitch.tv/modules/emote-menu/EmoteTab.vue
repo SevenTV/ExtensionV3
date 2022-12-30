@@ -5,7 +5,7 @@
 				<div :ref="'set-' + i.toString()" class="emote-set-container">
 					<div class="set-header">
 						<div class="set-header-icon">
-							<img v-if="emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
+							<img v-if="emoteSet.owner && emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
 							<Logo v-else class="logo" :provider="emoteSet.provider" />
 						</div>
 						{{ emoteSet.name }}
@@ -38,7 +38,7 @@
 					}
 				"
 			>
-				<img v-if="emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
+				<img v-if="emoteSet.owner && emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
 				<Logo v-else class="logo" :provider="emoteSet.provider" />
 			</div>
 		</template>

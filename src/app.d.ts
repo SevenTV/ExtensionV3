@@ -45,7 +45,7 @@ declare namespace SevenTV {
 		immutable: boolean;
 		privileged: boolean;
 		emotes: ActiveEmote[];
-		owner: User;
+		owner?: User;
 
 		// Non-structural
 		provider?: Provider;
