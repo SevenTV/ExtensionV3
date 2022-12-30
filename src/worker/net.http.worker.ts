@@ -80,7 +80,8 @@ export const seventv = {
 
 		data.emote_set = null;
 
-		ws.subscribe("emote_set.*", { object_id: set.id });
+		// subscribe to emote set events
+		eventAPI.subscribe("emote_set.*", { object_id: set.id });
 
 		return Promise.resolve(set);
 	},

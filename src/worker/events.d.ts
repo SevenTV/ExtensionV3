@@ -60,4 +60,14 @@ export namespace Payload {
 		type: string;
 		body: ChangeMap<SevenTV.ObjectKind>;
 	}
+
+	export interface Ack<T> {
+		command: string;
+		data: T;
+	}
+}
+
+export interface SubscriptionData {
+	type: string;
+	condition: Record<string, string>;
 }

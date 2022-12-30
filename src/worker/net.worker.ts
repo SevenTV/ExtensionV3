@@ -1,14 +1,15 @@
 import { log } from "@/common/Logger";
 import { NetWorkerMessageType, NetWorkerInstance, TypedNetWorkerMessage, NetWorkerMessage } from ".";
 import { seventv, betterttv, frankerfacez, onChannelChange } from "./net.http.worker";
-import { ws } from "./net.events.worker";
+import { eventAPI } from "./net.events.worker";
 import { WebSocketPayload } from "./events";
 import { db } from "@/db/IndexedDB";
+import { onTabMessage } from "./net.messaging";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 
 // Set up logger
-log.setContextName("NetWorker");
+log.setContextName("Worker/Net");
 
 // Set up a BroadcastChannel to communicate with the workers
 const bc = new BroadcastChannel("SEVENTV#Network");
@@ -21,6 +22,7 @@ const state = {
 	primary: false,
 } as NetWorkerInstance;
 
+export const getState = () => state;
 export const primaryExists = () => Object.values(instances).some((i) => i.primary);
 export const isPrimary = () => state.primary;
 
@@ -69,8 +71,8 @@ w.onmessage = async (ev) => {
 			log.debug("<NetWorker>", "Local State Updated", JSON.stringify(state.local));
 			break;
 		}
-
 		default:
+			onTabMessage(ev.data.type as NetWorkerMessageType, ev.data);
 			break;
 	}
 };
@@ -141,7 +143,7 @@ bc.onmessage = (ev) => {
 			if (ev.data.from.id === state.id) return; // ignore messages from self
 			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.MESSAGE>;
 
-			ws.pushMessage(msg.data);
+			eventAPI.pushMessage(msg.data);
 			break;
 		}
 		default:
@@ -197,12 +199,12 @@ function becomePrimary(): void {
 	state.primary = true;
 
 	// Connect to the WebSocket
-	ws.connect();
-	ws.getSocket()?.addEventListener("message", (ev: MessageEvent) => {
+	eventAPI.connect();
+	eventAPI.getSocket()?.addEventListener("message", (ev: MessageEvent) => {
 		const msg = JSON.parse(ev.data) as WebSocketPayload<unknown>;
 
 		// push the message to self
-		ws.pushMessage(msg);
+		eventAPI.pushMessage(msg);
 		// broadcast the message to the network
 		broadcastMessage(NetWorkerMessageType.MESSAGE, msg);
 	});

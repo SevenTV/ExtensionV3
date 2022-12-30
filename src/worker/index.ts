@@ -23,6 +23,8 @@ export enum NetWorkerMessageType {
 	PING,
 	PONG,
 	MESSAGE,
+
+	EVENTS_SUB,
 	NOTIFY,
 }
 
@@ -38,6 +40,11 @@ export type TypedNetWorkerMessage<T extends NetWorkerMessageType> = {
 	[NetWorkerMessageType.MESSAGE]: WebSocketPayload<unknown>;
 	[NetWorkerMessageType.NOTIFY]: {
 		key: string;
+	};
+	[NetWorkerMessageType.EVENTS_SUB]: {
+		do: "subscribe" | "unsubscribe";
+		type: string;
+		condition: Record<string, string>;
 	};
 }[T];
 

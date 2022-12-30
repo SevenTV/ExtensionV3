@@ -3,6 +3,7 @@ import {
 	NetWorkerMessageType,
 	TransformWorkerMessage,
 	TransformWorkerMessageType,
+	TypedNetWorkerMessage,
 	TypedTransformWorkerMessage,
 } from "@/worker";
 import { defineStore } from "pinia";
@@ -71,6 +72,17 @@ export const useStore = defineStore("main", {
 			}
 
 			return true;
+		},
+
+		sendWorkerMessage<T extends NetWorkerMessageType>(type: T, data: TypedNetWorkerMessage<T>) {
+			const w = this.workers.net;
+			if (!w) return;
+
+			w.postMessage({
+				source: "SEVENTV",
+				type,
+				data,
+			} as NetWorkerMessage<T>);
 		},
 
 		setWorker(name: keyof State["workers"], worker: Worker | null) {

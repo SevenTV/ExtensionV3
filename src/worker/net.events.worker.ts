@@ -6,17 +6,21 @@ import { getRandomInt } from "@/common/Rand";
 import { db } from "@/db/IndexedDB";
 import { NetWorkerMessageType } from ".";
 import { handleDispatchedEvent } from "./event-handlers/handler";
-import { EventContext, Payload, WebSocketPayload } from "./events";
+import { EventContext, Payload, SubscriptionData, WebSocketPayload } from "./events";
 import { isPrimary, primaryExists, sendToPrimary } from "./net.worker";
 
 export class EventAPI {
-	private socket: WebSocket | null = null;
+	private transport: EventAPITransport = "WebSocket";
 	private sessionID = "";
 	private heartbeatInterval: number | null = null;
 	private backoff = 100;
 	private ctx: EventContext;
 
+	subscriptions: Record<string, SubscriptionRecord[]> = {};
+
 	url = import.meta.env.VITE_APP_API_EVENTS;
+	private socket: WebSocket | null = null;
+	private eventSource: EventSource | null = null;
 
 	constructor() {
 		this.ctx = {
@@ -46,6 +50,9 @@ export class EventAPI {
 			case EventOpCode.DISPATCH:
 				this.onDispatch(msg as WebSocketPayload<Payload.Dispatch>);
 				break;
+			case EventOpCode.ACK:
+				this.onAck(msg as WebSocketPayload<Payload.Ack<unknown>>);
+				break;
 
 			default:
 				break;
@@ -65,6 +72,30 @@ export class EventAPI {
 		handleDispatchedEvent(this.ctx, msg.d.type, msg.d.body);
 	}
 
+	private onAck(msg: WebSocketPayload<Payload.Ack<unknown>>): void {
+		switch (msg.d.command) {
+			case "SUBSCRIBE": {
+				const d = msg.d as Payload.Ack<SubscriptionData>;
+
+				const sub = this.getSubscription(d.data.type, d.data.condition);
+				if (sub) {
+					sub.count++;
+					break;
+				}
+
+				if (!Array.isArray(this.subscriptions[d.data.type])) {
+					this.subscriptions[d.data.type] = [];
+				}
+
+				this.subscriptions[d.data.type].push({
+					condition: d.data.condition,
+					count: 1,
+				});
+				break;
+			}
+		}
+	}
+
 	subscribe(type: string, condition: Record<string, string>) {
 		const msg = {
 			op: EventOpCode.SUBSCRIBE,
@@ -75,6 +106,13 @@ export class EventAPI {
 		};
 
 		this.sendMessage(msg);
+	}
+
+	getSubscription(type: string, condition: Record<string, string>): SubscriptionRecord | null {
+		const sub = this.subscriptions[type];
+		if (!sub) return null;
+
+		return sub.find((c) => Object.entries(condition).every(([key, value]) => c.condition[key] === value)) ?? null;
 	}
 
 	sendMessage(msg: WebSocketPayload<unknown>): void {
@@ -92,6 +130,18 @@ export class EventAPI {
 		log.debug("<Net/EventAPI>", "Sending message with op:", msg.op.toString());
 
 		if (!this.socket) return;
+
+		// Ensure correct subscription behavior
+		if (msg.op === EventOpCode.SUBSCRIBE || msg.op === EventOpCode.UNSUBSCRIBE) {
+			const d = msg.d as SubscriptionData;
+			const sub = this.getSubscription(d.type, d.condition);
+			if (msg.op === EventOpCode.SUBSCRIBE && sub) {
+				return;
+			} else if (msg.op === EventOpCode.UNSUBSCRIBE && !sub) {
+				return;
+			}
+		}
+
 		this.socket.send(JSON.stringify(msg));
 	}
 
@@ -131,7 +181,7 @@ export class EventAPI {
 	}
 }
 
-export const ws = new EventAPI();
+export const eventAPI = new EventAPI();
 
 enum EventOpCode {
 	DISPATCH = 0,
@@ -147,3 +197,10 @@ enum EventOpCode {
 	UNSUBSCRIBE = 36,
 	SIGNAL = 37,
 }
+
+interface SubscriptionRecord {
+	condition: Record<string, string>;
+	count: number;
+}
+
+type EventAPITransport = "WebSocket" | "EventStream";
