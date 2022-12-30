@@ -1,6 +1,5 @@
 import { nextTick, reactive, ref, Ref, toRefs, watchEffect } from "vue";
 import UiScrollableVue from "@/ui/UiScrollable.vue";
-import { log } from "@/common/Logger";
 
 const data = reactive({
 	// Message Data
@@ -60,7 +59,6 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 	}
 
 	function clear() {
-		log.debug("clearing messages");
 		data.messages = [];
 		data.messageBuffer = [];
 		data.emoteProviders = {} as typeof data.emoteProviders;
