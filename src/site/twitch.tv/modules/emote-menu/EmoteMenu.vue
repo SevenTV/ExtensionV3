@@ -158,7 +158,8 @@ function toggleEmoteMenu() {
 	isVisible.value = !isVisible.value;
 }
 
-const emoteMenuKey = "Control";
+// disable menu toggle using ctrl
+const emoteMenuKey = "NONE";
 
 function onKeyDown(ev: KeyboardEvent) {
 	if (ev.key == emoteMenuKey) {
