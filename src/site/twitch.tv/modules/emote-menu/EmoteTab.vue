@@ -11,15 +11,18 @@
 						{{ emoteSet.name }}
 					</div>
 					<div class="emote-set">
-						<template v-for="emote of emoteSet.emotes" :key="emote.id">
-							<div
-								class="emote-container"
-								:class="`ratio-${determineRatio(emote)}`"
-								@click="emit('emoteClick', emote)"
-							>
-								<ChatEmote :emote="emote" />
-							</div>
-						</template>
+						<div
+							v-for="emote of emoteSet.emotes"
+							:key="emote.id"
+							:ref="(el) => setCardRef(el as HTMLElement)"
+							class="emote-container"
+							:class="`ratio-${determineRatio(emote)}`"
+							:visible="loaded[emote.id]"
+							:emote-id="emote.id"
+							@click="emit('emoteClick', emote)"
+						>
+							<ChatEmote :emote="emote" :unload="!loaded[emote.id]" />
+						</div>
 					</div>
 				</div>
 			</template>
@@ -28,7 +31,7 @@
 	<div class="sidebar">
 		<template v-for="(emoteSet, i) of emoteSets" :key="i">
 			<div
-				v-if="emoteSet.emotes.length"
+				v-if="emoteSet.emotes?.length"
 				class="set-sidebar-icon"
 				:selected="selectedSet == i"
 				@click="
@@ -46,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, reactive, onBeforeUnmount } from "vue";
 import { determineRatio } from "./EmoteMenuBackend";
 import Logo from "@/common/Logo.vue";
 import ChatEmote from "../chat/components/ChatEmote.vue";
@@ -61,6 +64,24 @@ const emit = defineEmits<{
 }>();
 
 const selectedSet = ref(0);
+
+const refs = [] as HTMLElement[];
+const loaded = reactive<Record<string, number>>({});
+const observer = new IntersectionObserver((entries) => {
+	entries.forEach((entry) => {
+		loaded[entry.target.getAttribute("emote-id") as string] = entry.isIntersecting ? 1 : 0;
+	});
+});
+// gather all card elements and observe them
+const setCardRef = (el: HTMLElement) => {
+	if (el instanceof Element) {
+		refs.push(el as HTMLElement);
+		observer.observe(el);
+	}
+};
+onBeforeUnmount(() => {
+	observer.disconnect();
+});
 </script>
 <style scoped lang="scss">
 .scroll-area {
