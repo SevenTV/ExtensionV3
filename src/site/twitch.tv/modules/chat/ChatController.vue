@@ -148,6 +148,7 @@ definePropertyHook(controller.value.component, "props", {
 
 		chatAPI.isModerator.value = v.isCurrentUserModerator;
 		chatAPI.isVIP.value = v.isCurrentUserVIP;
+		chatAPI.sendMessage.value = v.chatConnectionAPI.sendMessage;
 
 		const data = v.emoteSetsData;
 		if (!data || !data.emoteSets || data.loading) return;
