@@ -56,6 +56,11 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		flush();
 	}
 
+	function clearMessages() {
+		data.messages = [];
+		data.messageBuffer = [];
+	}
+
 	function flush(): void {
 		if (flushTimeout) return;
 
@@ -187,6 +192,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		scrollPaused: paused,
 
 		sendMessage,
+		clearMessages,
 		scrollToLive,
 		onScroll,
 		onWheel,

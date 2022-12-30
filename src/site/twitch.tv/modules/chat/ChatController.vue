@@ -64,7 +64,7 @@ watch(channel, (channel) => {
 });
 
 const chatAPI = useChatAPI(scroller, bounds);
-const { scrollBuffer, scrollPaused, messages, lineLimit, twitchBadgeSets } = chatAPI;
+const { scrollBuffer, scrollPaused, messages, lineLimit, twitchBadgeSets, clearMessages } = chatAPI;
 
 const dataSets = reactive({
 	badges: false,
@@ -88,7 +88,7 @@ watchEffect(() => {
 // Update current channel globally
 watchEffect(() => {
 	if (currentChannel.value) {
-		store.setChannel(currentChannel.value);
+		if (store.setChannel(currentChannel.value)) clearMessages();
 	}
 });
 
