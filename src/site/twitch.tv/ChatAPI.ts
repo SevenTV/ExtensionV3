@@ -1,5 +1,6 @@
 import { nextTick, reactive, ref, Ref, toRefs, watchEffect } from "vue";
 import UiScrollableVue from "@/ui/UiScrollable.vue";
+import { log } from "@/common/Logger";
 
 const data = reactive({
 	// Message Data
@@ -12,6 +13,7 @@ const data = reactive({
 	// User State Data
 	isModerator: false,
 	isVIP: false,
+	currentChannel: {} as CurrentChannel,
 
 	// Scroll Data
 	userInput: 0,
@@ -22,6 +24,7 @@ const data = reactive({
 	paused: false, // whether or not scrolling is paused
 	scrollBuffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
 
+	// Functions
 	sendMessage: (() => {
 		return;
 	}) as (msg: string) => void,
@@ -56,9 +59,11 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		flush();
 	}
 
-	function clearMessages() {
+	function clear() {
+		log.debug("clearing messages");
 		data.messages = [];
 		data.messageBuffer = [];
+		data.emoteProviders = {} as typeof data.emoteProviders;
 	}
 
 	function flush(): void {
@@ -174,6 +179,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		isModerator,
 		isVIP,
 		sendMessage,
+		currentChannel,
 	} = toRefs(data);
 
 	return {
@@ -185,6 +191,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 
 		isModerator: isModerator,
 		isVIP: isVIP,
+		currentChannel: currentChannel,
 
 		scrollSys: sys,
 		scrollInit: init,
@@ -192,7 +199,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		scrollPaused: paused,
 
 		sendMessage,
-		clearMessages,
+		clear,
 		scrollToLive,
 		onScroll,
 		onWheel,
