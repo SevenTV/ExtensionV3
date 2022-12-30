@@ -17,7 +17,7 @@
 				</div>
 				<!-- Emote menu body -->
 				<template v-for="[provider, emoteSets] of filtered" :key="provider">
-					<div v-if="provider == selectedProvider" class="body">
+					<div v-show="provider == selectedProvider" class="body">
 						<EmoteTab :emote-sets="emoteSets" @emote-click="onEmoteClick" />
 					</div>
 				</template>
@@ -155,8 +155,10 @@ function toggleEmoteMenu() {
 	isVisible.value = !isVisible.value;
 }
 
+const emoteMenuKey = "Control";
+
 function onKeyDown(ev: KeyboardEvent) {
-	if (ev.key == "Control") {
+	if (ev.key == emoteMenuKey) {
 		toggleEmoteMenu();
 	}
 }
