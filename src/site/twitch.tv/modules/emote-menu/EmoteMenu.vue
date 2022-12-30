@@ -18,7 +18,7 @@
 				<!-- Emote menu body -->
 				<template v-for="[provider, emoteSets] of providers" :key="provider">
 					<div class="body" :selected="provider == selectedProvider">
-						<EmoteTab :emote-sets="emoteSets" :input-controller="instance.component" />
+						<EmoteTab :emote-sets="emoteSets" :input-controller="instance.component" :filter="filter" />
 					</div>
 				</template>
 			</div>
@@ -29,7 +29,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from "vue";
 import { HookedInstance } from "@/common/ReactHooks";
-import { defineFunctionHook, unsetPropertyHook } from "@/common/Reflection";
+import {
+	defineFunctionHook,
+	definePropertyHook,
+	defineNamedEventHandler,
+	unsetNamedEventHandler,
+	unsetPropertyHook,
+} from "@/common/Reflection";
 import { useChatAPI } from "../../ChatAPI";
 import { determineRatio } from "./EmoteMenuBackend";
 import Logo from "@/common/Logo.vue";
@@ -47,6 +53,8 @@ const isVisible = ref(false);
 const selectedProvider = ref("TWITCH" as SevenTV.Provider);
 
 const providers = ref(new Map<SevenTV.Provider, SevenTV.EmoteSet[]>());
+
+const filter = ref("");
 
 // Determine order
 providers.value.set("TWITCH", []);
@@ -88,6 +96,34 @@ function toggleEmoteMenu() {
 	isVisible.value = !isVisible.value;
 }
 
+function onKeyDown(ev: KeyboardEvent) {
+	if (ev.key == "Control") {
+		toggleEmoteMenu();
+	}
+}
+
+watch(
+	() => props.instance.domNodes.root,
+	(node, old) => {
+		if (node === old) return;
+
+		if (old instanceof HTMLElement) {
+			unsetNamedEventHandler(old, "OpenEmoteMenu", "keydown");
+		}
+
+		if (node instanceof HTMLElement) {
+			defineNamedEventHandler(node, "OpenEmoteMenu", "keydown", onKeyDown);
+		}
+	},
+	{ immediate: true },
+);
+
+definePropertyHook(props.instance.component.autocompleteInputRef, "state", {
+	value(v: typeof props.instance.component.autocompleteInputRef.state) {
+		filter.value = v.value.split(" ").at(-1) ?? "";
+	},
+});
+
 onMounted(() => {
 	const component = props.instance.component;
 
@@ -98,6 +134,7 @@ onUnmounted(() => {
 	const component = props.instance.component;
 
 	unsetPropertyHook(component, "onEmotePickerToggle");
+	unsetPropertyHook(component.autocompleteInputRef, "state");
 
 	if (unsub) unsub();
 });

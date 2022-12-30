@@ -1,7 +1,7 @@
 <template>
 	<UiScrollable class="scroll-area">
 		<div class="emote-area">
-			<template v-for="(emoteSet, i) of emoteSets" :key="i">
+			<template v-for="(emoteSet, i) of emoteSets.map(filterSet).filter((s) => s.emotes.length)" :key="i">
 				<div :ref="'set-' + i.toString()" class="emote-set-container">
 					<div class="set-header">
 						<div class="set-header-icon">
@@ -26,7 +26,7 @@
 		</div>
 	</UiScrollable>
 	<div class="sidebar">
-		<template v-for="(emoteSet, i) of emoteSets" :key="i">
+		<template v-for="(emoteSet, i) of emoteSets.filter((s) => s.emotes.some(filterEmote))" :key="i">
 			<div
 				v-if="emoteSet.emotes.length"
 				class="set-sidebar-icon"
@@ -55,13 +55,26 @@ import UiScrollable from "@/ui/UiScrollable.vue";
 const props = defineProps<{
 	emoteSets: SevenTV.EmoteSet[];
 	inputController: Twitch.ChatInputController;
+	filter: string;
 }>();
+
+function filterSet(s: SevenTV.EmoteSet) {
+	return {
+		...s,
+		emotes: s.emotes.filter(filterEmote),
+	};
+}
+
+function filterEmote(e: SevenTV.ActiveEmote) {
+	return e.name.toLowerCase().includes(props.filter.toLowerCase());
+}
 
 function insertText(text: string) {
 	const inputRef = props.inputController.autocompleteInputRef;
 	const current = inputRef.getValue();
 
-	inputRef.setValue(current + (current.endsWith(" ") ? "" : " ") + text + " ");
+	inputRef.setValue(current.slice(0, props.filter.length ? props.filter.length * -1 : Infinity) + text + " ");
+	props.inputController.chatInputRef.focus();
 }
 
 const selectedSet = ref(0);
