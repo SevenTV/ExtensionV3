@@ -2,7 +2,7 @@
 	<UiScrollable class="scroll-area">
 		<div class="emote-area">
 			<template v-for="(emoteSet, i) of emoteSets" :key="i">
-				<div :ref="'set-' + i.toString()" class="emote-set-container">
+				<div v-if="emoteSet.emotes?.length" :ref="'set-' + i.toString()" class="emote-set-container">
 					<div class="set-header">
 						<div class="set-header-icon">
 							<img v-if="emoteSet.owner && emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
@@ -104,7 +104,7 @@ onBeforeUnmount(() => {
 	position: sticky;
 	top: 0;
 	display: flex;
-	background: #18181b;
+	background: var(--color-background-base);
 	box-shadow: 0 1px 3px #000;
 }
 

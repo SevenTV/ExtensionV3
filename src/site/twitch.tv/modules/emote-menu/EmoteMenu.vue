@@ -18,7 +18,7 @@
 				<!-- Emote menu body -->
 				<template v-for="[provider, emoteSets] of filtered" :key="provider">
 					<div v-show="provider == selectedProvider" class="body">
-						<EmoteTab :emote-sets="emoteSets" @emote-click="onEmoteClick" />
+						<EmoteMenuTab :emote-sets="emoteSets" @emote-click="onEmoteClick" />
 					</div>
 				</template>
 				<div v-if="filtered.size == 0" class="body empty">
@@ -43,7 +43,7 @@ import {
 import { useChatAPI } from "../../ChatAPI";
 import { determineRatio } from "./EmoteMenuBackend";
 import Logo from "@/common/Logo.vue";
-import EmoteTab from "./EmoteTab.vue";
+import EmoteMenuTab from "./EmoteMenuTab.vue";
 import { onClickOutside } from "@vueuse/core";
 
 const props = defineProps<{
@@ -226,8 +226,8 @@ onUnmounted(() => {
 .emote-menu {
 	width: 32rem;
 	border-radius: 0.6rem !important;
-	background-color: #18181b;
-	box-shadow: var(--shadow-elevation-2) !important;
+	background-color: var(--color-background-float);
+	box-shadow: var(--color-hinted-grey-3);
 }
 
 .header {
@@ -236,7 +236,7 @@ onUnmounted(() => {
 	background: rgba(217, 217, 217, 3%);
 	box-shadow: 0 1px 2px rgb(0 0 0 / 15%);
 	border-radius: 0.6rem 0.6rem 0 0;
-	justify-content: space-between;
+	justify-content: space-evenly;
 	padding: 0.75rem;
 }
 
@@ -256,7 +256,6 @@ onUnmounted(() => {
 .logo {
 	width: 2rem;
 	height: 2rem;
-	color: white;
 	margin-right: 0.5rem;
 }
 
