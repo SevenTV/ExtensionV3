@@ -5,6 +5,8 @@ import { Dexie, Table } from "dexie";
 export class Dexie7 extends Dexie {
 	VERSION = 1.4;
 
+	private _ready = false;
+
 	channels!: Table<ChannelMapping, SevenTV.ObjectID>;
 	emoteSets!: Table<SevenTV.EmoteSet, SevenTV.ObjectID>;
 	emotes!: Table<SevenTV.Emote, SevenTV.ObjectID>;
@@ -27,7 +29,7 @@ export class Dexie7 extends Dexie {
 
 	async ready(): Promise<boolean> {
 		return new Promise<boolean>((resolve) => {
-			if (this.isOpen()) return resolve(true);
+			if (this._ready) return resolve(true);
 
 			this.open().then(() => {
 				resolve(true);

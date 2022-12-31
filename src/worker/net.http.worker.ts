@@ -5,6 +5,7 @@ import { log } from "@/common/Logger";
 import { convertBttvEmoteSet, convertFFZEmoteSet } from "@/common/Transform";
 import { db } from "@/db/IndexedDB";
 import { ws } from "./net.events.worker";
+import { sendTabNotify } from "./net.worker";
 
 namespace API_BASE {
 	export const SEVENTV = import.meta.env.VITE_APP_API_REST;
@@ -49,12 +50,15 @@ export async function onChannelChange(channel: CurrentChannel) {
 
 	// iterate results and store sets to DB
 	for (const [provider, setP] of promises) {
-		setP.then((set) => onResult(set)).catch((err) =>
-			log.error(`<Net/Http> failed to load emote set from provider ${provider} in #${channel.username}`, err),
-		);
+		await setP
+			.then((set) => onResult(set))
+			.catch((err) =>
+				log.error(`<Net/Http> failed to load emote set from provider ${provider} in #${channel.username}`, err),
+			);
 	}
 
-	// listen to events (scuffed)
+	// notify the UI that the channel is ready
+	sendTabNotify(`channel:${channel.id}:ready`);
 }
 
 export const seventv = {

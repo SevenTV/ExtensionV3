@@ -231,6 +231,14 @@ function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWo
 	});
 }
 
+export function sendTabNotify(key: string): void {
+	w.postMessage({
+		source: "SEVENTV",
+		type: NetWorkerMessageType.NOTIFY,
+		data: { key },
+	});
+}
+
 export function sendToPrimary<T extends NetWorkerMessageType>(t: T, data: TypedNetWorkerMessage<T>): void {
 	const primaryInst = Object.values(instances).find((inst) => inst.primary);
 	if (!primaryInst) return;
