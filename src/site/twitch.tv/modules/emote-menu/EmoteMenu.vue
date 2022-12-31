@@ -227,14 +227,14 @@ onUnmounted(() => {
 	width: 32rem;
 	border-radius: 0.6rem !important;
 	background-color: var(--color-background-float);
-	box-shadow: var(--color-hinted-grey-3);
+	box-shadow: var(--shadow-elevation-2);
+	overflow: clip;
 }
 
 .header {
 	display: flex;
 	height: 4.5rem;
-	background: rgba(217, 217, 217, 3%);
-	box-shadow: 0 1px 2px rgb(0 0 0 / 15%);
+	background: hsla(0deg, 0%, 50%, 6%);
 	border-radius: 0.6rem 0.6rem 0 0;
 	justify-content: space-evenly;
 	padding: 0.75rem;
@@ -246,10 +246,11 @@ onUnmounted(() => {
 	display: flex;
 	user-select: none;
 	justify-content: center;
+	background: hsla(0deg, 0%, 50%, 6%);
+	border-radius: 0.2rem;
 
 	&[selected="true"] {
-		background: hsla(0deg, 0%, 100%, 16%);
-		border-radius: 0.2rem;
+		background: hsla(0deg, 0%, 50%, 32%);
 	}
 }
 
@@ -262,6 +263,16 @@ onUnmounted(() => {
 .body {
 	display: flex;
 	height: 40rem;
+
+	&:after {
+		content: "";
+		position: absolute;
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+		pointer-events: none;
+		box-shadow: inset 0 7px 9px -9px hsla(0deg, 0%, 0%, 50%);
+	}
 
 	&[selected="false"] {
 		display: none;
