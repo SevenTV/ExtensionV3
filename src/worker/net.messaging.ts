@@ -1,6 +1,6 @@
 import { NetWorkerMessageType } from ".";
 
-export const onTabMessage = (type: NetWorkerMessageType, data: unknown) => {
+export const onTabMessage = (type: NetWorkerMessageType) => {
 	switch (type) {
 		case NetWorkerMessageType.EVENTS_SUB:
 			break;

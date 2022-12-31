@@ -98,7 +98,37 @@ declare namespace SevenTV {
 		host: ImageHost;
 	}
 
-	type CosmeticKind = "BADGE" | "PAINT";
+	interface CosmeticPaint extends Cosmetic {
+		function: string;
+		color: number | null;
+		stops: CosmeticPaintStop[];
+		repeat: boolean;
+		angle: number;
+		shape?: string;
+		image_url?: string;
+		shadows: CosmeticPaintShadow[];
+	}
+	type AnyCosmetic = CosmeticBadge | CosmeticPaint;
+
+	interface CosmeticPaintStop {
+		at: number;
+		color: number;
+		_alpha?: number;
+	}
+	interface CosmeticPaintShadow {
+		x_offset: number;
+		y_offset: number;
+		radius: number;
+		color: number;
+	}
+
+	interface Entitlement {
+		id: ObjectID;
+		kind: EntitlementKind;
+		user?: User;
+		cid?: string;
+		ref_id: ObjectID;
+	}
 
 	type UserType = "" | "BOT" | "SYSTEM";
 
@@ -117,7 +147,13 @@ declare namespace SevenTV {
 		BAN = 6,
 		MESSAGE = 7,
 		REPORT = 8,
+		PRESENCE = 9,
+		COSMETIC = 10,
 	}
+
+	type CosmeticKind = "BADGE" | "PAINT";
+
+	type EntitlementKind = "BADGE" | "PAINT" | "EMOTE_SET" | "ROLE";
 
 	interface ImageHost {
 		url: string;
@@ -146,7 +182,7 @@ declare interface YouTubeIdentity {
 	id: string;
 }
 
-declare type Platform = "TWITCH" | "YOUTUBE" | "UNKNOWN";
+declare type Platform = "TWITCH" | "YOUTUBE";
 
 declare type PlatformIdentity<T extends Platform> = {
 	TWITCH: TwitchIdentity;

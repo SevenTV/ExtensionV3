@@ -4,7 +4,7 @@
 import { log } from "@/common/Logger";
 import { convertBttvEmoteSet, convertFFZEmoteSet } from "@/common/Transform";
 import { db } from "@/db/IndexedDB";
-import { ws } from "./net.events.worker";
+import { eventAPI } from "./net.events.worker";
 import { sendTabNotify } from "./net.worker";
 
 namespace API_BASE {
@@ -94,7 +94,11 @@ export const seventv = {
 
 		const set = (await resp.json()) as SevenTV.EmoteSet;
 
+		set.emotes = set.emotes ?? [];
 		set.provider = "7TV/G" as SevenTV.Provider;
+
+		// subscribe to events for the global set
+		eventAPI.subscribe("emote_set.*", { object_id: set.id });
 
 		db.emoteSets.put(set).catch(() => db.emoteSets.where({ id: set.id, provider: "7TV" }).modify(set));
 		return Promise.resolve(set);

@@ -5,6 +5,7 @@ import { eventAPI } from "./net.events.worker";
 import { WebSocketPayload } from "./events";
 import { db } from "@/db/IndexedDB";
 import { onTabMessage } from "./net.messaging";
+import { getRandomInt } from "@/common/Rand";
 
 const w = self as unknown as DedicatedWorkerGlobalScope;
 
@@ -25,9 +26,19 @@ const state = {
 export const getState = () => state;
 export const primaryExists = () => Object.values(instances).some((i) => i.primary);
 export const isPrimary = () => state.primary;
+export const getLocal = () => state.local;
 
 // Listen to global messages
 let electionTimeout = 0;
+
+// Run database cleanup
+setTimeout(() => {
+	const activeChannels = Object.values(instances)
+		.filter((i) => i.local?.channel)
+		.map((i) => i.local!.channel!.id);
+
+	db.ready().then(() => db.expireDocuments(activeChannels));
+}, getRandomInt(5000, 20000));
 
 // Listen to messages from the parent tab
 w.onmessage = async (ev) => {
@@ -72,7 +83,7 @@ w.onmessage = async (ev) => {
 			break;
 		}
 		default:
-			onTabMessage(ev.data.type as NetWorkerMessageType, ev.data);
+			onTabMessage(ev.data.type as NetWorkerMessageType);
 			break;
 	}
 };
@@ -227,6 +238,7 @@ function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWo
 			online: state.online,
 			primary: state.primary,
 			primary_vote: state.primary_vote,
+			local: state.local,
 		} as NetWorkerInstance,
 		to,
 		data,

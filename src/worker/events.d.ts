@@ -30,10 +30,12 @@ type ObjectTypeOfKind = {
 	[SevenTV.ObjectKind.EMOTE]: SevenTV.Emote;
 	[SevenTV.ObjectKind.EMOTE_SET]: SevenTV.EmoteSet;
 	[SevenTV.ObjectKind.ROLE]: unknown;
-	[SevenTV.ObjectKind.ENTITLEMENT]: unknown;
+	[SevenTV.ObjectKind.ENTITLEMENT]: SevenTV.Entitlement;
 	[SevenTV.ObjectKind.BAN]: unknown;
 	[SevenTV.ObjectKind.MESSAGE]: unknown;
 	[SevenTV.ObjectKind.REPORT]: unknown;
+	[SevenTV.ObjectKind.PRESENCE]: unknown;
+	[SevenTV.ObjectKind.COSMETIC]: SevenTV.CosmeticBadge | SevenTV.CosmeticBadge;
 };
 
 type ChangeFieldOf<K extends SevenTV.ObjectKind> = ChangeField<keyof ObjectTypeOfKind[K]>;
