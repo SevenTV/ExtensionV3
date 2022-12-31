@@ -25,10 +25,12 @@ export class Dexie7 extends Dexie {
 		});
 	}
 
-	async ready(): Promise<void> {
-		return new Promise<void>((resolve) => {
+	async ready(): Promise<boolean> {
+		return new Promise<boolean>((resolve) => {
+			if (this.isOpen()) return resolve(true);
+
 			this.open().then(() => {
-				resolve();
+				resolve(true);
 			});
 		});
 	}

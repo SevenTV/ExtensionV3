@@ -27,9 +27,9 @@ export async function onChannelChange(channel: CurrentChannel) {
 
 	// setup fetching promises
 	const promises = [
-		["7TV", seventv.loadUserEmoteSet("TWITCH", channel.id)],
-		["FFZ", frankerfacez.loadUserEmoteSet(channel.id)],
-		["BTTV", betterttv.loadUserEmoteSet(channel.id)],
+		["7TV", seventv.loadUserEmoteSet("TWITCH", channel.id).catch(() => void 0)],
+		["FFZ", frankerfacez.loadUserEmoteSet(channel.id).catch(() => void 0)],
+		["BTTV", betterttv.loadUserEmoteSet(channel.id).catch(() => void 0)],
 	] as [string, Promise<SevenTV.EmoteSet>][];
 
 	const onResult = (set: SevenTV.EmoteSet) => {
