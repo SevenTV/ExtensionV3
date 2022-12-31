@@ -6,7 +6,7 @@ import { useLiveQuery } from "@/composable/useLiveQuery";
 import { storeToRefs } from "pinia";
 
 const { channel } = storeToRefs(useStore());
-const { emoteMap, emoteProviders } = useChatAPI();
+const { emoteMap, emoteProviders, cosmetics } = useChatAPI();
 
 // query the channel's emote set bindings
 const channelSets = useLiveQuery(
@@ -20,6 +20,12 @@ const channelSets = useLiveQuery(
 	{
 		reactives: [channel],
 	},
+);
+
+// query available cosmetics
+useLiveQuery(
+	() => db.cosmetics.toArray(),
+	(res) => (cosmetics.value = res.reduce((a, b) => ({ ...a, [b.id]: b }), {})),
 );
 
 // query the channel's active emote sets

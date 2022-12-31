@@ -40,6 +40,8 @@ export type TypedNetWorkerMessage<T extends NetWorkerMessageType> = {
 	[NetWorkerMessageType.MESSAGE]: WebSocketPayload<unknown>;
 	[NetWorkerMessageType.NOTIFY]: {
 		key: string;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		values?: Record<string, any>;
 	};
 	[NetWorkerMessageType.EVENTS_SUB]: {
 		do: "subscribe" | "unsubscribe";
@@ -62,30 +64,3 @@ export interface NetWorkerInstance {
 
 	_timeout?: number;
 }
-
-// Transform
-export type TransformWorkerMessage<T extends TransformWorkerMessageType> = WorkerMessage<
-	TransformWorkerMessageType,
-	TypedTransformWorkerMessage<T>
->;
-
-export enum TransformWorkerMessageType {
-	TWITCH_EMOTES = 1,
-	BTTV_EMOTES,
-	FFZ_EMOTES,
-}
-
-export type TypedTransformWorkerMessage<T extends TransformWorkerMessageType> = {
-	[TransformWorkerMessageType.TWITCH_EMOTES]: {
-		input?: Twitch.TwitchEmoteSet[];
-		output?: SevenTV.Emote[];
-	};
-	[TransformWorkerMessageType.BTTV_EMOTES]: {
-		input?: BTTV.Emote[];
-		output?: SevenTV.Emote[];
-	};
-	[TransformWorkerMessageType.FFZ_EMOTES]: {
-		input?: FFZ.Emote[];
-		output?: SevenTV.Emote[];
-	};
-}[T];

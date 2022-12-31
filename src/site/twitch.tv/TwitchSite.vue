@@ -18,7 +18,6 @@ const props = defineProps<{
 
 const store = useStore();
 store.setWorker("net", props.netWorker);
-store.setWorker("transform", props.transformWorker);
 
 // Retrieve the current user from twitch internals
 const user = getUser()?.props.user ?? null;

@@ -71,23 +71,6 @@ export async function onChannelChange(channel: CurrentChannel) {
 	eventAPI.subscribe("entitlement.*", cond);
 	eventAPI.subscribe("cosmetic.*", cond);
 	eventAPI.subscribe("emote_set.*", cond);
-
-	// write a presence to the API
-	//
-	// TODO: make this only happen when the user is typing in chat
-	// or it will be considered a violation of privacy! [IMPORTANT]
-	setTimeout(() => {
-		const local = getLocal();
-		if (local?.user) {
-			doRequest(API_BASE.SEVENTV, `users/${local.user.id}/presences`, "POST", {
-				kind: 1,
-				data: {
-					platform: "TWITCH",
-					id: channel.id,
-				},
-			}).then(() => log.info("<Net/Http> Presence sent"));
-		}
-	}, 1500);
 }
 
 export const seventv = {
@@ -147,6 +130,19 @@ export const seventv = {
 		if (!userConn.user) return Promise.reject(new Error("No user was returned!"));
 
 		return Promise.resolve(userConn.user);
+	},
+
+	async writePresence(): Promise<void> {
+		const local = getLocal();
+		if (!local?.user || !local.channel) return;
+
+		doRequest(API_BASE.SEVENTV, `users/${local.user.id}/presences`, "POST", {
+			kind: 1,
+			data: {
+				platform: "TWITCH",
+				id: local.channel.id,
+			},
+		}).then(() => log.info("<Net/Http> Presence sent"));
 	},
 };
 

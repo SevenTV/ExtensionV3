@@ -8,11 +8,14 @@ import {
 } from "@/common/Reflection";
 import { HookedInstance } from "@/common/ReactHooks";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
+import { useStore } from "@/store/main";
+import { NetWorkerMessageType } from "@/worker";
 
 const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatAutocompleteComponent>;
 }>();
 
+const store = useStore();
 const { emoteMap } = useChatAPI();
 
 const providers = ref<Record<string, Twitch.ChatAutocompleteProvider>>({});
@@ -359,6 +362,8 @@ onMounted(() => {
 		function (old, value: string, sendOnUpdate?: boolean, ...args: unknown[]) {
 			if (sendOnUpdate) {
 				pushHistory();
+
+				store.sendWorkerMessage(NetWorkerMessageType.NOTIFY, { key: "presences:self:write" });
 			}
 
 			if (!awaitingUpdate.value) {

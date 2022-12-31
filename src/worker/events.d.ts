@@ -35,7 +35,7 @@ type ObjectTypeOfKind = {
 	[SevenTV.ObjectKind.MESSAGE]: unknown;
 	[SevenTV.ObjectKind.REPORT]: unknown;
 	[SevenTV.ObjectKind.PRESENCE]: unknown;
-	[SevenTV.ObjectKind.COSMETIC]: SevenTV.CosmeticBadge | SevenTV.CosmeticBadge;
+	[SevenTV.ObjectKind.COSMETIC]: SevenTV.Cosmetic;
 };
 
 type ChangeFieldOf<K extends SevenTV.ObjectKind> = ChangeField<keyof ObjectTypeOfKind[K]>;

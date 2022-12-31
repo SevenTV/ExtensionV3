@@ -157,15 +157,23 @@ definePropertyHook(controller.value.component, "props", {
 			loaded: false,
 		};
 
+		// Keep track of chat props
 		chatAPI.isModerator.value = v.isCurrentUserModerator;
 		chatAPI.isVIP.value = v.isCurrentUserVIP;
 		chatAPI.currentChannel.value = currentChannel.value;
 		chatAPI.sendMessage.value = v.chatConnectionAPI.sendMessage;
 
+		// Parse twitch emote sets
 		const data = v.emoteSetsData;
 		if (!data || !data.emoteSets || data.loading) return;
 
 		onTwitchEmotes(data.emoteSets);
+
+		// Add the current user & channel owner to active chatters
+		if (v.userID) {
+			chatAPI.chatters.value[v.userID] = {};
+			chatAPI.chatters.value[v.channelID] = {};
+		}
 	},
 });
 

@@ -1,11 +1,4 @@
-import {
-	NetWorkerMessage,
-	NetWorkerMessageType,
-	TransformWorkerMessage,
-	TransformWorkerMessageType,
-	TypedNetWorkerMessage,
-	TypedTransformWorkerMessage,
-} from "@/worker";
+import { NetWorkerMessage, NetWorkerMessageType, TypedNetWorkerMessage } from "@/worker";
 import { defineStore } from "pinia";
 
 export interface State {
@@ -15,9 +8,7 @@ export interface State {
 	channel: CurrentChannel | null;
 	workers: {
 		net: Worker | null;
-		transform: Worker | null;
 	};
-	workerSeq: number;
 }
 
 export const useStore = defineStore("main", {
@@ -29,8 +20,6 @@ export const useStore = defineStore("main", {
 			channel: null,
 			workers: {
 				net: null,
-				transform: null,
-				transformSeq: 0,
 			},
 			workerSeq: 0,
 		} as State),
@@ -54,8 +43,10 @@ export const useStore = defineStore("main", {
 
 			const w = this.workers.net;
 			if (w) {
-				this.awaitWorkerNotify(`channel:${channel.id}:ready`).then(() => {
+				this.awaitWorkerNotify(`channel:${channel.id}:ready`, () => {
 					this.channel!.loaded = true;
+
+					return false;
 				});
 
 				w.postMessage({
@@ -89,45 +80,25 @@ export const useStore = defineStore("main", {
 			this.workers[name] = worker;
 		},
 
-		async awaitWorkerNotify(key: string): Promise<void> {
+		awaitWorkerNotify(key: string, cb: (data?: Record<string, string>) => boolean): void {
 			const w = this.workers.net;
 			if (!w) return;
 
-			const p = new Promise<void>((resolve) => {
-				const resp = (ev: MessageEvent) => {
-					if (ev.data.source !== "SEVENTV") return;
-					if (ev.data.type !== NetWorkerMessageType.NOTIFY) return;
-					if (ev.data.data.key !== key) return;
-
-					w.removeEventListener("message", resp);
-					resolve();
-				};
-
-				w.addEventListener("message", resp);
-			});
-
-			return p;
-		},
-
-		sendTransformRequest<T extends TransformWorkerMessageType>(t: T, data: TypedTransformWorkerMessage<T>): void {
-			if (!this.workers.transform) return;
-			this.workerSeq++;
-
 			const resp = (ev: MessageEvent) => {
-				if (!this.workers.transform) return;
-				if (ev.data.seq !== this.workerSeq) return;
+				if (ev.data.source !== "SEVENTV") return true;
+				if (ev.data.type !== NetWorkerMessageType.NOTIFY) return true;
+				if (ev.data.data.key !== key) return true;
 
-				this.workers.transform.removeEventListener("message", resp);
+				if (!cb(ev.data.data.values)) {
+					w.removeEventListener("message", resp);
+
+					return false;
+				}
+
+				return true;
 			};
 
-			this.workers.transform.addEventListener("message", resp);
-
-			this.workers.transform.postMessage({
-				source: "SEVENTV",
-				type: t,
-				seq: this.workerSeq,
-				data,
-			} as TransformWorkerMessage<T>);
+			w.addEventListener("message", resp);
 		},
 	},
 

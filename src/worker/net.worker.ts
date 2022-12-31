@@ -90,7 +90,7 @@ w.onmessage = async (ev) => {
 			break;
 		}
 		default:
-			onTabMessage(ev.data.type as NetWorkerMessageType);
+			onTabMessage(ev.data.type as NetWorkerMessageType, ev.data);
 			break;
 	}
 };
@@ -261,11 +261,11 @@ function broadcastMessage<T extends NetWorkerMessageType>(t: T, data: TypedNetWo
 	});
 }
 
-export function sendTabNotify(key: string): void {
+export function sendTabNotify(key: string, values?: Record<string, string>): void {
 	w.postMessage({
 		source: "SEVENTV",
 		type: NetWorkerMessageType.NOTIFY,
-		data: { key },
+		data: { key, values },
 	});
 }
 

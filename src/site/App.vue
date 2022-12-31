@@ -1,7 +1,7 @@
 <template>
 	<!-- Spawn Platform-specific Logic -->
 	<template v-if="ok">
-		<component :is="platformComponent" v-if="platformComponent" :net-worker="nw" :transform-worker="tw" />
+		<component :is="platformComponent" v-if="platformComponent" :net-worker="nw" />
 	</template>
 
 	<!-- Render tooltip -->
@@ -25,7 +25,6 @@ import { log } from "@/common/Logger";
 import { tooltip } from "@/composable/useTooltip";
 import { NetWorkerMessage, NetWorkerMessageType } from "@/worker";
 import NetworkWorker from "@/worker/net.worker?worker&inline";
-import TransformWorker from "@/worker/transform.worker?worker&inline";
 import TwitchSite from "./twitch.tv/TwitchSite.vue";
 import { db } from "@/db/IndexedDB";
 
@@ -49,9 +48,6 @@ nw.postMessage({
 	type: NetWorkerMessageType.INIT,
 	data: { id },
 } as Partial<NetWorkerMessage<NetWorkerMessageType.INIT>>);
-
-// Spawn TransformWorker
-const tw = new TransformWorker();
 
 // Detect current platform
 const domain = window.location.hostname.split(/\./).slice(-2).join(".");

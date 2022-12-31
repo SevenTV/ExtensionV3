@@ -11,7 +11,7 @@ export class Dexie7 extends Dexie {
 	channels!: Table<ChannelMapping & WithTimestamp, SevenTV.ObjectID>;
 	emoteSets!: Table<SevenTV.EmoteSet & WithTimestamp, SevenTV.ObjectID>;
 	emotes!: Table<SevenTV.Emote & WithTimestamp, SevenTV.ObjectID>;
-	cosmetics!: Table<SevenTV.AnyCosmetic & WithTimestamp, SevenTV.ObjectID>;
+	cosmetics!: Table<SevenTV.Cosmetic & WithTimestamp, SevenTV.ObjectID>;
 	entitlements!: Table<SevenTV.Entitlement & WithTimestamp, SevenTV.ObjectID>;
 
 	constructor() {
