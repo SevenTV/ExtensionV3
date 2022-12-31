@@ -2,7 +2,7 @@
 	<UiScrollable class="scroll-area">
 		<div class="emote-area">
 			<template v-for="(emoteSet, i) of emoteSets" :key="i">
-				<div v-if="emoteSet.emotes?.length" :ref="'set-' + i.toString()" class="emote-set-container">
+				<div v-if="emoteSet.emotes.length" :ref="'set-' + i.toString()" class="emote-set-container">
 					<div class="set-header">
 						<div class="set-header-icon">
 							<img v-if="emoteSet.owner && emoteSet.owner.avatar_url" :src="emoteSet.owner.avatar_url" />
@@ -31,7 +31,7 @@
 	<div class="sidebar">
 		<template v-for="(emoteSet, i) of emoteSets" :key="i">
 			<div
-				v-if="emoteSet.emotes?.length"
+				v-if="emoteSet.emotes.length"
 				class="set-sidebar-icon"
 				:selected="selectedSet == i"
 				@click="

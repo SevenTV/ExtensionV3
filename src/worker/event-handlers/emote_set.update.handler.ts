@@ -12,7 +12,7 @@ export function onEmoteSetUpdate(ctx: EventContext, cm: ChangeMap<SevenTV.Object
 					.where("id")
 					.equals(cm.id)
 					.modify((es) => {
-						es.emotes?.push(v);
+						es.emotes.push(v);
 					});
 			},
 			pulled: (_: SevenTV.ActiveEmote, old: SevenTV.ActiveEmote) => {
@@ -22,9 +22,9 @@ export function onEmoteSetUpdate(ctx: EventContext, cm: ChangeMap<SevenTV.Object
 					.where("id")
 					.equals(cm.id)
 					.modify((es) => {
-						const i = es.emotes?.findIndex((ae) => ae.id === old.id) ?? -1;
+						const i = es.emotes.findIndex((ae) => ae.id === old.id) ?? -1;
 
-						if (i >= 0) es.emotes?.splice(i, 1);
+						if (i >= 0) es.emotes.splice(i, 1);
 					});
 			},
 		},

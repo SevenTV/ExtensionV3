@@ -85,13 +85,13 @@ const filtered = computed(() => {
 								.map((s) => {
 									return {
 										...s,
-										emotes: s.emotes?.filter((e) => {
+										emotes: s.emotes.filter((e) => {
 											return e.name.toLowerCase().includes(filter.value.toLowerCase());
 										}),
 									} as SevenTV.EmoteSet;
 								})
 								.filter((s) => {
-									return s.emotes?.length;
+									return s.emotes.length;
 								}),
 						];
 					})
@@ -138,8 +138,8 @@ watch(
 		for (const [p, sets] of Object.entries(e)) {
 			const temp = new Map<string, SevenTV.EmoteSet>();
 			for (const [, set] of Object.entries(sets))
-				temp.has(set.name) ? temp.get(set.name)?.emotes?.concat(set.emotes ?? []) : temp.set(set.name, set);
-			temp.forEach((s) => s.emotes?.sort(sortEmotes));
+				temp.has(set.name) ? temp.get(set.name)?.emotes.concat(set.emotes ?? []) : temp.set(set.name, set);
+			temp.forEach((s) => s.emotes.sort(sortEmotes));
 			providers.value.set(p as SevenTV.Provider, Array.from(temp.values()).sort(sortSets));
 		}
 	},
