@@ -79,33 +79,76 @@ export class EventAPI {
 
 				const sub = this.getSubscription(d.data.type, d.data.condition);
 				if (sub) {
-					sub.count++;
+					sub.confirmed = true;
 					break;
 				}
-
-				if (!Array.isArray(this.subscriptions[d.data.type])) {
-					this.subscriptions[d.data.type] = [];
-				}
-
-				this.subscriptions[d.data.type].push({
-					condition: d.data.condition,
-					count: 1,
-				});
 				break;
 			}
 		}
 	}
 
 	subscribe(type: string, condition: Record<string, string>) {
-		const msg = {
-			op: EventOpCode.SUBSCRIBE,
-			d: {
+		if (isPrimary()) {
+			const sub = this.getSubscription(type, condition);
+			if (sub) {
+				sub.count++;
+				return;
+			}
+
+			if (!Array.isArray(this.subscriptions[type])) {
+				this.subscriptions[type] = [];
+			}
+
+			this.subscriptions[type].push({
+				condition,
+				count: 1,
+			});
+
+			this.sendMessage({
+				op: EventOpCode.SUBSCRIBE,
+				d: {
+					type,
+					condition,
+				},
+			});
+		} else {
+			if (!primaryExists()) {
+				setTimeout(() => this.subscribe(type, condition), 100);
+				return;
+			}
+
+			sendToPrimary(NetWorkerMessageType.EVENTS_SUB, {
+				do: "subscribe",
 				type,
 				condition,
-			},
-		};
+			});
+		}
+	}
 
-		this.sendMessage(msg);
+	unsubscribe(type: string, condition: Record<string, string>) {
+		if (isPrimary()) {
+			const sub = this.getSubscription(type, condition);
+			if (!sub) return;
+
+			sub.count--;
+			if (sub.count <= 0) {
+				this.subscriptions[type] = this.subscriptions[type].filter((c) => c !== sub);
+
+				this.sendMessage({
+					op: EventOpCode.UNSUBSCRIBE,
+					d: {
+						type,
+						condition,
+					},
+				});
+			}
+		} else {
+			sendToPrimary(NetWorkerMessageType.EVENTS_SUB, {
+				do: "unsubscribe",
+				type,
+				condition,
+			});
+		}
 	}
 
 	getSubscription(type: string, condition: Record<string, string>): SubscriptionRecord | null {
@@ -130,17 +173,6 @@ export class EventAPI {
 		log.debug("<Net/EventAPI>", "Sending message with op:", msg.op.toString());
 
 		if (!this.socket) return;
-
-		// Ensure correct subscription behavior
-		if (msg.op === EventOpCode.SUBSCRIBE || msg.op === EventOpCode.UNSUBSCRIBE) {
-			const d = msg.d as SubscriptionData;
-			const sub = this.getSubscription(d.type, d.condition);
-			if (msg.op === EventOpCode.SUBSCRIBE && sub) {
-				return;
-			} else if (msg.op === EventOpCode.UNSUBSCRIBE && !sub) {
-				return;
-			}
-		}
 
 		this.socket.send(JSON.stringify(msg));
 	}
@@ -201,6 +233,7 @@ enum EventOpCode {
 interface SubscriptionRecord {
 	condition: Record<string, string>;
 	count: number;
+	confirmed?: boolean;
 }
 
 type EventAPITransport = "WebSocket" | "EventStream";

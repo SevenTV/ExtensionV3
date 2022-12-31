@@ -5,7 +5,7 @@ import { log } from "@/common/Logger";
 import { convertBttvEmoteSet, convertFFZEmoteSet } from "@/common/Transform";
 import { db } from "@/db/IndexedDB";
 import { eventAPI } from "./net.events.worker";
-import { sendTabNotify } from "./net.worker";
+import { getLocal, sendTabNotify } from "./net.worker";
 
 namespace API_BASE {
 	export const SEVENTV = import.meta.env.VITE_APP_API_REST;
@@ -60,6 +60,34 @@ export async function onChannelChange(channel: CurrentChannel) {
 
 	// notify the UI that the channel is ready
 	sendTabNotify(`channel:${channel.id}:ready`);
+
+	// begin subscriptions to channel data
+	const cond = {
+		ctx: "channel",
+		platform: "TWITCH",
+		id: channel.id,
+	};
+
+	eventAPI.subscribe("entitlement.*", cond);
+	eventAPI.subscribe("cosmetic.*", cond);
+	eventAPI.subscribe("emote_set.*", cond);
+
+	// write a presence to the API
+	//
+	// TODO: make this only happen when the user is typing in chat
+	// or it will be considered a violation of privacy! [IMPORTANT]
+	setTimeout(() => {
+		const local = getLocal();
+		if (local?.user) {
+			doRequest(API_BASE.SEVENTV, `users/${local.user.id}/presences`, "POST", {
+				kind: 1,
+				data: {
+					platform: "TWITCH",
+					id: channel.id,
+				},
+			}).then(() => log.info("<Net/Http> Presence sent"));
+		}
+	}, 1500);
 }
 
 export const seventv = {
@@ -102,6 +130,23 @@ export const seventv = {
 
 		db.emoteSets.put(set).catch(() => db.emoteSets.where({ id: set.id, provider: "7TV" }).modify(set));
 		return Promise.resolve(set);
+	},
+
+	async loadCurrentUser(): Promise<SevenTV.User> {
+		const local = getLocal();
+		if (!local?.identity) return Promise.reject(new Error("No local identity is defined!"));
+
+		const resp = await doRequest(API_BASE.SEVENTV, `users/twitch/${local.identity.id}`).catch((err) =>
+			Promise.reject(err),
+		);
+		if (!resp || resp.status !== 200) {
+			return Promise.reject(resp);
+		}
+
+		const userConn = (await resp.json()) as SevenTV.UserConnection;
+		if (!userConn.user) return Promise.reject(new Error("No user was returned!"));
+
+		return Promise.resolve(userConn.user);
 	},
 };
 
@@ -182,6 +227,12 @@ export const betterttv = {
 	},
 };
 
-function doRequest(base: string, path: string): Promise<Response> {
-	return fetch(`${base}/${path}`, {});
+function doRequest<T = object>(base: string, path: string, method?: string, body?: T): Promise<Response> {
+	return fetch(`${base}/${path}`, {
+		method,
+		body: body ? JSON.stringify(body) : undefined,
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
 }

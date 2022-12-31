@@ -13,14 +13,14 @@ export function onEntitlementCreate(ctx: EventContext, cm: ChangeMap<SevenTV.Obj
 	const obj = cm.object;
 	if (!cm.object || !obj.user || !obj.user.connections?.length) return;
 
-	obj.cid = obj.user.connections.find((x) => x.id === platform)?.id ?? "";
+	obj.cid = obj.user.connections.find((x) => x.platform === platform)?.id ?? "";
 
 	delete obj.user;
 
 	// Insert the cosmetic into the database
 	ctx.db
-		.withErrorFallback(ctx.db.entitlements.put(cm.object), () =>
-			ctx.db.entitlements.where("id").equals(cm.object.id).modify(cm.object),
+		.withErrorFallback(ctx.db.entitlements.put(obj), () =>
+			ctx.db.entitlements.where("id").equals(obj.id).modify(obj),
 		)
-		.catch(log.error);
+		.catch((err) => log.error("Net/EventAPI", "Failed to insert entitlement", err));
 }

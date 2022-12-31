@@ -9,5 +9,5 @@ export function onCosmeticCreate(ctx: EventContext, cm: ChangeMap<SevenTV.Object
 		.withErrorFallback(ctx.db.cosmetics.put(cm.object), () =>
 			ctx.db.cosmetics.where("id").equals(cm.object.id).modify(cm.object),
 		)
-		.catch(log.error);
+		.catch((err) => log.error("Net/EventAPI", "Failed to insert cosmetic", err));
 }

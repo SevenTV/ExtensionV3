@@ -9,10 +9,10 @@ export class Dexie7 extends Dexie {
 	private _ready = false;
 
 	channels!: Table<ChannelMapping & WithTimestamp, SevenTV.ObjectID>;
-	emoteSets!: Table<SevenTV.EmoteSet, SevenTV.ObjectID>;
-	emotes!: Table<SevenTV.Emote, SevenTV.ObjectID>;
-	cosmetics!: Table<SevenTV.AnyCosmetic, SevenTV.ObjectID>;
-	entitlements!: Table<SevenTV.Entitlement, SevenTV.ObjectID>;
+	emoteSets!: Table<SevenTV.EmoteSet & WithTimestamp, SevenTV.ObjectID>;
+	emotes!: Table<SevenTV.Emote & WithTimestamp, SevenTV.ObjectID>;
+	cosmetics!: Table<SevenTV.AnyCosmetic & WithTimestamp, SevenTV.ObjectID>;
+	entitlements!: Table<SevenTV.Entitlement & WithTimestamp, SevenTV.ObjectID>;
 
 	constructor() {
 		super("SevenTV", {

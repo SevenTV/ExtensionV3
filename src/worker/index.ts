@@ -56,6 +56,7 @@ export interface NetWorkerInstance {
 	local?: {
 		platform: Platform;
 		identity: TwitchIdentity | YouTubeIdentity | null;
+		user: SevenTV.User | null;
 		channel?: CurrentChannel;
 	};
 

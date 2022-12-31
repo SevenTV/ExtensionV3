@@ -69,9 +69,16 @@ w.onmessage = async (ev) => {
 			if (!msg.data.local) return;
 
 			state.local = msg.data.local;
+
 			broadcastMessage(NetWorkerMessageType.STATE, { local: state.local });
 
 			await db.ready();
+
+			// Fetch current user data
+			const usr = await seventv.loadCurrentUser().catch((err) => log.error(err));
+			if (usr) {
+				state.local.user = usr;
+			}
 
 			// Load local data
 			// todo: make this better
@@ -155,6 +162,15 @@ bc.onmessage = (ev) => {
 			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.MESSAGE>;
 
 			eventAPI.pushMessage(msg.data);
+			break;
+		}
+		case NetWorkerMessageType.EVENTS_SUB: {
+			const msg = ev.data as NetWorkerMessage<NetWorkerMessageType.EVENTS_SUB>;
+
+			msg.data.do === "subscribe"
+				? eventAPI.subscribe(msg.data.type, msg.data.condition)
+				: eventAPI.unsubscribe(msg.data.type, msg.data.condition);
+
 			break;
 		}
 		default:

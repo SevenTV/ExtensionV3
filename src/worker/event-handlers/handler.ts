@@ -12,8 +12,7 @@ export function handleDispatchedEvent(ctx: EventContext, type: string, cm: Chang
 	}[type];
 
 	if (typeof h === "function") h();
-
-	log.warn("<Net/EventAPI>", `Received dispatch '${type}' but no handler was found`);
+	else log.warn("<Net/EventAPI>", `Received dispatch '${type}' but no handler was found`);
 }
 
 export function iterateChangeMap<T extends SevenTV.ObjectKind>(cm: ChangeMap<T>, h: ChangeMapHandler<T>) {
