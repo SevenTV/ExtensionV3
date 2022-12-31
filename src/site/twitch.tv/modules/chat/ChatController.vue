@@ -144,6 +144,7 @@ definePropertyHook(controller.value.component, "props", {
 			id: v.channelID,
 			username: v.channelLogin,
 			display_name: v.channelDisplayName,
+			loaded: false,
 		};
 
 		chatAPI.isModerator.value = v.isCurrentUserModerator;
