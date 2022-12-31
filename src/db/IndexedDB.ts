@@ -12,7 +12,9 @@ export class Dexie7 extends Dexie {
 	userConnections!: Table<SevenTV.UserConnection, SevenTV.ObjectID>;
 
 	constructor() {
-		super("SevenTV");
+		super("SevenTV", {
+			autoOpen: false,
+		});
 
 		this.version(this.VERSION).stores({
 			channels: "id",
@@ -20,6 +22,14 @@ export class Dexie7 extends Dexie {
 			emotes: "id,name,owner.id",
 			users: "id,username,connections.id,connections.username",
 			userConnections: "id,platform,username,emote_set.id",
+		});
+	}
+
+	async ready(): Promise<void> {
+		return new Promise<void>((resolve) => {
+			this.open().then(() => {
+				resolve();
+			});
 		});
 	}
 }
