@@ -49,7 +49,7 @@ useLiveQuery(
 		emoteMap.value = o;
 	},
 	{
-		reactives: [channelSets],
+		reactives: [channel, channelSets],
 	},
 );
 </script>
