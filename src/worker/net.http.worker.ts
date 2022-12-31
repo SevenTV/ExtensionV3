@@ -22,9 +22,9 @@ enum ProviderPriority {
 
 export async function onChannelChange(channel: CurrentChannel) {
 	// store the channel into IDB
-	db.channels.put({ id: channel.id, set_ids: [] }, channel.id).catch(() => {
-		db.channels.where("id").equals(channel.id).modify(channel);
-	});
+	await db.withErrorFallback(db.channels.put({ id: channel.id, set_ids: [] }), () =>
+		db.channels.where("id").equals(channel.id).modify(channel),
+	);
 
 	// setup fetching promises
 	const promises = [
@@ -33,16 +33,16 @@ export async function onChannelChange(channel: CurrentChannel) {
 		["BTTV", betterttv.loadUserEmoteSet(channel.id).catch(() => void 0)],
 	] as [string, Promise<SevenTV.EmoteSet>][];
 
-	const onResult = (set: SevenTV.EmoteSet) => {
+	const onResult = async (set: SevenTV.EmoteSet) => {
 		if (!set) return;
 
 		// store set to DB
-		db.emoteSets.put(set).catch(() => {
-			db.emoteSets.where({ id: set.id, provider: set.provider }).modify(set);
-		});
+		await db.withErrorFallback(db.emoteSets.put(set), () =>
+			db.emoteSets.where({ id: set.id, provider: set.provider }).modify(set),
+		);
 
 		// add set ID to the channel
-		db.channels
+		await db.channels
 			.where("id")
 			.equals(channel.id)
 			.modify((x) => x.set_ids.push(set.id));
@@ -50,11 +50,12 @@ export async function onChannelChange(channel: CurrentChannel) {
 
 	// iterate results and store sets to DB
 	for (const [provider, setP] of promises) {
-		await setP
-			.then((set) => onResult(set))
-			.catch((err) =>
-				log.error(`<Net/Http> failed to load emote set from provider ${provider} in #${channel.username}`, err),
-			);
+		const set = await setP.catch((err) =>
+			log.error(`<Net/Http> failed to load emote set from provider ${provider} in #${channel.username}`, err),
+		);
+		if (!set) continue;
+
+		await onResult(set);
 	}
 
 	// notify the UI that the channel is ready

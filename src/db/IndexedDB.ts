@@ -1,6 +1,6 @@
 // NetCache uses IndexedDB to share data across all browser instances
 
-import { Dexie, Table } from "dexie";
+import { Dexie, PromiseExtended, Table } from "dexie";
 
 export class Dexie7 extends Dexie {
 	VERSION = 1.4;
@@ -34,6 +34,18 @@ export class Dexie7 extends Dexie {
 			this.open().then(() => {
 				resolve(true);
 			});
+		});
+	}
+
+	async withErrorFallback<T, T2>(promise: PromiseExtended<T>, ifError: () => PromiseExtended<T2>): Promise<T | T2> {
+		return new Promise<T | T2>((resolve, reject) => {
+			promise
+				.then((res) => resolve(res))
+				.catch(() => {
+					ifError()
+						.then((res) => resolve(res))
+						.catch((err) => reject(err));
+				});
 		});
 	}
 }
