@@ -117,7 +117,7 @@ export class EventAPI {
 
 	sendMessage(msg: WebSocketPayload<unknown>): void {
 		// retry if we're no primary has been selected or the socket isn't ready
-		if (!primaryExists() || (isPrimary() && !this.socket)) {
+		if (!primaryExists() || (isPrimary() && !(this.socket && this.socket.readyState === WebSocket.OPEN))) {
 			setTimeout(() => this.sendMessage(msg), 100);
 			return;
 		}
