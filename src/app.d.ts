@@ -182,7 +182,7 @@ declare interface YouTubeIdentity {
 	id: string;
 }
 
-declare type Platform = "TWITCH" | "YOUTUBE";
+declare type Platform = "TWITCH" | "YOUTUBE" | "UNKNOWN";
 
 declare type PlatformIdentity<T extends Platform> = {
 	TWITCH: TwitchIdentity;
