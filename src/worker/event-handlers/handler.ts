@@ -1,17 +1,19 @@
 import { log } from "@/common/Logger";
 import type { ChangeMap, EventContext, ObjectTypeOfKind } from "../events";
-import { onEmoteSetUpdate } from "./emote_set.update.handler";
+import { onCosmeticCreate } from "./cosmetic.handler";
+import { onEmoteSetUpdate } from "./emote-set.handler";
+import { onEntitlementCreate } from "./entitlement.handler";
 
 export function handleDispatchedEvent(ctx: EventContext, type: string, cm: ChangeMap<SevenTV.ObjectKind>) {
-	switch (type) {
-		case "emote_set.update": {
-			onEmoteSetUpdate(ctx, cm as ChangeMap<SevenTV.ObjectKind.EMOTE_SET>);
-			break;
-		}
+	const h = {
+		"cosmetic.create": () => onCosmeticCreate(ctx, cm as ChangeMap<SevenTV.ObjectKind.COSMETIC>),
+		"entitlement.create": () => onEntitlementCreate(ctx, cm as ChangeMap<SevenTV.ObjectKind.ENTITLEMENT>),
+		"emote_set.update": () => onEmoteSetUpdate(ctx, cm as ChangeMap<SevenTV.ObjectKind.EMOTE_SET>),
+	}[type];
 
-		default:
-			break;
-	}
+	if (typeof h === "function") h();
+
+	log.warn("<Net/EventAPI>", `Received dispatch '${type}' but no handler was found`);
 }
 
 export function iterateChangeMap<T extends SevenTV.ObjectKind>(cm: ChangeMap<T>, h: ChangeMapHandler<T>) {
@@ -26,11 +28,6 @@ export function iterateChangeMap<T extends SevenTV.ObjectKind>(cm: ChangeMap<T>,
 			hook.pushed?.(x.value, x.old_value);
 			log.debug("Net/EventAPI", `PUSH (${cm.kind}) ${cm.id}/${String(x.key)}`, JSON.stringify(x.value));
 		}
-
-		if (typeof cm.object === "object") {
-			hook.object?.(cm.object);
-			log.debug("Net/EventAPI", `OBJECT (${cm.kind}) ${cm.id}`, JSON.stringify(cm.object));
-		}
 	}
 }
 
@@ -42,5 +39,4 @@ export type ChangeMapHandler<T extends SevenTV.ObjectKind> = {
 export interface ChangeMapHook {
 	pulled?: (newValue: any, oldValue: any) => void;
 	pushed?: (newValue: any, oldValue: any) => void;
-	object?: (value: any) => void;
 }
