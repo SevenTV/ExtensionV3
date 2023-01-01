@@ -1,4 +1,4 @@
-import { nextTick, reactive, ref, Ref, toRefs, watchEffect } from "vue";
+import { computed, nextTick, reactive, ref, Ref, toRefs, watchEffect } from "vue";
 import UiScrollableVue from "@/ui/UiScrollable.vue";
 import { useStore } from "@/store/main";
 
@@ -50,6 +50,8 @@ let live: boolean;
 export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> | undefined>, bounds?: Ref<DOMRect>) {
 	const store = useStore();
 	const container = ref<HTMLElement | null>(null);
+
+	const imageFormat = computed<SevenTV.ImageFormat>(() => (store.avifSupported ? "AVIF" : "WEBP"));
 
 	watchEffect(() => {
 		if (scroller?.value?.container) {
@@ -255,5 +257,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		addMessage,
 		pauseScrolling,
 		unpauseScrolling,
+
+		imageFormat,
 	};
 }

@@ -77,7 +77,7 @@ export default defineConfig(({ mode }) => {
 				apply: "build",
 				async buildEnd() {
 					const man = await getManifest(
-						isDev,
+						isDev || !!process.env.MV2,
 						Object.keys(chunks)
 							.map((key) => [`assets/${key}.js`, `assets/${key}.js.map`])
 							.reduce((a, b) => [...a, ...b], []),

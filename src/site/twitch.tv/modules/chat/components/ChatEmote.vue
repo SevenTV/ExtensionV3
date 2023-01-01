@@ -23,17 +23,20 @@ import ChatEmoteTooltip from "@/site/twitch.tv/modules/chat/components/ChatEmote
 const props = withDefaults(
 	defineProps<{
 		emote: SevenTV.ActiveEmote;
+		imageFormat?: SevenTV.ImageFormat;
 		unload?: boolean;
 	}>(),
-	{ unload: false },
+	{ unload: false, imageFormat: "WEBP" },
 );
 
 const srcSet = computed(() => (props.unload ? "" : getSrcSet(props.emote)));
 
 function getSrcSet(emote: SevenTV.ActiveEmote) {
 	const host = emote.data?.host ?? { url: "", files: [] };
+	const format = host.files.some((fi) => fi.format === props.imageFormat) ? props.imageFormat : host.files[0]?.format;
+
 	return host.files
-		.filter((f) => f.format === host.files[0].format)
+		.filter((f) => f.format === format)
 		.map((f, i) => `${host.url}/${f.name} ${i + 1}x`)
 		.join(", ");
 }

@@ -2,6 +2,7 @@ import { log } from "@/common/Logger";
 import { useWorker, WorkletEvent } from "@/composable/useWorker";
 import { NetWorkerMessage, NetWorkerMessageType, TypedNetWorkerMessage } from "@/worker";
 import { defineStore } from "pinia";
+import { UAParser, UAParserInstance, IBrowser } from "ua-parser-js";
 
 export interface State {
 	platform: Platform;
@@ -11,6 +12,7 @@ export interface State {
 	workers: {
 		net: Worker | null;
 	};
+	agent: UAParserInstance;
 }
 
 export const useStore = defineStore("main", {
@@ -24,6 +26,7 @@ export const useStore = defineStore("main", {
 				net: null,
 			},
 			workerSeq: 0,
+			agent: new UAParser(),
 		} as State),
 
 	actions: {
@@ -113,6 +116,12 @@ export const useStore = defineStore("main", {
 		},
 		getLocation(state: State) {
 			return state.location;
+		},
+		browser(): IBrowser {
+			return this.agent.getBrowser();
+		},
+		avifSupported(): boolean {
+			return this.browser.name === "Chrome" && parseInt(this.browser.version as string, 10) >= 100;
 		},
 	},
 });
