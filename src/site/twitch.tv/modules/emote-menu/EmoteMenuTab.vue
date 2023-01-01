@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
 	top: -1px;
 	display: flex;
 	background: var(--color-background-base);
-	box-shadow: 0px 1px 3px hsla(0deg, 0%, 0%, 50%);
+	box-shadow: 0 1px 3px hsla(0deg, 0%, 0%, 50%);
 }
 
 .set-header-icon {
@@ -163,7 +163,6 @@ onBeforeUnmount(() => {
 	width: 4rem;
 	height: 100%;
 	background: hsla(0deg, 0%, 50%, 6%);
-	box-shadow: -1px 0px 1px hsla(0deg, 0%, 0%, 50%);
 	overflow-y: scroll;
 	scrollbar-width: none;
 
