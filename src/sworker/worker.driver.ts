@@ -1,6 +1,7 @@
 import { log, Logger } from "@/common/Logger";
 import { WorkerHttp } from "./worker.http";
 import { WorkerPort } from "./worker.port";
+import { EventAPI } from "./worker.events";
 import { db, Dexie7 } from "@/db/IndexedDB";
 import { TypedWorkerMessage, WorkerMessageType } from ".";
 import type { TypedEventListenerOrEventListenerObject } from "@/common/EventTarget";
@@ -8,6 +9,7 @@ import type { TypedEventListenerOrEventListenerObject } from "@/common/EventTarg
 export class WorkerDriver extends EventTarget {
 	bc: BroadcastChannel;
 	http: WorkerHttp;
+	eventAPI: EventAPI;
 	db: Dexie7;
 	log: Logger;
 
@@ -17,8 +19,25 @@ export class WorkerDriver extends EventTarget {
 		super();
 
 		this.bc = new BroadcastChannel("SEVENTV#NETWORK");
-		this.http = new WorkerHttp(this);
 		this.db = db;
+		this.log = log;
+		this.log.setContextName("Worker");
+		this.log.pipe = (type, text, extraCSS, objects) => {
+			this.bc.postMessage({
+				type: "LOG",
+				data: {
+					type,
+					text,
+					css: extraCSS,
+					objects,
+				},
+			});
+		};
+
+		this.http = new WorkerHttp(this);
+		this.eventAPI = new EventAPI(this);
+		this.eventAPI.connect("WebSocket");
+
 		db.ready().then(() => {
 			// Fetch global emotes
 			const sets = [] as SevenTV.EmoteSet[];
@@ -45,20 +64,6 @@ export class WorkerDriver extends EventTarget {
 				})
 				.catch((e) => log.error("<API>", "Failed to fetch global emotes:", e));
 		});
-
-		this.log = log;
-		this.log.setContextName("Worker");
-		this.log.pipe = (type, text, extraCSS, objects) => {
-			this.bc.postMessage({
-				type: "LOG",
-				data: {
-					type,
-					text,
-					css: extraCSS,
-					objects,
-				},
-			});
-		};
 
 		// Track new connections
 		w.onconnect = (ev) => {
@@ -110,6 +115,7 @@ type WorkerEventName =
 	| "idb_ready"
 	| "start_watching_channel"
 	| "stop_watching_channel"
+	| "set_channel_presence"
 	| "identity_updated"
 	| "user_updated";
 
@@ -119,6 +125,7 @@ type WorkerTypedEvent<EVN extends WorkerEventName> = {
 	idb_ready: void;
 	start_watching_channel: CurrentChannel;
 	stop_watching_channel: CurrentChannel;
+	set_channel_presence: object;
 	channel_data_fetched: CurrentChannel;
 	identity_updated: TwitchIdentity | YouTubeIdentity;
 	user_updated: SevenTV.User;

@@ -1,7 +1,7 @@
 import { LOCAL_STORAGE_KEYS } from "@/common/Constant";
 import { TypedEventListenerOrEventListenerObject } from "@/common/EventTarget";
 import { log, Logger } from "@/common/Logger";
-import { TypedWorkerMessage, WorkerMessageType } from "@/sworker";
+import { TypedWorkerMessage, WorkerMessage, WorkerMessageType } from "@/sworker";
 
 const workerLog = new Logger();
 workerLog.setContextName("Worker/Pipe");
@@ -103,9 +103,13 @@ function useGlobalHandlers(bc: BroadcastChannel) {
 
 function useHandlers(mp: MessagePort) {
 	mp.addEventListener("message", (ev) => {
-		const { type, data } = ev.data;
+		const { type, data } = ev.data as WorkerMessage<WorkerMessageType>;
 
 		switch (type) {
+			case "INIT": {
+				events.emit("ready", {});
+				break;
+			}
 			case "CHANNEL_FETCHED": {
 				const { channel } = data as TypedWorkerMessage<"CHANNEL_FETCHED">;
 
@@ -146,9 +150,10 @@ class WorkletTarget extends EventTarget {
 	}
 }
 
-type WorkletEventName = "channel_fetched";
+type WorkletEventName = "ready" | "channel_fetched";
 
 type WorkletTypedEvent<EVN extends WorkletEventName> = {
+	ready: object;
 	channel_fetched: CurrentChannel;
 }[EVN];
 

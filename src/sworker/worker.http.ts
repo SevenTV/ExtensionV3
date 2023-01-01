@@ -25,9 +25,17 @@ export class WorkerHttp {
 		this.driver = driver;
 
 		driver.addEventListener("start_watching_channel", (ev) => this.fetchChannelData(ev.detail, ev.port));
-		driver.addEventListener("identity_updated", (ev) =>
-			this.API().seventv.loadUserData(ev.port?.platform ?? "TWITCH", ev.detail.id),
-		);
+		driver.addEventListener("identity_updated", async (ev) => {
+			const user = await this.API().seventv.loadUserData(ev.port?.platform ?? "TWITCH", ev.detail.id);
+			if (user && ev.port) {
+				ev.port.user = user;
+			}
+		});
+		driver.addEventListener("set_channel_presence", (ev) => {
+			if (!ev.port || !ev.port.platform || !ev.port.user || !ev.port.channel) return;
+
+			this.API().seventv.writePresence(ev.port.platform, ev.port.user.id, ev.port.channel.id);
+		});
 	}
 
 	public async fetchChannelData(channel: CurrentChannel, port?: WorkerPort) {
@@ -63,6 +71,7 @@ export class WorkerHttp {
 		};
 
 		// iterate results and store sets to DB
+		const sets = [] as SevenTV.EmoteSet[];
 		for (const [provider, setP] of promises) {
 			const set = await setP.catch((err) =>
 				this.driver.log.error(
@@ -72,6 +81,7 @@ export class WorkerHttp {
 			);
 			if (!set) continue;
 
+			sets.push(set);
 			await onResult(set);
 		}
 
@@ -81,6 +91,24 @@ export class WorkerHttp {
 				channel,
 			});
 		}
+
+		// begin subscriptions to channel emote sets
+		for (const set of sets) {
+			this.driver.eventAPI.subscribe("emote_set.*", {
+				object_id: set.id,
+			});
+		}
+
+		// begin subscriptions to personal events in the channel
+		const cond = {
+			ctx: "channel",
+			platform: "TWITCH",
+			id: channel.id,
+		};
+
+		this.driver.eventAPI.subscribe("entitlement.*", cond);
+		this.driver.eventAPI.subscribe("cosmetic.*", cond);
+		this.driver.eventAPI.subscribe("emote_set.*", cond);
 	}
 
 	public API() {
@@ -140,6 +168,16 @@ export const seventv = {
 		if (!userConn.user) return Promise.reject(new Error("No user was returned!"));
 
 		return Promise.resolve(userConn.user);
+	},
+
+	async writePresence(platform: Platform, userID: string, channelID: string): Promise<void> {
+		doRequest(API_BASE.SEVENTV, `users/${userID}/presences`, "POST", {
+			kind: 1,
+			data: {
+				platform,
+				id: channelID,
+			},
+		}).then(() => log.info("<Net/Http> Presence sent"));
 	},
 };
 

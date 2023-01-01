@@ -1,7 +1,8 @@
-import path from "path";
 import { defineConfig, loadEnv } from "vite";
+import { spawn } from "child_process";
 import { getManifest } from "./manifest.config";
 import fs from "fs-extra";
+import path from "path";
 import vue from "@vitejs/plugin-vue";
 
 const r = (...args: string[]) => path.resolve(__dirname, ...args);
@@ -84,7 +85,9 @@ export default defineConfig(({ mode }) => {
 
 					setTimeout(() => {
 						fs.writeJSON(r("dist/manifest.json"), man);
-					}, 0);
+
+						spawn("yarn", ["build:worker"], { shell: true, stdio: "inherit" });
+					});
 				},
 			},
 

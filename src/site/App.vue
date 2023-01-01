@@ -1,6 +1,6 @@
 <template>
 	<!-- Spawn Platform-specific Logic -->
-	<template v-if="ok">
+	<template v-if="!wg">
 		<component :is="platformComponent" v-if="platformComponent" />
 	</template>
 
@@ -23,23 +23,28 @@
 import { Component, markRaw, onMounted, ref } from "vue";
 import { log } from "@/common/Logger";
 import { tooltip } from "@/composable/useTooltip";
-import TwitchSite from "./twitch.tv/TwitchSite.vue";
 import { db } from "@/db/IndexedDB";
 import { useWorker } from "@/composable/useWorker";
+import TwitchSite from "./twitch.tv/TwitchSite.vue";
 
-const ok = ref(false);
+const wg = ref(2);
 
-log.debug("Waiting for IndexedDB...");
+log.info("7TV is loading");
 
 db.ready().then(() => {
 	log.info("IndexedDB ready");
-	ok.value = true;
+	wg.value--;
 });
 
 // Spawn SharedWorker
 const bc = new BroadcastChannel("SEVENTV#NETWORK");
-const { init } = useWorker();
+const { init, target } = useWorker();
 init(bc);
+
+target.addEventListener("ready", () => {
+	log.info("Worker ready");
+	wg.value--;
+});
 
 // Detect current platform
 const domain = window.location.hostname.split(/\./).slice(-2).join(".");

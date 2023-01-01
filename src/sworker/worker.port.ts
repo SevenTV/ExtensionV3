@@ -1,9 +1,9 @@
-import { getRandomInt } from "@/common/Rand";
 import { TypedWorkerMessage, WorkerMessage, WorkerMessageType } from ".";
 import { WorkerDriver } from "./worker.driver";
 
 export class WorkerPort {
 	id: symbol;
+	seq = 0;
 
 	platform: Platform | null = null;
 	channel: CurrentChannel | null = null;
@@ -11,11 +11,14 @@ export class WorkerPort {
 	user: SevenTV.User | null = null;
 
 	constructor(private driver: WorkerDriver, private port: MessagePort) {
-		this.id = Symbol(`seventv-worker-port-${getRandomInt(1000, 9999)}`);
-		this.driver.log.debug("Port opened:", this.id.toString());
+		this.id = Symbol("seventv-worker-port");
+		this.seq = driver.ports.size + 1;
+		this.driver.log.debug(`Port opened: #${this.seq.toString()}`);
 
 		port.addEventListener("message", (ev) => this.onMessage(ev));
 		port.start();
+
+		this.postMessage("INIT", {});
 	}
 
 	private onMessage(ev: MessageEvent) {
@@ -45,13 +48,17 @@ export class WorkerPort {
 
 				break;
 			}
+			case "CHANNEL_ACTIVE_CHATTER": {
+				this.driver.emit("set_channel_presence", {}, this);
+				break;
+			}
 			case "CLOSE":
 				if (this.channel) {
 					this.driver.emit("stop_watching_channel", this.channel, this);
 				}
 
 				this.driver.ports.delete(this.id);
-				this.driver.log.debug("Port closed", this.id.toString());
+				this.driver.log.debug(`Port closed: #${this.seq.toString()}`);
 				break;
 		}
 	}

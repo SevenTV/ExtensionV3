@@ -9,7 +9,7 @@ import {
 import { HookedInstance } from "@/common/ReactHooks";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { useStore } from "@/store/main";
-import { NetWorkerMessageType } from "@/worker";
+import { useWorker } from "@/composable/useWorker";
 
 const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatAutocompleteComponent>;
@@ -17,6 +17,7 @@ const props = defineProps<{
 
 const store = useStore();
 const { emoteMap } = useChatAPI();
+const { sendMessage } = useWorker();
 
 const providers = ref<Record<string, Twitch.ChatAutocompleteProvider>>({});
 
@@ -363,7 +364,12 @@ onMounted(() => {
 			if (sendOnUpdate) {
 				pushHistory();
 
-				store.sendWorkerMessage(NetWorkerMessageType.NOTIFY, { key: "presences:self:write" });
+				// Tell the worker to write presence
+				if (store.channel) {
+					sendMessage("CHANNEL_ACTIVE_CHATTER", {
+						channel_id: store.channel.id,
+					});
+				}
 			}
 
 			if (!awaitingUpdate.value) {
