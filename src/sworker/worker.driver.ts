@@ -5,6 +5,7 @@ import { EventAPI } from "./worker.events";
 import { db, Dexie7 } from "@/db/IndexedDB";
 import { TypedWorkerMessage, WorkerMessageType } from ".";
 import type { TypedEventListenerOrEventListenerObject } from "@/common/EventTarget";
+import { getRandomInt } from "@/common/Rand";
 
 export class WorkerDriver extends EventTarget {
 	bc: BroadcastChannel;
@@ -38,12 +39,12 @@ export class WorkerDriver extends EventTarget {
 		this.eventAPI = new EventAPI(this);
 		this.eventAPI.connect("WebSocket");
 
-		db.ready().then(() => {
+		db.ready().then(async () => {
 			// Fetch global emotes
 			const sets = [] as SevenTV.EmoteSet[];
 			let emoteCount = 0;
 
-			Promise.allSettled<SevenTV.EmoteSet>([
+			await Promise.allSettled<SevenTV.EmoteSet>([
 				this.http.API().seventv.loadGlobalSet(),
 				this.http.API().frankerfacez.loadGlobalEmoteSet(),
 				this.http.API().betterttv.loadGlobalEmoteSet(),
@@ -63,6 +64,15 @@ export class WorkerDriver extends EventTarget {
 					);
 				})
 				.catch((e) => log.error("<API>", "Failed to fetch global emotes:", e));
+
+			// Do DB cleanup for unused data
+			setTimeout(() => {
+				const exemptions = Array.from(this.ports.values())
+					.filter((p) => p.channel)
+					.map((p) => p.channel!.id);
+
+				db.expireDocuments(exemptions);
+			}, getRandomInt(2500, 15000));
 		});
 
 		// Track new connections
