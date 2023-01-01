@@ -16,7 +16,12 @@ const channelSets = useLiveQuery(
 			.equals(channel.value?.id ?? "")
 			.first()
 			.then((c) => c?.set_ids ?? []),
-	() => void 0,
+	() => {
+		// reset the third-party emote providers
+		emoteProviders.value["7TV"] = {};
+		emoteProviders.value["FFZ"] = {};
+		emoteProviders.value["BTTV"] = {};
+	},
 	{
 		reactives: [channel],
 	},
@@ -55,7 +60,7 @@ useLiveQuery(
 		emoteMap.value = o;
 	},
 	{
-		reactives: [channel, channelSets],
+		reactives: [channelSets],
 	},
 );
 </script>

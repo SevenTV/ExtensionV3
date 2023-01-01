@@ -1,3 +1,5 @@
+import { log } from "@/common/Logger";
+import { useWorker, WorkletEvent } from "@/composable/useWorker";
 import { NetWorkerMessage, NetWorkerMessageType, TypedNetWorkerMessage } from "@/worker";
 import { defineStore } from "pinia";
 
@@ -34,33 +36,36 @@ export const useStore = defineStore("main", {
 			this.location = location;
 		},
 
-		setChannel(channel: CurrentChannel): boolean {
-			if (this.channel && this.channel.id === channel.id) {
+		setChannel(channel: CurrentChannel | null): boolean {
+			if (
+				(channel === null && this.channel === null) ||
+				(this.channel && channel && this.channel.id === channel.id)
+			) {
 				return false; // no change.
 			}
 
 			this.channel = channel;
+			if (!this.channel) return true;
 
-			const w = this.workers.net;
-			if (w) {
-				this.awaitWorkerNotify(`channel:${channel.id}:ready`, () => {
-					this.channel!.loaded = true;
+			const { sendMessage, target } = useWorker();
 
-					return false;
-				});
+			// Set the "loaded" property once the worker has confirmed the channel has been fetched
+			const onLoaded = (ev: WorkletEvent<"channel_fetched">) => {
+				if (!this.channel || this.channel.id !== ev.detail.id) return;
 
-				w.postMessage({
-					source: "SEVENTV",
-					type: NetWorkerMessageType.STATE,
-					data: {
-						local: {
-							identity: { ...this.identity },
-							platform: this.platform,
-							channel: this.channel && this.channel.id ? { ...this.channel } : null,
-						},
-					},
-				} as NetWorkerMessage<NetWorkerMessageType.STATE>);
-			}
+				this.channel.loaded = true;
+
+				log.info("Channel loaded:", this.channel.id);
+				target.removeEventListener("channel_fetched", onLoaded);
+			};
+			target.addEventListener("channel_fetched", onLoaded);
+
+			// Tell the worker we're now watching a new channel
+			sendMessage("STATE", {
+				identity: { ...this.identity } as TwitchIdentity | YouTubeIdentity,
+				platform: this.platform,
+				channel: this.channel && this.channel.id ? { ...this.channel } : null,
+			});
 
 			return true;
 		},

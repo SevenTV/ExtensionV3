@@ -5,10 +5,11 @@
 	"private": true,
 	"version": "3.0.0",
 	"scripts": {
-		"dev": "vite build --watch --mode dev --minify esnext",
+		"dev": "vite build --watch --mode dev --minify esnext & vite build -c worker.vite.config.ts --watch",
 		"build:dev": "vite build --mode dev --minify terser",
 		"build:stage": "vue-tsc --noEmit && vite build --minify terser --mode stage",
 		"build:prod": "vue-tsc --noEmit && vite build --minify terser",
+		"build:worker": "vite build -c worker.vite.config.ts",
 		"dev:web": "vite",
 		"format": "prettier -w .",
 		"lint:style": "stylelint **/*.{vue,scss,css} --ignore-path .gitignore",

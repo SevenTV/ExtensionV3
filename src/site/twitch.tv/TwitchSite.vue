@@ -11,13 +11,7 @@ import ChatModule from "./modules/chat/ChatModule.vue";
 import ChatInputModule from "./modules/chat-input/ChatInputModule.vue";
 import EmoteMenuModule from "./modules/emote-menu/EmoteMenuModule.vue";
 
-const props = defineProps<{
-	netWorker: Worker;
-	transformWorker: Worker;
-}>();
-
 const store = useStore();
-store.setWorker("net", props.netWorker);
 
 // Retrieve the current user from twitch internals
 const user = getUser()?.props.user ?? null;

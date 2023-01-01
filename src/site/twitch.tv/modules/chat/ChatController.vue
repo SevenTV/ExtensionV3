@@ -150,17 +150,20 @@ const onTwitchEmotes = debounceFn((emoteSets: Twitch.TwitchEmoteSet[]) => {
 
 definePropertyHook(controller.value.component, "props", {
 	value(v: typeof controller.value.component.props) {
-		currentChannel.value = {
-			id: v.channelID,
-			username: v.channelLogin,
-			display_name: v.channelDisplayName,
-			loaded: false,
-		};
+		if (v.channelID) {
+			currentChannel.value = {
+				id: v.channelID,
+				username: v.channelLogin,
+				display_name: v.channelDisplayName,
+				loaded: false,
+			};
+
+			chatAPI.currentChannel.value = currentChannel.value;
+		}
 
 		// Keep track of chat props
 		chatAPI.isModerator.value = v.isCurrentUserModerator;
 		chatAPI.isVIP.value = v.isCurrentUserVIP;
-		chatAPI.currentChannel.value = currentChannel.value;
 		chatAPI.sendMessage.value = v.chatConnectionAPI.sendMessage;
 
 		// Parse twitch emote sets

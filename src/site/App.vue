@@ -1,7 +1,7 @@
 <template>
 	<!-- Spawn Platform-specific Logic -->
 	<template v-if="ok">
-		<component :is="platformComponent" v-if="platformComponent" :net-worker="nw" />
+		<component :is="platformComponent" v-if="platformComponent" />
 	</template>
 
 	<!-- Render tooltip -->
@@ -23,10 +23,9 @@
 import { Component, markRaw, onMounted, ref } from "vue";
 import { log } from "@/common/Logger";
 import { tooltip } from "@/composable/useTooltip";
-import { NetWorkerMessage, NetWorkerMessageType } from "@/worker";
-import NetworkWorker from "@/worker/net.worker?worker&inline";
 import TwitchSite from "./twitch.tv/TwitchSite.vue";
 import { db } from "@/db/IndexedDB";
+import { useWorker } from "@/composable/useWorker";
 
 const ok = ref(false);
 
@@ -37,17 +36,10 @@ db.ready().then(() => {
 	ok.value = true;
 });
 
-// Spawn NetworkWorker
-// This contains the connection for the Event API
-const nw = new NetworkWorker();
-const id = Math.floor(Math.random() * Math.pow(2, 15));
-log.info("<Global>", "Initializing WebSocket,", `id=${id}`);
-
-nw.postMessage({
-	source: "SEVENTV",
-	type: NetWorkerMessageType.INIT,
-	data: { id },
-} as Partial<NetWorkerMessage<NetWorkerMessageType.INIT>>);
+// Spawn SharedWorker
+const bc = new BroadcastChannel("SEVENTV#NETWORK");
+const { init } = useWorker();
+init(bc);
 
 // Detect current platform
 const domain = window.location.hostname.split(/\./).slice(-2).join(".");
