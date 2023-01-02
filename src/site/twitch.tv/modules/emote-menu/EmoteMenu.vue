@@ -225,16 +225,19 @@ onUnmounted(() => {
 
 .emote-menu {
 	width: 32rem;
-	border-radius: 0.6rem !important;
-	background-color: var(--color-background-float);
-	box-shadow: var(--shadow-elevation-2);
+	border-top-left-radius: 0.6rem !important;
+	border-top-right-radius: 0.6rem !important;
+	background-color: #161616c4;
+	backdrop-filter: blur(16px);
 	overflow: clip;
+	outline: 1px solid #ffffff1a;
 }
 
 .header {
 	display: flex;
 	height: 4.5rem;
 	background: hsla(0deg, 0%, 50%, 6%);
+	border-bottom: 1px solid rgba(255, 255, 255, 4.1%);
 	border-radius: 0.6rem 0.6rem 0 0;
 	justify-content: space-evenly;
 	padding: 0.75rem;
@@ -263,16 +266,6 @@ onUnmounted(() => {
 .body {
 	display: flex;
 	height: 40rem;
-
-	&:after {
-		content: "";
-		position: absolute;
-		height: 100%;
-		width: 100%;
-		overflow: hidden;
-		pointer-events: none;
-		box-shadow: inset 0 7px 9px -9px hsla(0deg, 0%, 0%, 50%);
-	}
 
 	&[selected="false"] {
 		display: none;
