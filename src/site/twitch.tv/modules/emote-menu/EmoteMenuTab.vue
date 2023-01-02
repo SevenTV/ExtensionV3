@@ -89,6 +89,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 .scroll-area {
 	width: 28rem;
+	flex-shrink: 0;
 }
 
 .emote-set-container {
@@ -148,8 +149,8 @@ onBeforeUnmount(() => {
 }
 
 .sidebar {
-	width: 4rem;
 	height: 100%;
+	width: 100%;
 	background: rgba(217, 217, 217, 3%);
 	border-left: 1px solid rgba(255, 255, 255, 4.1%);
 	overflow-y: scroll;
@@ -163,7 +164,7 @@ onBeforeUnmount(() => {
 
 .set-sidebar-icon-container {
 	width: 100%;
-	padding: 0.5rem;
+	padding: 0.5rem 0;
 
 	&[selected="true"] {
 		background: hsla(0deg, 0%, 50%, 32%);
