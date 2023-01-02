@@ -98,7 +98,6 @@ onBeforeUnmount(() => {
 	top: 0;
 	overflow: hidden;
 	pointer-events: none;
-	box-shadow: inset -7px 0 9px -9px hsla(0deg, 0%, 0%, 50%);
 }
 
 .emote-set-container {
@@ -117,8 +116,7 @@ onBeforeUnmount(() => {
 	position: sticky;
 	top: -1px;
 	display: flex;
-	background: var(--color-background-base);
-	box-shadow: 0 1px 3px hsla(0deg, 0%, 0%, 50%);
+	background: rgba(217, 217, 217, 3%);
 }
 
 .set-header-icon {
@@ -161,7 +159,8 @@ onBeforeUnmount(() => {
 .sidebar {
 	width: 4rem;
 	height: 100%;
-	background: hsla(0deg, 0%, 50%, 6%);
+	background: rgba(217, 217, 217, 3%);
+	border-left: 1px solid rgba(255, 255, 255, 0.041);
 	overflow-y: scroll;
 	scrollbar-width: none;
 

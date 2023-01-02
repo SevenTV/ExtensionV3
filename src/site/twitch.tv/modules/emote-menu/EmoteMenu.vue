@@ -225,9 +225,11 @@ onUnmounted(() => {
 
 .emote-menu {
 	width: 32rem;
-	border-radius: 0.6rem !important;
-	background-color: var(--color-background-float);
-	box-shadow: var(--shadow-elevation-2);
+	border-top-left-radius: 0.6rem !important;
+	border-top-right-radius: 0.6rem !important;
+	background-color: #161616c4;
+	backdrop-filter: blur(16px);
+	border: 1px solid #ffffff1a;
 	overflow: clip;
 }
 
@@ -235,6 +237,7 @@ onUnmounted(() => {
 	display: flex;
 	height: 4.5rem;
 	background: hsla(0deg, 0%, 50%, 6%);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.041);
 	border-radius: 0.6rem 0.6rem 0 0;
 	justify-content: space-evenly;
 	padding: 0.75rem;
@@ -271,7 +274,6 @@ onUnmounted(() => {
 		width: 100%;
 		overflow: hidden;
 		pointer-events: none;
-		box-shadow: inset 0 7px 9px -9px hsla(0deg, 0%, 0%, 50%);
 	}
 
 	&[selected="false"] {
