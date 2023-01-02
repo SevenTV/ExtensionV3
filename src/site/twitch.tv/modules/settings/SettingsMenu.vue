@@ -1,7 +1,7 @@
 <template>
-	<SettingsMenuButton @toggle="show = !show" />
+	<SettingsMenuButton @toggle="toggle" />
 
-	<div v-show="show" class="seventv-settings-menu-container">
+	<div v-show="show" ref="el" class="seventv-settings-menu-container">
 		<div class="settings-menu">
 			<div class="header">
 				<div class="header-left">
@@ -10,7 +10,7 @@
 					</div>
 				</div>
 				<div class="header-right">
-					<button class="header-icon header-button" @click.prevent="show = false">
+					<button class="header-icon header-button" @click.prevent="toggle">
 						<Close />
 					</button>
 				</div>
@@ -30,6 +30,7 @@
 <script setup lang="ts">
 import { useSettings } from "@/composable/useSettings";
 import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
 import SettingsMenuButton from "./SettingsMenuButton.vue";
 import SettingsNode from "./SettingsNode.vue";
 import Logo7TV from "@/assets/svg/Logo7TV.vue";
@@ -38,6 +39,17 @@ import Close from "@/assets/svg/Icons/Close.vue";
 const { getNodes } = useSettings();
 
 const show = ref(false);
+const el = ref(null);
+
+let unsub: (() => void) | undefined;
+
+function toggle() {
+	unsub?.();
+	show.value = !show.value;
+	if (show.value) {
+		unsub = onClickOutside(el.value, toggle);
+	}
+}
 </script>
 
 <style scoped lang="scss">
