@@ -1,6 +1,5 @@
 import { log } from "@/common/Logger";
 import { useWorker, WorkletEvent } from "@/composable/useWorker";
-import { NetWorkerMessage, NetWorkerMessageType, TypedNetWorkerMessage } from "@/worker";
 import { defineStore } from "pinia";
 import { UAParser, UAParserInstance, IBrowser } from "ua-parser-js";
 
@@ -22,10 +21,6 @@ export const useStore = defineStore("main", {
 			identity: null,
 			location: null,
 			channel: null,
-			workers: {
-				net: null,
-			},
-			workerSeq: 0,
 			agent: new UAParser(),
 		} as State),
 
@@ -71,42 +66,6 @@ export const useStore = defineStore("main", {
 			});
 
 			return true;
-		},
-
-		sendWorkerMessage<T extends NetWorkerMessageType>(type: T, data: TypedNetWorkerMessage<T>) {
-			const w = this.workers.net;
-			if (!w) return;
-
-			w.postMessage({
-				source: "SEVENTV",
-				type,
-				data,
-			} as NetWorkerMessage<T>);
-		},
-
-		setWorker(name: keyof State["workers"], worker: Worker | null) {
-			this.workers[name] = worker;
-		},
-
-		awaitWorkerNotify(key: string, cb: (data?: Record<string, string>) => boolean): void {
-			const w = this.workers.net;
-			if (!w) return;
-
-			const resp = (ev: MessageEvent) => {
-				if (ev.data.source !== "SEVENTV") return true;
-				if (ev.data.type !== NetWorkerMessageType.NOTIFY) return true;
-				if (ev.data.data.key !== key) return true;
-
-				if (!cb(ev.data.data.values)) {
-					w.removeEventListener("message", resp);
-
-					return false;
-				}
-
-				return true;
-			};
-
-			w.addEventListener("message", resp);
 		},
 	},
 

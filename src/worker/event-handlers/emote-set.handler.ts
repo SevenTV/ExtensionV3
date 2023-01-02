@@ -1,4 +1,4 @@
-import type { ChangeMap, EventContext } from "@/worker/events";
+import { ChangeMap, EventContext } from "..";
 import { iterateChangeMap } from "./handler";
 
 export function onEmoteSetUpdate(ctx: EventContext, cm: ChangeMap<SevenTV.ObjectKind.EMOTE_SET>) {
@@ -17,9 +17,12 @@ export function onEmoteSetUpdate(ctx: EventContext, cm: ChangeMap<SevenTV.Object
 					.where("id")
 					.equals(cm.id)
 					.modify((es) => {
-						const i = es.emotes.findIndex((ae) => ae.id === old.id) ?? -1;
+						for (;;) {
+							const i = es.emotes.findIndex((ae) => ae.id === old.id);
+							if (i < 0) break;
 
-						if (i >= 0) es.emotes.splice(i, 1);
+							es.emotes.splice(i, 1);
+						}
 					});
 			},
 		},

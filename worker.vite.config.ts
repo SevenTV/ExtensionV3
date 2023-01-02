@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
 			write: true,
 			rollupOptions: {
 				input: {
-					worker: r("src/sworker/worker.root.ts"),
+					worker: r("src/worker/worker.root.ts"),
 				},
 				output: {
 					entryFileNames: "worker.js",

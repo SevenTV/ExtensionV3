@@ -1,7 +1,7 @@
 import { LOCAL_STORAGE_KEYS } from "@/common/Constant";
 import { TypedEventListenerOrEventListenerObject } from "@/common/EventTarget";
 import { log, Logger } from "@/common/Logger";
-import { TypedWorkerMessage, WorkerMessage, WorkerMessageType } from "@/sworker";
+import { TypedWorkerMessage, WorkerMessage, WorkerMessageType } from "@/worker";
 
 const workerLog = new Logger();
 workerLog.setContextName("Worker/Pipe");

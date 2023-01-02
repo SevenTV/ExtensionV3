@@ -1,5 +1,5 @@
 import { log } from "@/common/Logger";
-import type { ChangeMap, EventContext, ObjectTypeOfKind } from "../events";
+import type { ChangeMap, EventContext, ObjectTypeOfKind } from "../";
 import { onCosmeticCreate } from "./cosmetic.handler";
 import { onEmoteSetUpdate } from "./emote-set.handler";
 import { onEntitlementCreate } from "./entitlement.handler";

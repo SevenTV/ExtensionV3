@@ -1,5 +1,5 @@
 import { log } from "@/common/Logger";
-import type { ChangeMap, EventContext } from "../events";
+import { ChangeMap, EventContext } from "..";
 
 export function onCosmeticCreate(ctx: EventContext, cm: ChangeMap<SevenTV.ObjectKind.COSMETIC>) {
 	if (!cm.object) return;
@@ -9,5 +9,5 @@ export function onCosmeticCreate(ctx: EventContext, cm: ChangeMap<SevenTV.Object
 		.withErrorFallback(ctx.db.cosmetics.put(cm.object), () =>
 			ctx.db.cosmetics.where("id").equals(cm.object.id).modify(cm.object),
 		)
-		.catch((err) => log.error("Net/EventAPI", "Failed to insert cosmetic", err));
+		.catch((err) => log.error("<EventAPI>", "Failed to insert cosmetic", err));
 }

@@ -1,11 +1,10 @@
 import { log } from "@/common/Logger";
-import { ChangeMap, EventContext } from "../events";
-import { getLocal, sendTabNotify } from "../net.worker";
+import { ChangeMap, EventContext } from "..";
 
 export async function onEntitlementCreate(ctx: EventContext, cm: ChangeMap<SevenTV.ObjectKind.ENTITLEMENT>) {
 	if (!cm.object) return;
 
-	const platform = getLocal()?.platform;
+	const platform = ctx.eventAPI.platform;
 	if (!platform) return; // no platform set
 
 	// Mutate the entitlement
@@ -23,11 +22,4 @@ export async function onEntitlementCreate(ctx: EventContext, cm: ChangeMap<Seven
 			ctx.db.entitlements.where("id").equals(obj.id).modify(obj),
 		)
 		.catch((err) => log.error("Net/EventAPI", "Failed to insert entitlement", err));
-
-	// Notify the UI about the new entitlement
-	sendTabNotify("entitlements:create", {
-		ref_id: obj.ref_id,
-		slot: obj.kind,
-		cid: obj.cid,
-	});
 }
