@@ -267,15 +267,6 @@ onUnmounted(() => {
 	display: flex;
 	height: 40rem;
 
-	&:after {
-		content: "";
-		position: absolute;
-		height: 100%;
-		width: 100%;
-		overflow: hidden;
-		pointer-events: none;
-	}
-
 	&[selected="false"] {
 		display: none;
 	}

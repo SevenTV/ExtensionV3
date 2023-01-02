@@ -90,16 +90,6 @@ onBeforeUnmount(() => {
 	width: 28rem;
 }
 
-.emote-area:after {
-	content: "";
-	position: absolute;
-	height: 100%;
-	width: 100%;
-	top: 0;
-	overflow: hidden;
-	pointer-events: none;
-}
-
 .emote-set-container {
 	position: relative;
 }
