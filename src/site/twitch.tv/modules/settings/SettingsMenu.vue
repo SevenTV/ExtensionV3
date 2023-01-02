@@ -1,5 +1,5 @@
 <template>
-	<SettingsMenuButton @toggle="toggle" />
+	<SettingsMenuButton ref="button" @toggle="toggle" />
 
 	<div v-show="show" ref="el" class="seventv-settings-menu-container">
 		<div class="settings-menu">
@@ -47,7 +47,7 @@ function toggle() {
 	unsub?.();
 	show.value = !show.value;
 	if (show.value) {
-		unsub = onClickOutside(el.value, toggle);
+		unsub = onClickOutside(el.value, toggle, { ignore: ["button"] });
 	}
 }
 </script>

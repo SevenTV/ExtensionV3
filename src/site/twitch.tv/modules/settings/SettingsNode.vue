@@ -4,7 +4,7 @@
 			{{ node.label }}
 		</div>
 		<div class="component-container">
-			<component :is="getComponent(node)" :node="node" class="component" />
+			<component :is="getComponent(node)" :node="node" />
 			<div v-if="node.hint" class="hint">
 				{{ node.hint }}
 			</div>
@@ -38,6 +38,7 @@ defineProps<{
 }
 
 .hint {
+	margin-top: 1rem;
 	font-size: 1.2rem;
 	font-weight: 400;
 }

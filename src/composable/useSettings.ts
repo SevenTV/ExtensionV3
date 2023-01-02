@@ -1,5 +1,5 @@
 import { db } from "@/db/IndexedDB";
-import { reactive, toRef, watch } from "vue";
+import { reactive, toRef, watch, Ref } from "vue";
 import { useLiveQuery } from "./useLiveQuery";
 
 const raw = reactive({} as Record<string, SevenTV.SettingType>);
@@ -10,9 +10,9 @@ const settings = reactive({} as Record<string, SevenTV.SettingNode<SevenTV.Setti
 */
 
 export function useSettings() {
-	function get(key: string) {
+	function get<T extends SevenTV.SettingType>(key: string) {
 		if (settings[key]) settings[key];
-		return toRef(raw, key);
+		return toRef(raw, key) as Ref<T>;
 	}
 
 	function getNodes() {

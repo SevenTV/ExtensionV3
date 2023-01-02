@@ -64,7 +64,7 @@ declare namespace SevenTV {
 		hint?: string;
 		type: SettingNode.ComponentType;
 		component?: VueElementConstructor<SettingNode<T>>;
-		options?: T[];
+		options?: SettingType[];
 
 		value?: T;
 		defaultValue: T;
@@ -73,7 +73,7 @@ declare namespace SevenTV {
 	export type SettingType = boolean | number | string | object;
 
 	export namespace SettingNode {
-		export type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "CUSTOM";
+		export type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "TOGGLE" | "CUSTOM";
 	}
 
 	interface ActiveEmote {

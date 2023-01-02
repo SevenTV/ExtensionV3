@@ -53,7 +53,7 @@ const { show, hide } = useTooltip(ChatEmoteTooltip, {
 	emote: props.emote,
 });
 
-const hideUnlisted = useSettings().get("general.hide_unlisted_emotes");
+const hideUnlisted = useSettings().get("general.blur_unlisted_emotes");
 
 const openCard = (ev: MouseEvent) => {
 	if (!props.emote.id || props.emote.provider !== "TWITCH") return;

@@ -14,10 +14,11 @@ const { markAsReady } = useModule("settings", {
 
 useSettings().register([
 	{
-		key: "general.hide_unlisted_emotes",
-		label: "Hide Unlisted Emotes",
+		key: "general.blur_unlisted_emotes",
+		label: "Blur unlisted emotes",
 		hint: "If checked, emotes which have not yet been approved for listing on 7tv.app will be blurred",
-		type: "CHECKBOX",
+		type: "TOGGLE",
+		options: ["Show", "Blur"],
 		defaultValue: false,
 	},
 ]);
