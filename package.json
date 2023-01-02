@@ -5,7 +5,7 @@
 	"private": true,
 	"version": "3.0.0",
 	"scripts": {
-		"dev": "vite build --watch --mode dev --minify esnext & vite build -c worker.vite.config.ts --watch",
+		"dev": "concurrently -k \"vite build --watch --mode dev --minify esnext\" \"vite build -c worker.vite.config.ts --mode dev --watch\"",
 		"build:dev": "vite build --mode dev --minify terser",
 		"build:stage": "vue-tsc --noEmit && vite build --minify terser --mode stage",
 		"build:prod": "vue-tsc --noEmit && vite build --minify terser",
@@ -36,6 +36,7 @@
 		"@vueuse/core": "^9.9.0",
 		"chokidar": "^3.5.3",
 		"color2k": "^2.0.0",
+		"concurrently": "^7.6.0",
 		"dexie": "^3.2.2",
 		"eslint": "^8.30.0",
 		"eslint-plugin-prettier": "^4.2.1",
