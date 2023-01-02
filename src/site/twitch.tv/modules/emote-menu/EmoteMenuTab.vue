@@ -160,7 +160,7 @@ onBeforeUnmount(() => {
 	width: 4rem;
 	height: 100%;
 	background: rgba(217, 217, 217, 3%);
-	border-left: 1px solid rgba(255, 255, 255, 0.041);
+	border-left: 1px solid rgba(255, 255, 255, 4.1%);
 	overflow-y: scroll;
 	scrollbar-width: none;
 

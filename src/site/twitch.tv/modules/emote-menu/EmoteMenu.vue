@@ -237,7 +237,7 @@ onUnmounted(() => {
 	display: flex;
 	height: 4.5rem;
 	background: hsla(0deg, 0%, 50%, 6%);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.041);
+	border-bottom: 1px solid rgba(255, 255, 255, 4.1%);
 	border-radius: 0.6rem 0.6rem 0 0;
 	justify-content: space-evenly;
 	padding: 0.75rem;
