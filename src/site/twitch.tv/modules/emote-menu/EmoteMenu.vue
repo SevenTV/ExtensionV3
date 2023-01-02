@@ -229,8 +229,8 @@ onUnmounted(() => {
 	border-top-right-radius: 0.6rem !important;
 	background-color: #161616c4;
 	backdrop-filter: blur(16px);
-	border: 1px solid #ffffff1a;
 	overflow: clip;
+	outline: 1px solid #ffffff1a;
 }
 
 .header {

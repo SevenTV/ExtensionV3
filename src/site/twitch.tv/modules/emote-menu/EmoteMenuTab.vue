@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
 	position: sticky;
 	top: -1px;
 	display: flex;
-	background: rgba(217, 217, 217, 3%);
+	background: rgb(30 30 30 / 90%);
 }
 
 .set-header-icon {
