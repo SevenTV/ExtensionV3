@@ -5,7 +5,7 @@ declare namespace SevenTV {
 		flags: EmoteFlags;
 		tags: string[];
 		lifecycle: EmoteLifecycle;
-		listed: boolean;
+		listed?: boolean;
 		animated?: boolean;
 		owner: User | null;
 		host: ImageHost;
@@ -50,6 +50,30 @@ declare namespace SevenTV {
 		// Non-structural
 		provider?: Provider;
 		priority?: number;
+	}
+
+	interface Setting<T extends SettingType> {
+		key: string;
+		type: typeof T;
+		value: T;
+	}
+
+	export interface SettingNode<T extends SettingType> {
+		key: string;
+		label: string;
+		hint?: string;
+		type: SettingNode.ComponentType;
+		component?: VueElementConstructor<SettingNode<T>>;
+		options?: T[];
+
+		value?: T;
+		defaultValue: T;
+		disabledIf?: () => boolean;
+	}
+	export type SettingType = boolean | number | string | object;
+
+	export namespace SettingNode {
+		export type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "CUSTOM";
 	}
 
 	interface ActiveEmote {

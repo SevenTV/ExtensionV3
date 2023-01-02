@@ -28,6 +28,7 @@ import NetworkWorker from "@/worker/net.worker?worker&inline";
 import TransformWorker from "@/worker/transform.worker?worker&inline";
 import TwitchSite from "./twitch.tv/TwitchSite.vue";
 import { db } from "@/db/IndexedDB";
+import { useSettings } from "@/composable/useSettings";
 
 const ok = ref(false);
 
@@ -36,6 +37,7 @@ log.debug("Waiting for IndexedDB...");
 db.ready().then(() => {
 	log.info("IndexedDB ready");
 	ok.value = true;
+	useSettings().init();
 });
 
 // Spawn NetworkWorker
@@ -87,5 +89,15 @@ onMounted(() => {
 	pointer-events: none;
 	top: 0;
 	left: 0;
+}
+
+.tw-root--theme-dark {
+	--seventv-background-transparent-1: #161616c4;
+	--seventv-border-transparent-1: #ffffff1a;
+}
+
+.tw-root--theme-light {
+	--seventv-background-transparent-1: #e9e9e9c4;
+	--seventv-border-transparent-1: #0000001a;
 }
 </style>
