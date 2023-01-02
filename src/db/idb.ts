@@ -1,7 +1,6 @@
-// NetCache uses IndexedDB to share data across all browser instances
-
 import { log } from "@/common/Logger";
-import { DBCoreMutateRequest, Dexie, PromiseExtended, Table } from "dexie";
+import { DBCoreMutateRequest, Dexie, PromiseExtended, Table, DexieError } from "dexie";
+import { defineVersions } from "./versions.idb";
 
 export class Dexie7 extends Dexie {
 	VERSION = 1.7;
@@ -15,17 +14,16 @@ export class Dexie7 extends Dexie {
 	entitlements!: Table<SevenTV.Entitlement & WithTimestamp, SevenTV.ObjectID>;
 
 	constructor() {
-		super("SevenTV", {
+		const dbName = ["seventv"];
+		if (import.meta.env.MODE && import.meta.env.MODE !== "production") {
+			dbName.push(import.meta.env.MODE);
+		}
+
+		super(dbName.join("_"), {
 			autoOpen: false,
 		});
 
-		this.version(this.VERSION).stores({
-			channels: "id,timestamp",
-			emoteSets: "id,timestamp,owner.id,priority,provider",
-			emotes: "id,timestamp,name,owner.id",
-			cosmetics: "id,timestamp",
-			entitlements: "id,timestamp,cid",
-		});
+		defineVersions(this);
 
 		this.use({
 			name: "SetDocumentTimestamps",
@@ -58,12 +56,26 @@ export class Dexie7 extends Dexie {
 	}
 
 	async ready(): Promise<boolean> {
-		return new Promise<boolean>((resolve) => {
+		return new Promise<boolean>((resolve, reject) => {
 			if (this._ready) return resolve(true);
 
-			this.open().then(() => {
-				resolve(true);
-			});
+			// Handle errors in opening the DB
+			const onError = async (err: Error) => {
+				reject(err);
+
+				log.error("<IDB>", "Failed to open database", err.toString());
+
+				// VersionError: delete the DB
+				if ((err as DexieError).name === "VersionError") {
+					log.error("<IDB>", `!! Versioning issue detected. This will not work. (IndexedDB/${db.name}) !!`);
+				}
+			};
+
+			this.open()
+				.then(() => {
+					resolve(true);
+				})
+				.catch(onError);
 		});
 	}
 

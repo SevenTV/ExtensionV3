@@ -2,7 +2,7 @@ import { log, Logger } from "@/common/Logger";
 import { WorkerHttp } from "./worker.http";
 import { WorkerPort } from "./worker.port";
 import { EventAPI } from "./worker.events";
-import { db, Dexie7 } from "@/db/IndexedDB";
+import { db, Dexie7 } from "@/db/idb";
 import { TypedWorkerMessage, WorkerMessageType } from ".";
 import type { TypedEventListenerOrEventListenerObject } from "@/common/EventTarget";
 import { getRandomInt } from "@/common/Rand";

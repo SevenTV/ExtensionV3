@@ -3,7 +3,7 @@
 
 import { log } from "@/common/Logger";
 import { convertBttvEmoteSet, convertFFZEmoteSet } from "@/common/Transform";
-import { db } from "@/db/IndexedDB";
+import { db } from "@/db/idb";
 import type { WorkerDriver } from "./worker.driver";
 import type { WorkerPort } from "./worker.port";
 

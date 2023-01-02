@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { db } from "@/db/IndexedDB";
+import { db } from "@/db/idb";
 import { useStore } from "@/store/main";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { useLiveQuery } from "@/composable/useLiveQuery";
