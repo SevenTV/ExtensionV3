@@ -250,10 +250,13 @@ onUnmounted(() => {
 	user-select: none;
 	justify-content: center;
 	background: hsla(0deg, 0%, 50%, 6%);
+	color: var(--seventv-text-color-secondary);
 	border-radius: 0.2rem;
 
 	&[selected="true"] {
-		background: hsla(0deg, 0%, 50%, 32%);
+		background: var(--seventv-highlight-neutral-1);
+		color: var(--seventv-text-color-normal);
+		font-weight: 600;
 	}
 }
 

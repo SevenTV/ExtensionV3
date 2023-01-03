@@ -103,13 +103,16 @@ onBeforeUnmount(() => {
 }
 
 .set-header {
+	// =====================================================================
+	// Note: Please do not try to add blur to the set header, as it ends up
+	//       looking like it's half transparent and broken.
+	// =====================================================================
 	height: 3rem;
 	padding: 0.5rem 1.25rem;
 	position: sticky;
 	top: -1px;
 	display: flex;
-	background: var(--seventv-background-transparent-1);
-	backdrop-filter: blur(16px);
+	background: var(--seventv-background-transparent-2);
 }
 
 .set-header-icon {
