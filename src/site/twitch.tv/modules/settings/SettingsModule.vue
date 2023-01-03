@@ -12,7 +12,9 @@ const { markAsReady } = useModule("settings", {
 	depends_on: [],
 });
 
-useSettings().register([
+const { register } = useSettings();
+
+register([
 	{
 		key: "general.blur_unlisted_emotes",
 		label: "Blur unlisted emotes",

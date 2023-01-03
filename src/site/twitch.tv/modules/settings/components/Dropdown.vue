@@ -7,11 +7,10 @@
 </template>
 
 <script setup lang="ts">
-import { useSettings } from "@/composable/useSettings";
-import { Ref } from "vue";
+import { useConfig } from "@/composable/useSettings";
 const props = defineProps<{
-	node: SevenTV.SettingNode<string>;
+	node: SevenTV.SettingNode<SevenTV.SettingType>;
 }>();
 
-const setting = useSettings().get(props.node.key) as Ref<string>;
+const setting = useConfig(props.node.key);
 </script>

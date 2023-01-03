@@ -58,7 +58,7 @@ declare namespace SevenTV {
 		value: T;
 	}
 
-	export interface SettingNode<T extends SettingType> {
+	interface SettingNode<T extends SettingType> {
 		key: string;
 		label: string;
 		hint?: string;
@@ -71,10 +71,10 @@ declare namespace SevenTV {
 		defaultValue: T;
 		disabledIf?: () => boolean;
 	}
-	export type SettingType = boolean | number | string | object;
+	type SettingType = boolean | number | string | object;
 
-	export namespace SettingNode {
-		export type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "TOGGLE" | "CUSTOM";
+	namespace SettingNode {
+		type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "TOGGLE" | "CUSTOM";
 	}
 
 	interface ActiveEmote {

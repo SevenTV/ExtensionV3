@@ -28,7 +28,6 @@ import NetworkWorker from "@/worker/net.worker?worker&inline";
 import TransformWorker from "@/worker/transform.worker?worker&inline";
 import TwitchSite from "./twitch.tv/TwitchSite.vue";
 import { db } from "@/db/IndexedDB";
-import { useSettings } from "@/composable/useSettings";
 
 const ok = ref(false);
 
@@ -37,7 +36,6 @@ log.debug("Waiting for IndexedDB...");
 db.ready().then(() => {
 	log.info("IndexedDB ready");
 	ok.value = true;
-	useSettings().init();
 });
 
 // Spawn NetworkWorker

@@ -27,7 +27,7 @@ import { useTooltip } from "@/composable/useTooltip";
 import { tools } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import { ref, computed } from "vue";
 import ChatEmoteTooltip from "@/site/twitch.tv/modules/chat/components/ChatEmoteTooltip.vue";
-import { useSettings } from "@/composable/useSettings";
+import { useConfig } from "@/composable/useSettings";
 
 const props = withDefaults(
 	defineProps<{
@@ -53,7 +53,7 @@ const { show, hide } = useTooltip(ChatEmoteTooltip, {
 	emote: props.emote,
 });
 
-const hideUnlisted = useSettings().get("general.blur_unlisted_emotes");
+const hideUnlisted = useConfig<boolean>("general.blur_unlisted_emotes");
 
 const openCard = (ev: MouseEvent) => {
 	if (!props.emote.id || props.emote.provider !== "TWITCH") return;

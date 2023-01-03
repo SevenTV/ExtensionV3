@@ -1,53 +1,60 @@
 import { db } from "@/db/IndexedDB";
-import { reactive, toRef, watch, Ref } from "vue";
+import { reactive, Ref, customRef } from "vue";
 import { useLiveQuery } from "./useLiveQuery";
 
 const raw = reactive({} as Record<string, SevenTV.SettingType>);
-const settings = reactive({} as Record<string, SevenTV.SettingNode<SevenTV.SettingType>>);
-/*
+const nodes = reactive({} as Record<string, SevenTV.SettingNode<SevenTV.SettingType>>);
 
-//Initialize
-*/
+function toSettingRef<T extends SevenTV.SettingType>(key: string): Ref<T> {
+	return customRef<T>((track, trigger) => {
+		return {
+			get() {
+				track();
+				return raw[key] as T;
+			},
+			set(newVal) {
+				//Only write the setting if it passes the optional predicate
+				const predicate = nodes[key].predicate;
+				if (predicate && !predicate(newVal)) return;
 
+				raw[key] = newVal;
+				trigger();
+
+				//Write changes to the db
+				db.settings.put({ key: key, type: typeof newVal, value: newVal }, key);
+			},
+		};
+	});
+}
+
+db.ready().then(() =>
+	useLiveQuery(
+		() => db.settings.toArray(),
+		(s) => {
+			for (const { key, value } of s) {
+				raw[key] = value;
+			}
+		},
+	),
+);
+
+export function useConfig<T extends SevenTV.SettingType>(key: string) {
+	return toSettingRef<T>(key);
+}
 export function useSettings() {
-	function get<T extends SevenTV.SettingType>(key: string) {
-		if (settings[key]) settings[key];
-		return toRef(raw, key) as Ref<T>;
-	}
-
 	function getNodes() {
-		return settings;
+		return nodes;
 	}
 
-	function register(nodes: SevenTV.SettingNode<SevenTV.SettingType>[]) {
-		for (const node of nodes) {
-			settings[node.key] = node;
+	function register(newNodes: SevenTV.SettingNode<SevenTV.SettingType>[]) {
+		for (const node of newNodes) {
+			nodes[node.key] = node;
 			if (!raw[node.key]) raw[node.key] = node.defaultValue;
 		}
 	}
 
-	function init() {
-		watch(raw, (newRaw) => {
-			db.settings.bulkPut(
-				Object.entries(newRaw).map(([key, value]) => {
-					return { key: key, type: typeof value, value: value };
-				}),
-			);
-		});
-		useLiveQuery(
-			() => db.settings.toArray(),
-			(settings) => {
-				for (const { key, value } of settings) {
-					raw[key] = value;
-				}
-			},
-		);
-	}
-
 	return {
-		get,
 		getNodes,
 		register,
-		init,
 	};
 }

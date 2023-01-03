@@ -9,13 +9,12 @@
 </template>
 
 <script setup lang="ts">
-import { useSettings } from "@/composable/useSettings";
-import { Ref } from "vue";
+import { useConfig } from "@/composable/useSettings";
 const props = defineProps<{
 	node: SevenTV.SettingNode<string>;
 }>();
 
-const setting = useSettings().get(props.node.key) as Ref<string>;
+const setting = useConfig<string>(props.node.key);
 </script>
 <style scoped lang="scss">
 .radio-button {

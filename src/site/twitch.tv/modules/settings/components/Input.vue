@@ -11,13 +11,13 @@
 </template>
 
 <script setup lang="ts">
-import { useSettings } from "@/composable/useSettings";
-import { Ref, computed } from "vue";
+import { useConfig } from "@/composable/useSettings";
+import { computed } from "vue";
 const props = defineProps<{
 	node: SevenTV.SettingNode<string>;
 }>();
 
-const setting = useSettings().get(props.node.key) as Ref<string>;
+const setting = useConfig<string>(props.node.key);
 
 const isValid = computed(() => {
 	return props.node.predicate ? props.node.predicate?.(setting.value) : true;
