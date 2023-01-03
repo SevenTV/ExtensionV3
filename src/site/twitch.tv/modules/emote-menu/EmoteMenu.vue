@@ -256,7 +256,6 @@ onUnmounted(() => {
 	&[selected="true"] {
 		background: var(--seventv-highlight-neutral-1);
 		color: var(--seventv-text-color-normal);
-		font-weight: 600;
 	}
 }
 
