@@ -207,10 +207,13 @@ watch(list.value.domNodes, (nodes) => {
 });
 
 // Push a message
+const msgTypes = [MessageType.MESSAGE, MessageType.MODERATION];
 const onMessage = (msg: Twitch.Message): boolean => {
 	if (msg.id === "seventv-hook-message") {
 		return false;
 	}
+	if (!msgTypes.includes(msg.type)) return false;
+
 	switch (msg.type) {
 		case MessageType.MESSAGE:
 			onChatMessage(msg as Twitch.ChatMessage);
@@ -329,6 +332,11 @@ seventv-container.seventv-chat-list {
 .community-highlight {
 	opacity: 0.75;
 	backdrop-filter: blur(1em);
+	transition: opacity 0.25s;
+
+	&:hover {
+		opacity: 1;
+	}
 }
 
 .chat-list--default.seventv-checked {
