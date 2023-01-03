@@ -63,8 +63,9 @@ declare namespace SevenTV {
 		label: string;
 		hint?: string;
 		type: SettingNode.ComponentType;
-		component?: VueElementConstructor<SettingNode<T>>;
+		component?: Raw<object>;
 		options?: SettingType[];
+		predicate?: (p: T) => boolean;
 
 		value?: T;
 		defaultValue: T;
