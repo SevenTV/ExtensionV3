@@ -12,6 +12,7 @@ export class Dexie7 extends Dexie {
 	emotes!: Table<SevenTV.Emote & WithTimestamp, SevenTV.ObjectID>;
 	cosmetics!: Table<SevenTV.Cosmetic & WithTimestamp, SevenTV.ObjectID>;
 	entitlements!: Table<SevenTV.Entitlement & WithTimestamp, SevenTV.ObjectID>;
+	settings!: Table<SevenTV.Setting<SevenTV.SettingType>>;
 
 	constructor() {
 		const dbName = ["seventv"];

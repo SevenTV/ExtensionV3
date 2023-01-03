@@ -7,5 +7,6 @@ export function defineVersions(db: Dexie7) {
 		emotes: "id,timestamp,name,owner.id",
 		cosmetics: "id,timestamp",
 		entitlements: "id,timestamp,cid",
+		settings: "key",
 	});
 }
