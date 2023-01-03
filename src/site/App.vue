@@ -88,7 +88,7 @@ onMounted(() => {
 }
 
 .tw-root--theme-light {
-	--seventv-background-transparent-1: #e9e9e9c4;
+	--seventv-background-transparent-1: #f7f7f7c4;
 	--seventv-border-transparent-1: #0000001a;
 }
 </style>

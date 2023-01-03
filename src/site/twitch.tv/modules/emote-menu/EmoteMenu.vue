@@ -225,19 +225,19 @@ onUnmounted(() => {
 
 .emote-menu {
 	width: 32rem;
-	border-top-left-radius: 0.6rem !important;
-	border-top-right-radius: 0.6rem !important;
-	background-color: #161616c4;
+	border-top-left-radius: 0.6rem;
+	border-top-right-radius: 0.6rem;
+	background-color: var(--seventv-background-transparent-1);
 	backdrop-filter: blur(16px);
 	overflow: clip;
-	outline: 1px solid #ffffff1a;
+	outline: 1px solid var(--seventv-border-transparent-1);
 }
 
 .header {
 	display: flex;
 	height: 4.5rem;
 	background: hsla(0deg, 0%, 50%, 6%);
-	border-bottom: 1px solid rgba(255, 255, 255, 4.1%);
+	border-bottom: 1px solid var(--seventv-border-transparent-1);
 	border-radius: 0.6rem 0.6rem 0 0;
 	justify-content: space-evenly;
 	padding: 0.75rem;

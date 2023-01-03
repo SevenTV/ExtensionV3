@@ -108,7 +108,8 @@ onBeforeUnmount(() => {
 	position: sticky;
 	top: -1px;
 	display: flex;
-	background: rgb(30 30 30 / 90%);
+	background: var(--seventv-background-transparent-1);
+	backdrop-filter: blur(16px);
 }
 
 .set-header-icon {
@@ -151,8 +152,8 @@ onBeforeUnmount(() => {
 .sidebar {
 	height: 100%;
 	width: 100%;
-	background: rgba(217, 217, 217, 3%);
-	border-left: 1px solid rgba(255, 255, 255, 4.1%);
+	background: hsla(0deg, 0%, 50%, 6%);
+	border-left: 1px solid var(--seventv-border-transparent-1);
 	overflow-y: scroll;
 	scrollbar-width: none;
 
