@@ -108,8 +108,7 @@ onBeforeUnmount(() => {
 	position: sticky;
 	top: -1px;
 	display: flex;
-	background: var(--seventv-background-transparent-1);
-	backdrop-filter: blur(16px);
+	background: var(--seventv-background-transparent-2);
 }
 
 .set-header-icon {
