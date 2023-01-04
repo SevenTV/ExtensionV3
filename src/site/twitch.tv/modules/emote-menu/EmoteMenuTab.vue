@@ -52,10 +52,10 @@
 
 <script setup lang="ts">
 import { onBeforeUnmount, reactive, ref } from "vue";
-import Logo from "@/common/Logo.vue";
-import { determineRatio } from "./EmoteMenuBackend";
+import ChatEmote from "@/site/twitch.tv/modules/chat/components/ChatEmote.vue";
+import { determineRatio } from "@/site/twitch.tv/modules/emote-menu/EmoteMenuBackend";
+import Logo from "@/assets/svg/Logo.vue";
 import UiScrollable from "@/ui/UiScrollable.vue";
-import ChatEmote from "../chat/components/ChatEmote.vue";
 
 defineProps<{
 	emoteSets: SevenTV.EmoteSet[];

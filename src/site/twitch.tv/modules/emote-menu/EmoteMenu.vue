@@ -33,7 +33,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
-import Logo from "@/common/Logo.vue";
 import { HookedInstance } from "@/common/ReactHooks";
 import {
 	defineFunctionHook,
@@ -42,9 +41,10 @@ import {
 	unsetNamedEventHandler,
 	unsetPropertyHook,
 } from "@/common/Reflection";
-import { determineRatio } from "./EmoteMenuBackend";
-import EmoteMenuTab from "./EmoteMenuTab.vue";
-import { useChatAPI } from "../../ChatAPI";
+import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
+import { determineRatio } from "@/site/twitch.tv/modules/emote-menu/EmoteMenuBackend";
+import EmoteMenuTab from "@/site/twitch.tv/modules/emote-menu/EmoteMenuTab.vue";
+import Logo from "@/assets/svg/Logo.vue";
 
 const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatInputController>;
