@@ -27,6 +27,7 @@ const data = reactive({
 	// User State Data
 	isModerator: false,
 	isVIP: false,
+	isDarkTheme: 1,
 	currentChannel: {} as CurrentChannel,
 
 	// Scroll Data
@@ -201,6 +202,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		paused,
 		isModerator,
 		isVIP,
+		isDarkTheme,
 		sendMessage,
 		currentChannel,
 	} = toRefs(data);
@@ -217,6 +219,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 
 		isModerator: isModerator,
 		isVIP: isVIP,
+		isDarkTheme: isDarkTheme,
 		currentChannel: currentChannel,
 
 		scrollSys: sys,

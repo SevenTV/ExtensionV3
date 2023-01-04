@@ -165,6 +165,7 @@ definePropertyHook(controller.value.component, "props", {
 		chatAPI.isModerator.value = v.isCurrentUserModerator;
 		chatAPI.isVIP.value = v.isCurrentUserVIP;
 		chatAPI.sendMessage.value = v.chatConnectionAPI.sendMessage;
+		chatAPI.isDarkTheme.value = v.theme;
 
 		// Parse twitch emote sets
 		const data = v.emoteSetsData;

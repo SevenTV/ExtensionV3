@@ -1,5 +1,5 @@
 <template>
-	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: color }">
+	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: adjustedColor }">
 		<!--Badge List -->
 		<span v-if="twitchBadges.length || badges.length" class="seventv-chat-user-badge-list">
 			<ChatBadge
@@ -52,11 +52,11 @@ const badges = computed<SevenTV.Cosmetic<"BADGE">[]>(() => {
 		.map((cos) => cos as SevenTV.Cosmetic<"BADGE">);
 });
 
-const color = ref(props.user.color);
-
-// Get these from twitch settings
-const readableColors = true;
-color.value = normalizeUsername(color.value, readableColors);
+// TODO: Get the get the readableChatColors from somewhere and return uncomputed name
+const { isDarkTheme } = useChatAPI();
+const adjustedColor = computed(() => {
+	return normalizeUsername(props.user.color, isDarkTheme.value as 0 | 1);
+});
 
 if (props.badges && twitchBadgeSets.value) {
 	for (const [key, value] of Object.entries(props.badges)) {
