@@ -253,6 +253,10 @@ onUnmounted(() => {
 	color: var(--seventv-text-color-secondary);
 	border-radius: 0.2rem;
 
+	&:hover {
+		background: #80808029;
+	}
+
 	&[selected="true"] {
 		background: var(--seventv-highlight-neutral-1);
 		color: var(--seventv-text-color-normal);

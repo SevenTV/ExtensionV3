@@ -94,7 +94,7 @@ onMounted(() => {
 .tw-root--theme-light {
 	--seventv-text-color-normal: #161616;
 	--seventv-text-color-secondary: #161616b3;
-	--seventv-highlight-neutral-1: #ffffff9e;
+	--seventv-highlight-neutral-1: #cfcfcf9e;
 	--seventv-background-transparent-1: #f7f7f7c4;
 	--seventv-background-transparent-2: #e7e7e7c4;
 	--seventv-border-transparent-1: #0000001a;
