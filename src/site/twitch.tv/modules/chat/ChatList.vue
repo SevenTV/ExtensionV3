@@ -17,7 +17,7 @@ defineProps<{
 	messages: Twitch.ChatMessage[];
 }>();
 
-const types = import.meta.glob<object>("./components/types/*.vue", { eager: true });
+const types = import.meta.glob<object>("./components/types/*.vue", { eager: true, import: "default" });
 
 function getMessageComponent(type: MessageType) {
 	const e = MessageType[type];
