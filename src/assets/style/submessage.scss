@@ -1,0 +1,32 @@
+.seventv-sub-message-container {
+	display: block;
+	padding: 1rem 2rem;
+	overflow-wrap: anywhere;
+	background-color: hsla(0deg, 0%, 50%, 10%);
+}
+
+.highlight {
+	border-left: 0.4rem blue;
+	padding-left: 1.6rem;
+
+	&:has(.seventv-ban-slider) {
+		border-left: none !important;
+		padding-left: 2rem;
+
+		--ban-slider-color: blue;
+	}
+}
+.sub-part {
+	display: flex;
+	.sub-message-text {
+		margin-left: 0.25rem;
+		.sub-name {
+			font-weight: 700;
+			display: block;
+		}
+	}
+}
+
+.message-part {
+	margin-top: 0.5rem;
+}

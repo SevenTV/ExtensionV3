@@ -594,7 +594,8 @@ declare module Twitch {
 		color: string;
 		isIntl: boolean;
 		isSubscriber: boolean;
-		userDisplayName: string;
+		userDisplayName?: string;
+		displayName?: string;
 		userID: string;
 		userLogin: string;
 		userType: string;

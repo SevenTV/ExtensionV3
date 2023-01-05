@@ -1,5 +1,5 @@
 <template>
-	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: adjustedColor }">
+	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: color }">
 		<!--Badge List -->
 		<span v-if="twitchBadges.length || badges.length" class="seventv-chat-user-badge-list">
 			<Badge
@@ -24,12 +24,11 @@
 import { computed, ref } from "vue";
 import { convertTwitchEmote } from "@/common/Transform";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
-import { normalizeUsername } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import Badge from "./Badge.vue";
 
 const props = defineProps<{
 	user: Twitch.ChatUser;
-
+	color: string;
 	badges?: Record<string, string>;
 }>();
 
@@ -44,12 +43,6 @@ const badges = computed<SevenTV.Cosmetic<"BADGE">[]>(() => {
 	return (ids ? ids.map((id) => cosmetics.value[id]) : [])
 		.filter((cos) => cos && cos.kind === "BADGE")
 		.map((cos) => cos as SevenTV.Cosmetic<"BADGE">);
-});
-
-// TODO: Get the get the readableChatColors from somewhere and return uncomputed name
-const { isDarkTheme } = useChatAPI();
-const adjustedColor = computed(() => {
-	return normalizeUsername(props.user.color, isDarkTheme.value as 0 | 1);
 });
 
 if (props.badges && twitchBadgeSets.value) {

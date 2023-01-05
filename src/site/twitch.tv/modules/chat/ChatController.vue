@@ -106,6 +106,7 @@ watch(
 			defineFunctionHook(handler, "handleMessage", function (old, msg: Twitch.AnyMessage) {
 				const t = Date.now() + getRandomInt(0, 1000);
 				const msgData = Object.create({ seventv: true, t });
+				console.log(msg.type, msg);
 				for (const k of Object.keys(msg)) {
 					msgData[k] = msg[k as keyof Twitch.AnyMessage];
 				}
@@ -207,11 +208,17 @@ watch(list.value.domNodes, (nodes) => {
 	}
 });
 
+const messagetypes = {} as Record<number, object>;
+
+(window as any).examples = messagetypes;
+
 // Determine if the message should performe some action or be sendt to the chatAPI for rendering
 const onMessage = (msg: Twitch.AnyMessage): boolean => {
 	if (msg.id === "seventv-hook-message") {
 		return false;
 	}
+
+	messagetypes[msg.type] = msg;
 
 	switch (msg.type) {
 		case MessageType.MESSAGE:
@@ -331,9 +338,9 @@ seventv-container.seventv-chat-list {
 }
 
 .community-highlight {
-	opacity: 0.75;
+	background-color: 181818c4 !important;
 	backdrop-filter: blur(1em);
-	transition: opacity 0.25s;
+	transition: background-color 0.25s;
 
 	&:hover {
 		opacity: 1;

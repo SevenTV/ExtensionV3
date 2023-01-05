@@ -1,10 +1,18 @@
 <template>
-	<span class="seventv-chat-message" :class="{ deleted: props.msg.banned || props.msg.deleted }">
+	<span
+		class="seventv-chat-message"
+		:class="{
+			deleted: msg.banned || msg.deleted,
+			'slash-me-italic': msg.messageType === 1,
+		}"
+		:style="{ color: msg.messageType === 1 ? adjustedColor : '' }"
+	>
 		<!-- Chat Author -->
-		<template v-if="msg.user && msg.user.userDisplayName">
-			<UserTag v-if="msg.user" :user="msg.user" :badges="msg.badges" />
-			<span>: </span>
-		</template>
+		<UserTag v-if="msg.user" :user="msg.user" :badges="msg.badges" :color="adjustedColor" />
+
+		<span>
+			{{ msg.messageType === 0 ? ": " : " " }}
+		</span>
 
 		<!-- Message Content -->
 		<span class="seventv-chat-message-body">
@@ -60,6 +68,7 @@ import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import Emote from "@/site/twitch.tv/modules/chat/components/message/Emote.vue";
 import UserTag from "@/site/twitch.tv/modules/chat/components/message/UserTag.vue";
 import { Tokenizer } from "./Tokenizer";
+import { normalizeUsername } from "../../ChatBackend";
 
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
@@ -72,24 +81,32 @@ const tokenizer = new Tokenizer(props.msg.messageParts);
 const tokens = computed(() => {
 	return tokenizer.getParts(emoteMap.value);
 });
+
+// TODO: Get the get the readableChatColors from somewhere and return uncomputed name
+const { isDarkTheme } = useChatAPI();
+const adjustedColor = computed(() => {
+	return normalizeUsername(props.msg.user.color, isDarkTheme.value as 0 | 1);
+});
 </script>
 
 <style scoped lang="scss">
-.emote-part {
-	display: inline-grid;
-	vertical-align: middle;
-	margin: -1rem 0;
-}
-
 .seventv-chat-message {
 	vertical-align: baseline;
+	.emote-part {
+		display: inline-grid;
+		vertical-align: middle;
+		margin: -1rem 0;
+	}
+
+	.mention-part {
+		padding: 0.2rem;
+		font-weight: bold;
+	}
 }
 
-.mention-part {
-	padding: 0.2rem;
-	font-weight: bold;
+.slash-me-italic {
+	font-style: italic;
 }
-
 .deleted:not(:hover) {
 	opacity: 0.5;
 	text-decoration: line-through;

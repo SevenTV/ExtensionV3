@@ -1,11 +1,11 @@
 <template>
 	<span class="seventv-chat-message-container">
-		<Message :msg="msg" />
+		<UserMessage :msg="msg" />
 	</span>
 </template>
 
 <script setup lang="ts">
-import Message from "./message/Message.vue";
+import UserMessage from "../message/UserMessage.vue";
 
 defineProps<{
 	msg: Twitch.ChatMessage;
@@ -17,14 +17,5 @@ defineProps<{
 	display: block;
 	padding: 0.5rem 2rem;
 	overflow-wrap: anywhere;
-
-	&:has(.mention-part) {
-		display: block;
-		padding: 0.5rem 2rem;
-		overflow-wrap: anywhere;
-		box-shadow: inset 0 0 0.2rem 0.2rem red;
-		background-color: #ff000040;
-		border-radius: 0.4rem;
-	}
 }
 </style>
