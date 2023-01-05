@@ -103,11 +103,11 @@ watch(
 		if (handler !== old && old) {
 			unsetPropertyHook(old, "handleMessage");
 		} else if (handler) {
-			defineFunctionHook(handler, "handleMessage", function (old, msg: Twitch.Message) {
+			defineFunctionHook(handler, "handleMessage", function (old, msg: Twitch.AnyMessage) {
 				const t = Date.now() + getRandomInt(0, 1000);
 				const msgData = Object.create({ seventv: true, t });
 				for (const k of Object.keys(msg)) {
-					msgData[k] = msg[k as keyof Twitch.Message];
+					msgData[k] = msg[k as keyof Twitch.AnyMessage];
 				}
 
 				const ok = onMessage(msgData);
@@ -207,16 +207,16 @@ watch(list.value.domNodes, (nodes) => {
 	}
 });
 
-// Push a message
-const msgTypes = [MessageType.MESSAGE, MessageType.MODERATION];
-const onMessage = (msg: Twitch.Message): boolean => {
+// Determine if the message should performe some action or be sendt to the chatAPI for rendering
+const onMessage = (msg: Twitch.AnyMessage): boolean => {
 	if (msg.id === "seventv-hook-message") {
 		return false;
 	}
-	if (!msgTypes.includes(msg.type)) return false;
 
 	switch (msg.type) {
 		case MessageType.MESSAGE:
+		case MessageType.SUBSCRIPTION:
+		case MessageType.RESUBSCRIPTION:
 			onChatMessage(msg as Twitch.ChatMessage);
 			break;
 		case MessageType.MODERATION:

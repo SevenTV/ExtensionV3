@@ -1,6 +1,6 @@
 <template>
 	<div
-		v-if="shouldModerate(props.msg)"
+		v-if="shouldModerate"
 		class="seventv-ban-slider"
 		:style="{
 			transform: 'translateX(' + data.pos + ')',
@@ -30,14 +30,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { maxVal, sliderData } from "./BanSliderBackend";
 
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
 }>();
-const chatAPI = useChatAPI();
+
+const { isModerator, sendMessage } = useChatAPI();
 
 const transition = ref(false);
 const tracking = ref(false);
@@ -45,19 +46,19 @@ const tracking = ref(false);
 const data = ref(new sliderData(0));
 let initial = 0;
 
-function shouldModerate(msg: Twitch.ChatMessage) {
+const shouldModerate = computed(() => {
 	return (
-		(chatAPI.isModerator.value &&
-			msg.badges &&
-			!("moderator" in msg.badges) &&
-			!("broadcaster" in msg.badges) &&
-			!("staff" in msg.badges)) ??
+		(isModerator.value &&
+			props.msg.badges &&
+			!("moderator" in props.msg.badges) &&
+			!("broadcaster" in props.msg.badges) &&
+			!("staff" in props.msg.badges)) ??
 		false
 	);
-}
+});
 
 function executeModAction(message: string, name: string, id: string) {
-	chatAPI.sendMessage.value(message.replace("{user}", name).replace("{id}", id));
+	sendMessage.value(message.replace("{user}", name).replace("{id}", id));
 }
 
 const handleDown = (e: PointerEvent) => {
@@ -146,6 +147,7 @@ const update = (e: PointerEvent): void => {
 			align-items: center;
 			border-left: none;
 			box-shadow: 0 0 0.4rem black;
+			background-color: var(--ban-slider-color, none);
 			.dots {
 				background-image: radial-gradient(circle, var(--color-border-input) 0.1rem, transparent 0.2rem);
 				background-size: 100% 33.33%;

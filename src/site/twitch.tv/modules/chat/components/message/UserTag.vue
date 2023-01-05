@@ -2,20 +2,14 @@
 	<span v-if="user && user.userDisplayName" class="seventv-chat-user" :style="{ color: adjustedColor }">
 		<!--Badge List -->
 		<span v-if="twitchBadges.length || badges.length" class="seventv-chat-user-badge-list">
-			<ChatBadge
+			<Badge
 				v-for="(badge, index) of twitchBadges"
 				:key="index"
 				:badge="badge"
 				:alt="badge.title"
 				type="twitch"
 			/>
-			<ChatBadge
-				v-for="(badge, index) of badges"
-				:key="index"
-				:badge="badge"
-				:alt="badge.data.tooltip"
-				type="app"
-			/>
+			<Badge v-for="(badge, index) of badges" :key="index" :badge="badge" :alt="badge.data.tooltip" type="app" />
 		</span>
 
 		<!-- Message Author -->
@@ -31,7 +25,7 @@ import { computed, ref } from "vue";
 import { convertTwitchEmote } from "@/common/Transform";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { normalizeUsername } from "@/site/twitch.tv/modules/chat/ChatBackend";
-import ChatBadge from "./ChatBadge.vue";
+import Badge from "./Badge.vue";
 
 const props = defineProps<{
 	user: Twitch.ChatUser;

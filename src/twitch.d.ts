@@ -499,44 +499,48 @@ declare module Twitch {
 		replies: [];
 	}
 
-	export interface Message {
+	export interface AnyMessage {
 		id: string;
 		type: number;
+
+		seventv?: boolean;
+		t?: number;
+		element?: HTMLElement;
 	}
 
-	export interface ChatMessage {
+	export interface DisplayableMessage extends AnyMessage {
+		user: ChatUser;
+	}
+
+	export interface ChatMessage extends DisplayableMessage {
 		badgeDynamicData: {};
 		badges: Record<string, string>;
 		banned: boolean;
 		bits: number;
 		deleted: boolean;
 		hidden: boolean;
-		id: string;
 		isHistorical: unknown;
 		message: string | ChatMessage;
 		messageBody: string;
 		messageParts: ChatMessage.Part[];
 		messageType: number;
-		type: number;
-		reply: unknown;
-		user: ChatUser;
-		state?: {
-			broadcasterLanguage: string | null;
-			emoteOnly: boolean;
-			followersOnly: boolean;
-			followersOnlyRequirement: number;
-			r9k: boolean;
-			mercury: boolean;
-			slowMode: boolean;
-			slowModeDuration: number;
-			subsOnly: boolean;
-		};
 		emotes?: any;
-
-		seventv?: boolean;
-		t?: number;
-		element?: HTMLElement;
 	}
+
+	export interface SubMessage extends DisplayableMessage {
+		channel: string;
+		methods?: {
+			plan: string;
+			planName: string;
+			prime: boolean;
+		};
+		message?: ChatMessage;
+		months?: number;
+		cumulativeMonths?: number;
+		shouldShareStreakTenure: boolean;
+		wasGift: boolean;
+	}
+
 	export namespace ChatMessage {
 		export interface Part {
 			content: string | EmoteRef | LinkContent | { [key: string]: any };
@@ -578,12 +582,10 @@ declare module Twitch {
 			content?: string | { [key: string]: any };
 		}
 	}
-	export interface ModerationMessage {
+	export interface ModerationMessage extends AnyMessage {
 		duration: number;
-		id: string;
 		moderationType: number;
 		reason: string;
-		type: number;
 		userLogin: string;
 		targetMessageID?: string;
 	}
