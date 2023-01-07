@@ -30,6 +30,7 @@ const chunks = {
 };
 
 const ignoreHMR = [
+	"main.ts",
 	"App.vue",
 	"TwitchSite.vue",
 	"ChatModule.vue",

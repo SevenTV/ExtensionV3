@@ -15,6 +15,7 @@ export class WorkerDriver extends EventTarget {
 	log: Logger;
 
 	ports = new Map<symbol, WorkerPort>();
+	portSeq = 0;
 
 	constructor(public w: SharedWorkerGlobalScope) {
 		super();
