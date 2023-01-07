@@ -116,6 +116,18 @@ function useHandlers(mp: MessagePort) {
 				events.emit("channel_fetched", channel);
 				break;
 			}
+			case "ENTITLEMENT_CREATED": {
+				const entitlement = data as TypedWorkerMessage<"ENTITLEMENT_CREATED">;
+
+				events.emit("entitlement_created", entitlement);
+				break;
+			}
+			case "ENTITLEMENT_DELETED": {
+				const entitlement = data as TypedWorkerMessage<"ENTITLEMENT_DELETED">;
+
+				events.emit("entitlement_deleted", entitlement);
+				break;
+			}
 		}
 	});
 }
@@ -150,11 +162,21 @@ class WorkletTarget extends EventTarget {
 	}
 }
 
-type WorkletEventName = "ready" | "channel_fetched";
+type WorkletEventName = "ready" | "channel_fetched" | "entitlement_created" | "entitlement_deleted";
 
 type WorkletTypedEvent<EVN extends WorkletEventName> = {
 	ready: object;
 	channel_fetched: CurrentChannel;
+	entitlement_created: {
+		kind: SevenTV.EntitlementKind;
+		ref_id: SevenTV.ObjectID;
+		user_id: string;
+	};
+	entitlement_deleted: {
+		kind: SevenTV.EntitlementKind;
+		ref_id: SevenTV.ObjectID;
+		user_id: string;
+	};
 }[EVN];
 
 export class WorkletEvent<T extends WorkletEventName> extends CustomEvent<WorkletTypedEvent<T>> {

@@ -23,7 +23,9 @@ export class WorkerHttp {
 	constructor(private driver: WorkerDriver) {
 		this.driver = driver;
 
-		driver.addEventListener("start_watching_channel", (ev) => this.fetchChannelData(ev.detail, ev.port));
+		driver.addEventListener("start_watching_channel", (ev) =>
+			ev.port ? this.fetchChannelData(ev.detail, ev.port) : undefined,
+		);
 		driver.addEventListener("identity_updated", async (ev) => {
 			const user = await this.API().seventv.loadUserData(ev.port?.platform ?? "TWITCH", ev.detail.id);
 			if (user && ev.port) {
@@ -37,7 +39,7 @@ export class WorkerHttp {
 		});
 	}
 
-	public async fetchChannelData(channel: CurrentChannel, port?: WorkerPort) {
+	public async fetchChannelData(channel: CurrentChannel, port: WorkerPort) {
 		await this.driver.db.ready();
 
 		this.driver.log.debug(`<Net/Http> fetching channel data for #${channel.username}`);
@@ -93,9 +95,13 @@ export class WorkerHttp {
 
 		// begin subscriptions to channel emote sets
 		for (const set of sets) {
-			this.driver.eventAPI.subscribe("emote_set.*", {
-				object_id: set.id,
-			});
+			this.driver.eventAPI.subscribe(
+				"emote_set.*",
+				{
+					object_id: set.id,
+				},
+				port,
+			);
 		}
 
 		// begin subscriptions to personal events in the channel
@@ -105,9 +111,9 @@ export class WorkerHttp {
 			id: channel.id,
 		};
 
-		this.driver.eventAPI.subscribe("entitlement.*", cond);
-		this.driver.eventAPI.subscribe("cosmetic.*", cond);
-		this.driver.eventAPI.subscribe("emote_set.*", cond);
+		this.driver.eventAPI.subscribe("entitlement.*", cond, port);
+		this.driver.eventAPI.subscribe("cosmetic.*", cond, port);
+		this.driver.eventAPI.subscribe("emote_set.*", cond, port);
 	}
 
 	public API() {
@@ -186,7 +192,7 @@ export const seventv = {
 				platform,
 				id: channelID,
 			},
-		}).then(() => log.info("<Net/Http> Presence sent"));
+		}).then(() => log.debug("<API> Presence sent"));
 	},
 };
 
