@@ -42,16 +42,8 @@ export type TypedWorkerMessage<T extends WorkerMessageType> = {
 	CHANNEL_ACTIVE_CHATTER: {
 		channel_id: string;
 	};
-	ENTITLEMENT_CREATED: {
-		kind: SevenTV.EntitlementKind;
-		ref_id: SevenTV.ObjectID;
-		user_id: string;
-	};
-	ENTITLEMENT_DELETED: {
-		kind: SevenTV.EntitlementKind;
-		ref_id: SevenTV.ObjectID;
-		user_id: string;
-	};
+	ENTITLEMENT_CREATED: Pick<SevenTV.Entitlement, "id" | "kind" | "ref_id" | "user_id">;
+	ENTITLEMENT_DELETED: Pick<SevenTV.Entitlement, "id" | "kind" | "ref_id" | "user_id">;
 }[T];
 
 export interface EventAPIMessage<O extends keyof typeof EventAPIOpCode> {

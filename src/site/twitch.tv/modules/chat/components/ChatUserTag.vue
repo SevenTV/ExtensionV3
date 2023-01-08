@@ -27,8 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, toRef, watchEffect } from "vue";
-import { convertTwitchEmote } from "@/common/Transform";
+import { ref } from "vue";
+import { useCosmetics } from "@/composable/useCosmetics";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { normalizeUsername } from "@/site/twitch.tv/modules/chat/ChatBackend";
 import ChatBadge from "./ChatBadge.vue";
@@ -39,26 +39,10 @@ const props = defineProps<{
 	badges?: Record<string, string>;
 }>();
 
-const { twitchBadgeSets, cosmetics, entitledUsers } = useChatAPI();
+const { twitchBadgeSets } = useChatAPI();
+const { userBadges } = useCosmetics();
 const twitchBadges = ref([] as Twitch.ChatBadge[]);
-
-// 7TV Badges
-const entitlements = toRef(entitledUsers.value, props.user.userID);
-const badges = ref([] as SevenTV.Cosmetic<"BADGE">[]);
-
-watchEffect(() => {
-	if (!props.user) return;
-	if (!entitlements.value) return;
-
-	nextTick(() => {
-		const badgeIDs = entitlements.value.BADGE;
-		if (badgeIDs) {
-			badges.value = badgeIDs
-				.map((id) => cosmetics.value[id])
-				.filter((cos) => cos && cos.kind === "BADGE") as SevenTV.Cosmetic<"BADGE">[];
-		}
-	});
-});
+const badges = userBadges(props.user.userID);
 
 const color = ref(props.user.color);
 
@@ -81,8 +65,6 @@ if (props.badges && twitchBadgeSets.value) {
 			if (!badge) continue;
 
 			twitchBadges.value.push(badge);
-
-			convertTwitchEmote;
 			break;
 		}
 	}

@@ -167,16 +167,8 @@ type WorkletEventName = "ready" | "channel_fetched" | "entitlement_created" | "e
 type WorkletTypedEvent<EVN extends WorkletEventName> = {
 	ready: object;
 	channel_fetched: CurrentChannel;
-	entitlement_created: {
-		kind: SevenTV.EntitlementKind;
-		ref_id: SevenTV.ObjectID;
-		user_id: string;
-	};
-	entitlement_deleted: {
-		kind: SevenTV.EntitlementKind;
-		ref_id: SevenTV.ObjectID;
-		user_id: string;
-	};
+	entitlement_created: Pick<SevenTV.Entitlement, "id" | "kind" | "ref_id" | "user_id">;
+	entitlement_deleted: Pick<SevenTV.Entitlement, "id" | "kind" | "ref_id" | "user_id">;
 }[EVN];
 
 export class WorkletEvent<T extends WorkletEventName> extends CustomEvent<WorkletTypedEvent<T>> {

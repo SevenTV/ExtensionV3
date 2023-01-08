@@ -31,6 +31,9 @@ const chunks = {
 
 const ignoreHMR = [
 	"main.ts",
+	"idb.ts",
+	"versions.idb.ts",
+	"useModule.ts",
 	"App.vue",
 	"TwitchSite.vue",
 	"ChatModule.vue",

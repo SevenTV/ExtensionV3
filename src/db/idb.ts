@@ -124,6 +124,14 @@ export class Dexie7 extends Dexie {
 				.anyOf(channels.map((c) => c.id))
 				.delete();
 		}
+
+		// Clean up entitlements
+		{
+			this.entitlements
+				.where("timestamp")
+				.below(now - oneHour * 24)
+				.delete();
+		}
 	}
 }
 

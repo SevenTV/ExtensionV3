@@ -13,15 +13,6 @@ const data = reactive({
 	emoteProviders: {} as Record<SevenTV.Provider, Record<string, SevenTV.EmoteSet>>,
 
 	// Cosmetics
-	cosmetics: {} as Record<string, SevenTV.Cosmetic>,
-	entitledUsers: {} as Record<
-		string,
-		{
-			BADGE: SevenTV.ObjectID[];
-			PAINT: SevenTV.ObjectID[];
-			EMOTE_SET: SevenTV.ObjectID[];
-		}
-	>,
 	twitchBadgeSets: {} as Twitch.BadgeSets | null,
 
 	// User State Data
@@ -192,8 +183,6 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		emoteMap,
 		emoteProviders,
 		chatters,
-		cosmetics,
-		entitledUsers,
 		twitchBadgeSets,
 		sys,
 		init,
@@ -211,8 +200,6 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		emoteMap: emoteMap,
 		emoteProviders: emoteProviders,
 		chatters: chatters,
-		cosmetics: cosmetics,
-		entitledUsers: entitledUsers,
 		twitchBadgeSets: twitchBadgeSets,
 
 		isModerator: isModerator,
@@ -236,3 +223,12 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		imageFormat,
 	};
 }
+
+export interface UserMod {
+	badges: SevenTV.ObjectID[];
+	paints: SevenTV.ObjectID[];
+	emote_sets: SevenTV.ObjectID[];
+	uninitialized?: boolean;
+}
+
+export type UserModEditable = Pick<UserMod, "badges" | "emote_sets" | "paints">;

@@ -156,7 +156,7 @@ declare namespace SevenTV {
 		id: ObjectID;
 		kind: EntitlementKind;
 		user?: User;
-		cid?: string;
+		user_id: ObjectID;
 		ref_id: ObjectID;
 	}
 

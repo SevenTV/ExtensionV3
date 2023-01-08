@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onUnmounted, reactive, ref, toRefs, watch, watchEffect } from "vue";
+import { onUnmounted, reactive, ref, toRefs, watch, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
 import { debounceFn } from "@/common/Async";
@@ -30,7 +30,6 @@ import { getRandomInt } from "@/common/Rand";
 import { HookedInstance } from "@/common/ReactHooks";
 import { defineFunctionHook, definePropertyHook, unsetPropertyHook } from "@/common/Reflection";
 import { convertTwitchEmoteSet } from "@/common/Transform";
-import { useWorker } from "@/composable/useWorker";
 import { MessageType, ModerationType } from "@/site/twitch.tv";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import ChatData from "@/site/twitch.tv/modules/chat/ChatData.vue";
@@ -43,7 +42,6 @@ const props = defineProps<{
 }>();
 
 const store = useStore();
-const { target: workerTarget } = useWorker();
 const { channel } = storeToRefs(store);
 
 const { list, controller } = toRefs(props);
@@ -92,30 +90,6 @@ watchEffect(() => {
 watchEffect(() => {
 	if (currentChannel.value) {
 		if (store.setChannel(currentChannel.value)) clear();
-	}
-});
-
-// Handle user entitlements
-workerTarget.addEventListener("entitlement_created", (ev) => {
-	if (!chatAPI.entitledUsers.value[ev.detail.user_id]) {
-		chatAPI.entitledUsers.value[ev.detail.user_id] = {
-			BADGE: [],
-			PAINT: [],
-			EMOTE_SET: [],
-		};
-	}
-
-	nextTick(() => {
-		chatAPI.entitledUsers.value[ev.detail.user_id][ev.detail.kind].push(ev.detail.ref_id);
-	});
-});
-
-workerTarget.addEventListener("entitlement_deleted", (ev) => {
-	if (!chatAPI.entitledUsers.value[ev.detail.user_id]) return;
-
-	const index = chatAPI.entitledUsers.value[ev.detail.user_id][ev.detail.kind].indexOf(ev.detail.ref_id);
-	if (index > -1) {
-		chatAPI.entitledUsers.value[ev.detail.user_id][ev.detail.kind].splice(index, 1);
 	}
 });
 
