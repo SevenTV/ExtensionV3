@@ -63,7 +63,11 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			label: "Smooth scroll chat",
 			hint: "How smooth should the chat scroll on new messages. 0 is instant",
 			type: "SLIDER",
-			options: [0, 3000, "ms"],
+			options: {
+				min: 0,
+				max: 3000,
+				unit: "ms",
+			},
 			defaultValue: 0,
 		},
 	],
