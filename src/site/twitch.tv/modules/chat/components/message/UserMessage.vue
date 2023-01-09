@@ -7,6 +7,16 @@
 		}"
 		:style="{ color: msg.messageType === 1 ? adjustedColor : '' }"
 	>
+		<template v-if="showTimestamps">
+			<span class="chat-line__timestamp">
+				{{
+					new Date(props.msg.timestamp).toLocaleTimeString(locale, {
+						hour: "numeric",
+						minute: "numeric",
+					})
+				}}
+			</span>
+		</template>
 		<!-- Chat Author -->
 		<UserTag v-if="msg.user" :user="msg.user" :badges="msg.badges" :color="adjustedColor" />
 
@@ -51,7 +61,12 @@ const props = defineProps<{
 	msg: Twitch.ChatMessage;
 }>();
 
+// Get this from twitch settings instead?
+const showTimestamps = useConfig<boolean>("chat.show_timestamps");
 const emoteMargin = useConfig<string>("chat.emote_margin");
+
+// Get the locale to format the timestamp
+const locale = navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language ?? "en";
 
 // Tokenize the message
 const { emoteMap, imageFormat } = useChatAPI();

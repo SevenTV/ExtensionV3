@@ -531,6 +531,7 @@ declare module Twitch {
 		messageParts: ChatMessage.Part[];
 		messageType: number;
 		emotes?: any;
+		timestamp: number;
 	}
 
 	export interface SubMessage extends AnyMessage {

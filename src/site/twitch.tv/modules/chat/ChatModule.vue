@@ -38,6 +38,13 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			type: "TOGGLE",
 			defaultValue: true,
 		},
+		{
+			key: "chat.show_timestamps",
+			label: "Show Timestamps",
+			hint: "Show timestamps on messages sendt in the chat",
+			type: "TOGGLE",
+			defaultValue: false,
+		},
 	],
 });
 
