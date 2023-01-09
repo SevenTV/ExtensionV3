@@ -4,7 +4,6 @@ import { onEmoteSetUpdate } from "./emote-set.handler";
 import { onEntitlementCreate, onEntitlementDelete } from "./entitlement.handler";
 import type { ChangeMap, EventContext, ObjectTypeOfKind } from "../";
 import { SubscriptionRecord } from "../worker.events";
-import { WorkerPort } from "../worker.port";
 
 export function handleDispatchedEvent(
 	ctx: EventContext,
@@ -16,20 +15,15 @@ export function handleDispatchedEvent(
 
 	const h = {
 		"cosmetic.create": () => onCosmeticCreate(ctx, cm as ChangeMap<SevenTV.ObjectKind.COSMETIC>),
-		"entitlement.create": (port: WorkerPort) =>
-			onEntitlementCreate(ctx, cm as ChangeMap<SevenTV.ObjectKind.ENTITLEMENT>, port),
-		"entitlement.delete": (port: WorkerPort) =>
-			onEntitlementDelete(ctx, cm as ChangeMap<SevenTV.ObjectKind.ENTITLEMENT>, port),
+		"entitlement.create": () =>
+			onEntitlementCreate(ctx, structuredClone(cm) as ChangeMap<SevenTV.ObjectKind.ENTITLEMENT>, ports),
+		"entitlement.delete": () =>
+			onEntitlementDelete(ctx, structuredClone(cm) as ChangeMap<SevenTV.ObjectKind.ENTITLEMENT>, ports),
 		"emote_set.update": () => onEmoteSetUpdate(ctx, cm as ChangeMap<SevenTV.ObjectKind.EMOTE_SET>),
 	}[type];
 
-	if (typeof h === "function") {
-		for (const port of ports ?? []) h(port);
-
-		if (ports.length === 0) (h as () => void)();
-	} else {
-		log.warn("<Net/EventAPI>", `Received dispatch '${type}' but no handler was found`);
-	}
+	if (typeof h === "function") h();
+	else log.warn("<Net/EventAPI>", `Received dispatch '${type}' but no handler was found`);
 }
 
 export function iterateChangeMap<T extends SevenTV.ObjectKind>(cm: ChangeMap<T>, h: ChangeMapHandler<T>) {

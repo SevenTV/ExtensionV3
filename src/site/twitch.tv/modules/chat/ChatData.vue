@@ -10,9 +10,9 @@ import { useWorker } from "@/composable/useWorker";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { db } from "@/db/idb";
 
-const { channel } = storeToRefs(useStore());
+const { channel, platform } = storeToRefs(useStore());
 const { target: workerTarget } = useWorker();
-const { addEntitlement } = useCosmetics();
+const { setEntitlement } = useCosmetics();
 const chatAPI = useChatAPI();
 
 // query the channel's emote set bindings
@@ -64,21 +64,28 @@ useLiveQuery(
 		reactives: [channelSets],
 	},
 );
+
 // Set up user entitlements
-const handleEntitlement = (ent: SevenTV.Entitlement, mode: "+" | "-") => {
-	switch (ent.kind) {
-		case "BADGE":
-			addEntitlement(ent, mode);
-			break;
-	}
-};
+
+useLiveQuery(
+	() =>
+		db.entitlements
+			.where("scope")
+			.equals(`${platform.value}:${channel.value?.id ?? "X"}`)
+			.toArray(),
+	(ents) => {
+		for (const ent of ents) {
+			setEntitlement(ent, "+");
+		}
+	},
+);
 
 // Handle user entitlements
 workerTarget.addEventListener("entitlement_created", (ev) => {
-	handleEntitlement(ev.detail, "+");
+	setEntitlement(ev.detail, "+");
 });
 
 workerTarget.addEventListener("entitlement_deleted", (ev) => {
-	handleEntitlement(ev.detail, "-");
+	setEntitlement(ev.detail, "-");
 });
 </script>

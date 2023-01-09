@@ -45,8 +45,13 @@ export class WorkerHttp {
 		this.driver.log.debug(`<Net/Http> fetching channel data for #${channel.username}`);
 
 		// store the channel into IDB
-		await db.withErrorFallback(db.channels.put({ id: channel.id, set_ids: [] }), () =>
-			db.channels.where("id").equals(channel.id).modify(channel),
+		await db.withErrorFallback(
+			db.channels.put({
+				id: channel.id,
+				platform: port.platform as Platform,
+				set_ids: [],
+			}),
+			() => db.channels.where("id").equals(channel.id).modify(channel),
 		);
 
 		// setup fetching promises

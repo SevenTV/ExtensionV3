@@ -28,12 +28,22 @@ export function useCosmetics() {
 		},
 	);
 
+	/**
+	 * Bind or unbind an entitlement to a user
+	 *
+	 * @param ent The entitlement to bind or unbind
+	 * @param mode "+" to bind, "-" to unbind
+	 */
 	function setEntitlement(ent: SevenTV.Entitlement, mode: "+" | "-") {
 		data.entitlementBuffers[mode].push(ent);
 
 		flush();
 	}
 
+	// Flush schedules the entitlement buffer
+	//
+	// This operation processes a time gap between grants and revokations
+	// in order to allow the UI to update smoothly
 	function flush() {
 		if (flushTimeout) return;
 
@@ -54,17 +64,17 @@ export function useCosmetics() {
 					const l = userListFor(ent.kind);
 					if (!l[ent.user_id]) l[ent.user_id] = [];
 
-					const cos = await awaitCosmetic(ent.ref_id);
-
-					const idx = l[ent.user_id].findIndex((b) => b.id === ent.ref_id);
-					if (idx === -1) {
-						l[ent.user_id].push(cos as SevenTV.Cosmetic<"BADGE">);
-					}
+					awaitCosmetic(ent.ref_id).then((cos) => {
+						const idx = l[ent.user_id].findIndex((b) => b.id === ent.ref_id);
+						if (idx === -1) {
+							l[ent.user_id].push(cos as never);
+						}
+					});
 				}
-			}, 10);
+			}, 50);
 
 			flushTimeout = null;
-		}, 10);
+		}, 50);
 	}
 
 	function awaitCosmetic(id: SevenTV.ObjectID) {
@@ -74,8 +84,8 @@ export function useCosmetics() {
 	function userListFor(kind: SevenTV.EntitlementKind) {
 		return {
 			BADGE: data.userBadges,
-			PAINT: data.userBadges,
-			EMOTE_SET: data.userBadges,
+			PAINT: data.userPaints,
+			EMOTE_SET: {},
 		}[kind];
 	}
 
@@ -86,7 +96,7 @@ export function useCosmetics() {
 	}
 
 	return {
-		addEntitlement: setEntitlement,
+		setEntitlement,
 		userBadges,
 	};
 }
