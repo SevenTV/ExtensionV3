@@ -4,8 +4,8 @@ import UiScrollableVue from "@/ui/UiScrollable.vue";
 
 const data = reactive({
 	// Message Data
-	messages: [] as Twitch.ChatMessage[],
-	messageBuffer: [] as Twitch.ChatMessage[],
+	messages: [] as Twitch.DisplayableMessage[],
+	messageBuffer: [] as Twitch.DisplayableMessage[],
 	chatters: {} as Record<string, object>,
 
 	// Emote Data
@@ -37,7 +37,7 @@ const data = reactive({
 	sys: true,
 	visible: true,
 	paused: false, // whether or not scrolling is paused
-	scrollBuffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
+	scrollBuffer: [] as Twitch.DisplayableMessage[], // twitch chat message buffe when scrolling is paused
 
 	// Functions
 	sendMessage: (() => {
@@ -63,10 +63,10 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		}
 	});
 
-	function addMessage(message: Twitch.ChatMessage): void {
+	function addMessage(message: Twitch.DisplayableMessage): void {
 		if (data.paused) {
 			// if scrolling is paused, buffer the message
-			data.scrollBuffer.push(message as Twitch.ChatMessage);
+			data.scrollBuffer.push(message as Twitch.DisplayableMessage);
 			if (data.scrollBuffer.length > data.lineLimit) data.scrollBuffer.shift();
 
 			return;

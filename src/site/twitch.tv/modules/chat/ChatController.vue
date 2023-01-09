@@ -197,7 +197,7 @@ watch(list.value.domNodes, (nodes) => {
 		chatAPI.addMessage({
 			id: nodeId + "-unhandled",
 			element: node,
-		} as Twitch.ChatMessage);
+		} as Twitch.DisplayableMessage);
 
 		nodeMap.set(nodeId, node);
 	}
@@ -217,7 +217,8 @@ const onMessage = (msg: Twitch.AnyMessage): boolean => {
 		case MessageType.MESSAGE:
 		case MessageType.SUBSCRIPTION:
 		case MessageType.RESUBSCRIPTION:
-			onChatMessage(msg as Twitch.ChatMessage);
+		case MessageType.SUBGIFT:
+			onChatMessage(msg as Twitch.DisplayableMessage);
 			break;
 		case MessageType.MODERATION:
 			onModerationMessage(msg as Twitch.ModerationMessage);
@@ -228,20 +229,24 @@ const onMessage = (msg: Twitch.AnyMessage): boolean => {
 	return true;
 };
 
-function onChatMessage(msg: Twitch.ChatMessage) {
+function onChatMessage(msg: Twitch.DisplayableMessage) {
 	// Add message to store
 	// it will be rendered on the next tick
-	chatAPI.addMessage(msg as Twitch.ChatMessage);
+	chatAPI.addMessage(msg);
 }
 
 function onModerationMessage(msg: Twitch.ModerationMessage) {
 	if (msg.moderationType == ModerationType.DELETE) {
 		const found = messages.value.find((m) => m.id == msg.targetMessageID);
-		if (found) found.deleted = true;
+		if (found) {
+			if (found.deleted !== undefined) found.deleted = true;
+			if (found.message?.deleted !== undefined) found.message.deleted = true;
+		}
 	} else {
 		messages.value.forEach((m) => {
 			if (!m.seventv || m.user.userLogin != msg.userLogin) return;
-			m.banned = true;
+			if (m.banned !== undefined) m.banned = true;
+			if (m.message?.banned !== undefined) m.message.banned = true;
 		});
 	}
 }

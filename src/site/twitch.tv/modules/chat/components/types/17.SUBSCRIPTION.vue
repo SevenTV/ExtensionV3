@@ -2,34 +2,35 @@
 	<span class="seventv-sub-message-container">
 		<div class="sub-part">
 			<div class="sub-message-icon">
-				<TwPrime />
+				<TwPrime v-if="msg.methods?.plan == 'Prime'" />
+				<TwStar v-else />
 			</div>
 			<div class="sub-message-text">
-				<span class="sub-name">
+				<span class="sub-name bold">
 					{{ msg.user.displayName }}
 				</span>
-				<span> Subscribed with {{ msg.methods?.plan }}. </span>
-				<span v-if="msg.type == MessageType.RESUBSCRIPTION">
-					They've subscribed for {{ msg.cumulativeMonths }} months!
-				</span>
+				Subscribed with
+				<span> {{ plan }}. </span>
 			</div>
 		</div>
 
 		<!-- Message part -->
-		<div class="message-part">
-			<UserMessage v-if="msg.message" :msg="msg.message" />
+		<div v-if="msg.message" class="message-part">
+			<UserMessage :msg="msg.message" />
 		</div>
 	</span>
 </template>
 
 <script setup lang="ts">
-import { MessageType } from "@/site/twitch.tv";
 import TwPrime from "@/assets/svg/TwPrime.vue";
+import TwStar from "@/assets/svg/TwStar.vue";
 import UserMessage from "../message/UserMessage.vue";
 
-defineProps<{
+const props = defineProps<{
 	msg: Twitch.SubMessage;
 }>();
+
+const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.methods?.plan.charAt(0);
 </script>
 
 <style scoped lang="scss">

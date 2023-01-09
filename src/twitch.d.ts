@@ -510,9 +510,15 @@ declare module Twitch {
 
 	export interface DisplayableMessage extends AnyMessage {
 		user: ChatUser;
+		message?: ChatMessage;
+		messageParts?: ChatMessage.Part[];
+		badges?: Record<string, string>;
+		deleted?: boolean;
+		banned?: boolean;
 	}
 
-	export interface ChatMessage extends DisplayableMessage {
+	export interface ChatMessage extends AnyMessage {
+		user: ChatUser;
 		badgeDynamicData: {};
 		badges: Record<string, string>;
 		banned: boolean;
@@ -527,7 +533,8 @@ declare module Twitch {
 		emotes?: any;
 	}
 
-	export interface SubMessage extends DisplayableMessage {
+	export interface SubMessage extends AnyMessage {
+		user: ChatUser;
 		channel: string;
 		methods?: {
 			plan: string;
@@ -539,6 +546,8 @@ declare module Twitch {
 		cumulativeMonths?: number;
 		shouldShareStreakTenure: boolean;
 		wasGift: boolean;
+		recipientDisplayName?: string;
+		giftMonths?: number;
 	}
 
 	export namespace ChatMessage {

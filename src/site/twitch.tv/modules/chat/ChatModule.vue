@@ -22,6 +22,22 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			options: ["Show", "Blur"],
 			defaultValue: false,
 		},
+		{
+			key: "chat.emote_margin",
+			label: "Emote Margin",
+			hint: "Choose the margin around emotes in chat. Negative values lets them overlap and keep the chatlines inline",
+			type: "INPUT",
+			options: ["-1rem"],
+			predicate: (p) => CSS.supports("margin", p as string),
+			defaultValue: "-1rem",
+		},
+		{
+			key: "chat.mod_slider",
+			label: "Mod Slider",
+			hint: "Enable the mod slider in channels where you are moderator",
+			type: "TOGGLE",
+			defaultValue: true,
+		},
 	],
 });
 

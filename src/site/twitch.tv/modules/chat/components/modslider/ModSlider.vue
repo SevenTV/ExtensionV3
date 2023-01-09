@@ -1,6 +1,6 @@
 <template>
 	<div
-		v-if="shouldModerate"
+		v-if="canModerate"
 		class="seventv-ban-slider"
 		:style="{
 			transform: 'translateX(' + data.pos + ')',
@@ -32,10 +32,10 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
-import { maxVal, sliderData } from "./BanSliderBackend";
+import { maxVal, sliderData } from "./ModSliderBackend";
 
 const props = defineProps<{
-	msg: Twitch.ChatMessage;
+	msg: Twitch.DisplayableMessage;
 }>();
 
 const { isModerator, sendMessage } = useChatAPI();
@@ -46,13 +46,14 @@ const tracking = ref(false);
 const data = ref(new sliderData(0));
 let initial = 0;
 
-const shouldModerate = computed(() => {
+const canModerate = computed(() => {
+	const badges = props.msg.badges ?? props.msg.message?.badges;
 	return (
 		(isModerator.value &&
-			props.msg.badges &&
-			!("moderator" in props.msg.badges) &&
-			!("broadcaster" in props.msg.badges) &&
-			!("staff" in props.msg.badges)) ??
+			badges &&
+			!("moderator" in badges) &&
+			!("broadcaster" in badges) &&
+			!("staff" in badges)) ??
 		false
 	);
 });

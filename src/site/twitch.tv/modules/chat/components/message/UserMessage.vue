@@ -17,45 +17,18 @@
 		<!-- Message Content -->
 		<span class="seventv-chat-message-body">
 			<template v-for="(part, index) of tokens" :key="index">
-				<span v-if="part.type === MessagePartType.TEXT" class="text-part">
-					{{ part.content }}
-				</span>
-
-				<span v-else-if="part.type === MessagePartType.MODERATEDTEXT" class="moderated-text-part">
-					{{ part.content }}
-				</span>
-
-				<span v-else-if="part.type === MessagePartType.CURRENTUSERHIGHLIGHT" class="mention-part">
-					{{ part.content }}
-				</span>
-
 				<span
-					v-else-if="part.type === MessagePartType.MENTION"
-					:class="part.content.currentUserMentionRelation === 1 ? 'mention-part' : 'text-part'"
+					v-if="part.type === MessagePartType.SEVENTVEMOTE"
+					class="emote-part"
+					:style="{
+						margin: emoteMargin,
+					}"
 				>
-					{{ "@" + part.content.recipient }}
-				</span>
-
-				<a v-else-if="part.type === MessagePartType.LINK" :href="part.content.url" class="link-part">
-					{{ part.content.displayText }}
-				</a>
-
-				<span v-else-if="part.type === MessagePartType.EMOTE"> !This should not appear! </span>
-
-				<a v-else-if="part.type === MessagePartType.CLIPLINK" :href="part.content.url" class="link-part">
-					{{ part.content.displayText }}
-				</a>
-
-				<a v-else-if="part.type === MessagePartType.VIDEOLINK" :href="part.content.url" class="link-part">
-					{{ part.content.displayText }}
-				</a>
-
-				<span v-else-if="part.type === MessagePartType.SEVENTVEMOTE" class="emote-part">
 					<Emote :emote="part.content" :image-format="imageFormat" />
 				</span>
-				<a v-else-if="part.type === MessagePartType.SEVENTVLINK" :href="part.content.url" class="link-part">
-					{{ part.content.displayText }}
-				</a>
+				<template v-else>
+					<Component :is="getPart(part)" :part="part" />
+				</template>
 			</template>
 		</span>
 	</span>
@@ -63,16 +36,22 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { useConfig } from "@/composable/useSettings";
 import { MessagePartType } from "@/site/twitch.tv";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import Emote from "@/site/twitch.tv/modules/chat/components/message/Emote.vue";
 import UserTag from "@/site/twitch.tv/modules/chat/components/message/UserTag.vue";
 import { Tokenizer } from "./Tokenizer";
+import Link from "./parts/Link.vue";
+import Mention from "./parts/Mention.vue";
+import Text from "./parts/Text.vue";
 import { normalizeUsername } from "../../ChatBackend";
 
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
 }>();
+
+const emoteMargin = useConfig<string>("chat.emote_margin");
 
 // Tokenize the message
 const { emoteMap, imageFormat } = useChatAPI();
@@ -87,6 +66,25 @@ const { isDarkTheme } = useChatAPI();
 const adjustedColor = computed(() => {
 	return normalizeUsername(props.msg.user.color, isDarkTheme.value as 0 | 1);
 });
+
+function getPart(part: Twitch.ChatMessage.Part) {
+	switch (part.type) {
+		case MessagePartType.TEXT:
+		case MessagePartType.MODERATEDTEXT:
+		case MessagePartType.FLAGGEDSEGMENT:
+		case MessagePartType.CURRENTUSERHIGHLIGHT:
+			return Text;
+		case MessagePartType.MENTION:
+			return Mention;
+		case MessagePartType.LINK:
+		case MessagePartType.CLIPLINK:
+		case MessagePartType.VIDEOLINK:
+		case MessagePartType.SEVENTVLINK:
+			return Link;
+		default:
+			return new Error("Unknown part");
+	}
+}
 </script>
 
 <style scoped lang="scss">
@@ -95,7 +93,8 @@ const adjustedColor = computed(() => {
 	.emote-part {
 		display: inline-grid;
 		vertical-align: middle;
-		margin: -1rem 0;
+		margin-left: 0 !important;
+		margin-right: 0 !important;
 	}
 
 	.mention-part {
