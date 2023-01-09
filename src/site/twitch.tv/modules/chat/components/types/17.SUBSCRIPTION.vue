@@ -1,5 +1,5 @@
 <template>
-	<span class="seventv-sub-message-container">
+	<span class="seventv-sub-message-container seventv-highlight">
 		<div class="sub-part">
 			<div class="sub-message-icon">
 				<TwPrime v-if="msg.methods?.plan == 'Prime'" />
@@ -9,8 +9,9 @@
 				<span class="sub-name bold">
 					{{ msg.user.displayName }}
 				</span>
-				Subscribed with
-				<span> {{ plan }}. </span>
+				<span class="bold">Subscribed</span>
+				with
+				{{ plan }}.
 			</div>
 		</div>
 
@@ -22,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import TwPrime from "@/assets/svg/TwPrime.vue";
-import TwStar from "@/assets/svg/TwStar.vue";
+import TwPrime from "@/assets/svg/twitch/TwPrime.vue";
+import TwStar from "@/assets/svg/twitch/TwStar.vue";
 import UserMessage from "../message/UserMessage.vue";
 
 const props = defineProps<{

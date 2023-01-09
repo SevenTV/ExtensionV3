@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import Logo7TV from "@/assets/svg/Logo7TV.vue";
+import Logo7TV from "@/assets/svg/logos/Logo7TV.vue";
 
 const emit = defineEmits<{
 	(event: "toggle"): void;

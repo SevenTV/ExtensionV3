@@ -64,7 +64,8 @@ declare namespace SevenTV {
 		hint?: string;
 		type: SettingNode.ComponentType;
 		component?: Raw<object>;
-		options?: SettingType[];
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		options?: any[];
 		predicate?: (p: T) => boolean;
 
 		value?: T;

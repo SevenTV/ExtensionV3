@@ -45,6 +45,19 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			type: "TOGGLE",
 			defaultValue: false,
 		},
+		{
+			key: "chat.slash_me_style",
+			label: "/me Style",
+			hint: "How the /me type messages should be displayed",
+			type: "DROPDOWN",
+			options: [
+				["Nothing", 0],
+				["Italic", 1],
+				["Colored", 2],
+				["Italic + Colored", 3],
+			],
+			defaultValue: 1,
+		},
 	],
 });
 

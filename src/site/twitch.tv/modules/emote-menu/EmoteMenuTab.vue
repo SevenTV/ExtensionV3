@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, reactive, ref } from "vue";
 import { determineRatio } from "@/site/twitch.tv/modules/emote-menu/EmoteMenuBackend";
-import Logo from "@/assets/svg/Logo.vue";
+import Logo from "@/assets/svg/logos/Logo.vue";
 import UiScrollable from "@/ui/UiScrollable.vue";
 import Emote from "../chat/components/message/Emote.vue";
 

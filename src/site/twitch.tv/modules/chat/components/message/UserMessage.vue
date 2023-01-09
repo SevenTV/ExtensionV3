@@ -3,9 +3,11 @@
 		class="seventv-chat-message"
 		:class="{
 			deleted: msg.banned || msg.deleted,
-			'slash-me-italic': msg.messageType === 1,
 		}"
-		:style="{ color: msg.messageType === 1 ? adjustedColor : '' }"
+		:style="{
+			'font-style': msg.messageType === 1 && mentionStyle & 1 ? 'italic' : '',
+			color: msg.messageType === 1 && mentionStyle & 2 ? adjustedColor : '',
+		}"
 	>
 		<template v-if="showTimestamps">
 			<span class="chat-line__timestamp">
@@ -64,6 +66,7 @@ const props = defineProps<{
 // Get this from twitch settings instead?
 const showTimestamps = useConfig<boolean>("chat.show_timestamps");
 const emoteMargin = useConfig<string>("chat.emote_margin");
+const mentionStyle = useConfig<number>("chat.slash_me_style");
 
 // Get the locale to format the timestamp
 const locale = navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language ?? "en";

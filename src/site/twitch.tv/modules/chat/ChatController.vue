@@ -218,6 +218,9 @@ const onMessage = (msg: Twitch.AnyMessage): boolean => {
 		case MessageType.SUBSCRIPTION:
 		case MessageType.RESUBSCRIPTION:
 		case MessageType.SUBGIFT:
+		case MessageType.RAID:
+		case MessageType.SUBMYSTERYGIFT:
+		case MessageType.CHANNELPOINTSREWARD:
 			onChatMessage(msg as Twitch.DisplayableMessage);
 			break;
 		case MessageType.MODERATION:
@@ -244,7 +247,7 @@ function onModerationMessage(msg: Twitch.ModerationMessage) {
 		}
 	} else {
 		messages.value.forEach((m) => {
-			if (!m.seventv || m.user.userLogin != msg.userLogin) return;
+			if (!m.seventv || m.user?.userLogin != msg.userLogin) return;
 			if (m.banned !== undefined) m.banned = true;
 			if (m.message?.banned !== undefined) m.message.banned = true;
 		});

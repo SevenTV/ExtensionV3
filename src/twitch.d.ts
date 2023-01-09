@@ -549,6 +549,7 @@ declare module Twitch {
 		wasGift: boolean;
 		recipientDisplayName?: string;
 		giftMonths?: number;
+		streakMonths?: number;
 	}
 
 	export namespace ChatMessage {
@@ -592,12 +593,45 @@ declare module Twitch {
 			content?: string | { [key: string]: any };
 		}
 	}
+
 	export interface ModerationMessage extends AnyMessage {
 		duration: number;
 		moderationType: number;
 		reason: string;
 		userLogin: string;
 		targetMessageID?: string;
+	}
+
+	export interface ChannelPointsRewardMessage extends AnyMessage {
+		displayName: string;
+		login: string;
+		message: ChatMessage;
+		reward: {
+			cost: number;
+			isHighlighted: boolean;
+			name: string;
+		};
+		userID: string;
+	}
+
+	export interface MassGiftMessage extends AnyMessage {
+		user: ChatUser;
+		channel: string;
+		massGiftCount: number;
+		plan: string;
+		senderCount: number;
+	}
+
+	export interface RaidMessage extends AnyMessage {
+		channel: string;
+		userLogin: string;
+		params: {
+			displayName: string;
+			login: string;
+			msgId: string;
+			userID: string;
+			viewerCount: string;
+		};
 	}
 
 	export interface ChatUser {

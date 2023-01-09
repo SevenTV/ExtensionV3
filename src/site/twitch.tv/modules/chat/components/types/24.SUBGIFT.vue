@@ -1,5 +1,5 @@
 <template>
-	<span class="seventv-sub-message-container">
+	<span class="seventv-sub-message-container seventv-highlight">
 		<div class="sub-part">
 			<div class="gift-icon">
 				<TwGift />
@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import TwGift from "@/assets/svg/TwGift.vue";
+import TwGift from "@/assets/svg/twitch/TwGift.vue";
 
 defineProps<{
 	msg: Twitch.SubMessage;
