@@ -65,8 +65,8 @@ declare namespace SevenTV {
 		type: SettingNode.ComponentType;
 		component?: Raw<object>;
 		options?: {
-			SELECT: [string, SettingType][];
-			DROPDOWN: [string, SettingType][];
+			SELECT: [string, T][];
+			DROPDOWN: [string, T][];
 			CHECKBOX: never;
 			INPUT: string;
 			TOGGLE: {
