@@ -73,6 +73,11 @@ declare namespace SevenTV {
 				left: string;
 				right: string;
 			};
+			SLIDER: {
+				min: number;
+				max: number;
+				unit: string;
+			};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			CUSTOM: any;
 		}[K];
@@ -85,7 +90,7 @@ declare namespace SevenTV {
 	type SettingType = boolean | number | string | object;
 
 	namespace SettingNode {
-		type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "TOGGLE" | "CUSTOM";
+		type ComponentType = "SELECT" | "DROPDOWN" | "CHECKBOX" | "INPUT" | "TOGGLE" | "SLIDER" | "CUSTOM";
 	}
 
 	interface ActiveEmote {
