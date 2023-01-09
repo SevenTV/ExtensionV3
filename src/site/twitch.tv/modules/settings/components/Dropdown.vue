@@ -10,7 +10,7 @@
 import { useConfig } from "@/composable/useSettings";
 
 const props = defineProps<{
-	node: SevenTV.SettingNode<SevenTV.SettingType>;
+	node: SevenTV.SettingNode<SevenTV.SettingType, "DROPDOWN">;
 }>();
 
 const setting = useConfig(props.node.key);
