@@ -1,6 +1,9 @@
 import { Ref, computed, nextTick, reactive, ref, toRefs, watchEffect } from "vue";
 import { useStore } from "@/store/main";
+import { useConfig } from "@/composable/useSettings";
 import UiScrollableVue from "@/ui/UiScrollable.vue";
+
+const scrollduration = useConfig<number>("chat.smooth_scroll_duration");
 
 const data = reactive({
 	// Message Data
@@ -36,7 +39,7 @@ const data = reactive({
 	sys: true,
 	visible: true,
 	paused: false, // whether or not scrolling is paused
-	duration: 1000,
+	duration: scrollduration,
 
 	scrollBuffer: [] as Twitch.ChatMessage[], // twitch chat message buffe when scrolling is paused
 	scrollClear: () => {
