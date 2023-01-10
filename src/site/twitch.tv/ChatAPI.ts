@@ -4,6 +4,7 @@ import { useConfig } from "@/composable/useSettings";
 import UiScrollableVue from "@/ui/UiScrollable.vue";
 
 const scrollduration = useConfig<number>("chat.smooth_scroll_duration");
+const lineLimit = useConfig<number>("chat.line_limit");
 
 const data = reactive({
 	// Message Data
@@ -35,7 +36,7 @@ const data = reactive({
 
 	// Scroll Data
 	userInput: 0,
-	lineLimit: 150,
+	lineLimit: lineLimit,
 	init: false,
 	sys: true,
 	visible: true,

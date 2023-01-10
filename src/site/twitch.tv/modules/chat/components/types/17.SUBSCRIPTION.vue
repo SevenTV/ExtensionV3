@@ -51,12 +51,6 @@ const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.
 
 .sub-part {
 	display: flex;
-	.gift-icon {
-		display: flex;
-		flex-shrink: 0;
-		padding-right: 1.6rem;
-		margin: auto 0;
-	}
 	.sub-message-text {
 		margin-left: 0.25rem;
 		.bold {
