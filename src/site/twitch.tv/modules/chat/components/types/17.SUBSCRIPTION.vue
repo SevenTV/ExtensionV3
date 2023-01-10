@@ -45,7 +45,7 @@ const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.
 }
 
 .seventv-highlight {
-	border-left: 0.4rem solid blue;
+	border-left: 0.4rem solid var(--seventv-primary-color);
 	padding-left: 1.6rem !important;
 }
 
@@ -58,6 +58,7 @@ const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.
 		}
 		.sub-name {
 			display: block;
+			color: var(--color-text-link);
 		}
 	}
 }

@@ -8,12 +8,14 @@
 				<span class="sub-name-big">
 					{{ msg.user.displayName }}
 				</span>
-				is gifting {{ msg.senderCount }} Tier {{ msg.plan.charAt(0) }} Sub
-				{{ msg.senderCount > 1 ? "s" : "" }} to {{ msg.channel }}'s community.
+				is gifting {{ msg.massGiftCount }} Tier {{ msg.plan.charAt(0) }} Sub{{
+					msg.massGiftCount > 1 ? "s" : ""
+				}}
+				to {{ msg.channel }}'s community.
 				<template v-if="msg.senderCount == msg.massGiftCount">
 					It's their first Gift Sub in the channel!
 				</template>
-				<template v-else> They've gifted a total of {{ msg.massGiftCount }} Subs in the channel! </template>
+				<template v-else> They've gifted a total of {{ msg.senderCount }} Subs in the channel! </template>
 			</div>
 		</div>
 	</span>
@@ -38,7 +40,7 @@ defineProps<{
 }
 
 .seventv-highlight {
-	border-left: 0.4rem solid blue;
+	border-left: 0.4rem solid var(--seventv-primary-color);
 	padding-left: 1.6rem !important;
 }
 

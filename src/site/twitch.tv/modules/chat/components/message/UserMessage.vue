@@ -80,9 +80,11 @@ const tokens = computed(() => {
 });
 
 // TODO: Get the get the readableChatColors from somewhere and return uncomputed name
-const { isDarkTheme } = useChatAPI();
+const { isDarkTheme, useHighContrastColors } = useChatAPI();
 const adjustedColor = computed(() => {
-	return normalizeUsername(props.msg.user.color, isDarkTheme.value as 0 | 1);
+	return useHighContrastColors.value
+		? normalizeUsername(props.msg.user.color, isDarkTheme.value as 0 | 1)
+		: props.msg.user.color;
 });
 
 function getPart(part: Twitch.ChatMessage.Part) {

@@ -52,6 +52,6 @@ defineProps<{
 }
 
 .announcement-line--primary {
-	border-color: var(--seventv-channel-color, currentColor);
+	border-color: var(--seventv-primary-color, currentColor);
 }
 </style>

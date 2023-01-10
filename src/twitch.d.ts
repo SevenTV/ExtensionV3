@@ -166,6 +166,11 @@ declare module Twitch {
 		messageHandlerAPI: MessageHandlerAPI;
 	}>;
 
+	export type ChatRoomComponent = ReactExtended.WritableComponent<{
+		primaryColorHex: string;
+		useHighContrastColors: boolean;
+	}>;
+
 	export interface MessageHandlerAPI {
 		addMessageHandler: (event: (msg: ChatMessage) => void) => void;
 		removeMessageHandler: (event: (msg: ChatMessage) => void) => void;

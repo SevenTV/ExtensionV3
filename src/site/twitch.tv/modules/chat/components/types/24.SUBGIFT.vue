@@ -36,7 +36,7 @@ defineProps<{
 }
 
 .seventv-highlight {
-	border-left: 0.4rem solid blue;
+	border-left: 0.4rem solid var(--seventv-primary-color);
 	padding-left: 1.6rem !important;
 }
 
@@ -55,6 +55,7 @@ defineProps<{
 		}
 		.sub-name {
 			display: block;
+			color: var(--color-text-link);
 		}
 	}
 }

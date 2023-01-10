@@ -39,12 +39,13 @@ import UiScrollable from "@/ui/UiScrollable.vue";
 const props = defineProps<{
 	list: HookedInstance<Twitch.ChatListComponent>;
 	controller: HookedInstance<Twitch.ChatControllerComponent>;
+	room: HookedInstance<Twitch.ChatRoomComponent>;
 }>();
 
 const store = useStore();
 const { channel } = storeToRefs(store);
 
-const { list, controller } = toRefs(props);
+const { list, controller, room } = toRefs(props);
 
 const el = document.createElement("seventv-container");
 el.id = "seventv-chat-controller";
@@ -65,7 +66,7 @@ watch(channel, (channel) => {
 });
 
 const chatAPI = useChatAPI(scroller, bounds);
-const { scrollBuffer, scrollPaused, messages, lineLimit, twitchBadgeSets, clear } = chatAPI;
+const { scrollBuffer, scrollPaused, messages, lineLimit, twitchBadgeSets, clear, primaryColorHex } = chatAPI;
 
 const dataSets = reactive({
 	badges: false,
@@ -147,6 +148,13 @@ const onTwitchEmotes = debounceFn((emoteSets: Twitch.TwitchEmoteSet[]) => {
 
 	chatAPI.emoteProviders.value.TWITCH = temp;
 }, 1000);
+
+definePropertyHook(room.value.component, "props", {
+	value(v: typeof room.value.component.props) {
+		chatAPI.primaryColorHex.value = "#" + v.primaryColorHex;
+		chatAPI.useHighContrastColors.value = v.useHighContrastColors;
+	},
+});
 
 definePropertyHook(controller.value.component, "props", {
 	value(v: typeof controller.value.component.props) {
@@ -273,6 +281,7 @@ onUnmounted(() => {
 	unsetPropertyHook(list.value.component.props, "messageHandlerAPI");
 	unsetPropertyHook(list.value.component, "props");
 	unsetPropertyHook(controller.value.component, "props");
+	unsetPropertyHook(room.value.component, "props");
 });
 </script>
 
@@ -292,6 +301,8 @@ seventv-container.seventv-chat-list {
 	.seventv-message-container {
 		padding: 1em 0;
 		line-height: 1.5em;
+
+		--seventv-primary-color: v-bind(primaryColorHex);
 	}
 
 	// Chat padding

@@ -12,10 +12,11 @@
 				<span class="bold">Subscribed</span>
 				with
 				{{ plan }}. They've subscribed for
-				<span class="bold"> {{ msg.cumulativeMonths }} months! </span>
+				<span class="bold"> {{ msg.cumulativeMonths }} months</span>
 				<template v-if="msg.shouldShareStreakTenure">
-					{{ msg.streakMonths }} month{{ (msg.streakMonths ?? 0) > 1 ? "s" : "" }} in a row.
+					, {{ msg.streakMonths }} month{{ (msg.streakMonths ?? 0) > 1 ? "s" : "" }} in a row.
 				</template>
+				<template v-else>! </template>
 			</div>
 		</div>
 
@@ -49,7 +50,7 @@ const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.
 }
 
 .seventv-highlight {
-	border-left: 0.4rem solid blue;
+	border-left: 0.4rem solid var(--seventv-primary-color);
 	padding-left: 1.6rem !important;
 }
 
@@ -62,6 +63,7 @@ const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.
 		}
 		.sub-name {
 			display: block;
+			color: var(--color-text-link);
 		}
 	}
 }

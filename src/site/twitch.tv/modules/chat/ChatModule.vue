@@ -1,6 +1,11 @@
 <template>
 	<template v-for="(inst, i) of chatList.instances" :key="inst.identifier">
-		<ChatController v-if="dependenciesMet && isHookable" :list="inst" :controller="chatController.instances[i]" />
+		<ChatController
+			v-if="dependenciesMet && isHookable"
+			:list="inst"
+			:controller="chatController.instances[i]"
+			:room="chatRoom.instances[i]"
+		/>
 	</template>
 </template>
 
@@ -94,9 +99,14 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 	],
 });
 
+const chatRoom = useComponentHook<Twitch.ChatRoomComponent>({
+	parentSelector: ".stream-chat",
+	predicate: (n) => n.props?.primaryColorHex,
+});
+
 const chatList = useComponentHook<Twitch.ChatListComponent>(
 	{
-		parentSelector: ".chat-list--default",
+		parentSelector: ".chat-room",
 		predicate: (n) => n.scrollRef,
 	},
 	{
@@ -118,7 +128,11 @@ const chatController = useComponentHook<Twitch.ChatControllerComponent>({
 	predicate: (n) => n.pushMessage && n.props?.messageHandlerAPI,
 });
 
-const isHookable = computed(() => chatController.instances.length === chatList.instances.length);
+const isHookable = computed(
+	() =>
+		chatController.instances.length === chatList.instances.length &&
+		chatController.instances.length === chatRoom.instances.length,
+);
 
 markAsReady();
 </script>
