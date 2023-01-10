@@ -14,17 +14,26 @@
 
 		<!-- Message Author -->
 		<span class="seventv-chat-user-username">
-			<span>{{ user.userDisplayName }}</span>
-			<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
+			<span v-if="!paint">
+				<span>{{ user.userDisplayName }}</span>
+				<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
+			</span>
+			<span v-else>
+				<UiPaint :paint="paint" :text="true">
+					<span>{{ user.userDisplayName }}</span>
+					<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
+				</UiPaint>
+			</span>
 		</span>
 	</span>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { convertTwitchEmote } from "@/common/Transform";
+import { useCosmetics } from "@/composable/useCosmetics";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import Badge from "./Badge.vue";
+import UiPaint from "@/ui/UiPaint.vue";
 
 const props = defineProps<{
 	user: Twitch.ChatUser;
@@ -32,18 +41,11 @@ const props = defineProps<{
 	badges?: Record<string, string>;
 }>();
 
-const { twitchBadgeSets, cosmetics, entitledUsers } = useChatAPI();
+const { twitchBadgeSets } = useChatAPI();
+const { badges, paints } = useCosmetics(props.user.userID);
 const twitchBadges = ref([] as Twitch.ChatBadge[]);
 
-// 7TV Badges
-const badges = computed<SevenTV.Cosmetic<"BADGE">[]>(() => {
-	const ids = entitledUsers.value[props.user.userID]?.BADGE;
-	if (!ids || !ids.length) return [];
-
-	return (ids ? ids.map((id) => cosmetics.value[id]) : [])
-		.filter((cos) => cos && cos.kind === "BADGE")
-		.map((cos) => cos as SevenTV.Cosmetic<"BADGE">);
-});
+const paint = computed(() => (paints.value && paints.value.length ? paints.value[0] : null));
 
 if (props.badges && twitchBadgeSets.value) {
 	for (const [key, value] of Object.entries(props.badges)) {
@@ -60,8 +62,6 @@ if (props.badges && twitchBadgeSets.value) {
 			if (!badge) continue;
 
 			twitchBadges.value.push(badge);
-
-			convertTwitchEmote;
 			break;
 		}
 	}
