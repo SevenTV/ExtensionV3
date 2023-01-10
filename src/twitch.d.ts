@@ -634,6 +634,11 @@ declare module Twitch {
 		};
 	}
 
+	export interface AnnouncementMessage extends AnyMessage {
+		color: "PRIMARY" | "BLUE" | "GREEN" | "ORANGE" | "PURPLE";
+		message: ChatMessage;
+	}
+
 	export interface ChatUser {
 		color: string;
 		isIntl: boolean;

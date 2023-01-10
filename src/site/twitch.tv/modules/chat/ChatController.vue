@@ -221,6 +221,7 @@ const onMessage = (msg: Twitch.AnyMessage): boolean => {
 		case MessageType.RAID:
 		case MessageType.SUBMYSTERYGIFT:
 		case MessageType.CHANNELPOINTSREWARD:
+		case MessageType.ANNOUNCEMENTMESSAGE:
 			onChatMessage(msg as Twitch.DisplayableMessage);
 			break;
 		case MessageType.MODERATION:
