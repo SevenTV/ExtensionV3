@@ -30,6 +30,7 @@ const setting = useConfig<boolean>(props.node.key);
 	display: flex;
 	flex-wrap: nowrap;
 	align-items: center;
+	gap: 1rem;
 }
 .slider-option {
 	font-size: 1.4rem;
@@ -37,7 +38,6 @@ const setting = useConfig<boolean>(props.node.key);
 	vertical-align: center;
 }
 .switch {
-	margin: 0 1rem;
 	display: inline-block;
 	height: 2rem;
 	position: relative;

@@ -19,7 +19,10 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			label: "Unlisted Emotes",
 			hint: "If checked, emotes which have not yet been approved for listing on 7tv.app will be blurred",
 			type: "TOGGLE",
-			options: ["Show", "Blur"],
+			options: {
+				left: "Show",
+				right: "Blur",
+			},
 			defaultValue: false,
 		},
 		{
