@@ -15,10 +15,10 @@
 
 <script setup lang="ts">
 import { useConfig } from "@/composable/useSettings";
+import { MessagePartType } from "@/site/twitch.tv/";
+import { MessageType } from "@/site/twitch.tv/";
 import ChatMessageUnhandled from "./ChatMessageUnhandled.vue";
 import ModSlider from "./components/modslider/ModSlider.vue";
-import { MessagePartType } from "../..";
-import { MessageType } from "../..";
 
 defineProps<{
 	controller: Twitch.ChatControllerComponent | undefined;

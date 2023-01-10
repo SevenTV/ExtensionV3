@@ -24,12 +24,16 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 		},
 		{
 			key: "chat.emote_margin",
-			label: "Emote Margin",
-			hint: "Choose the margin around emotes in chat. Negative values lets them overlap and keep the chatlines inline",
-			type: "INPUT",
-			options: ["-1rem"],
-			predicate: (p) => CSS.supports("margin", p as string),
-			defaultValue: "-1rem",
+			label: "Emote Spacing",
+			hint: "Choose the margin around emotes in chat. Negative values lets them overlap and keep the chatlines inline. 0 Makes the emotes not overlap at all",
+			type: "SLIDER",
+			options: {
+				min: -1,
+				max: 1,
+				step: 0.1,
+				unit: "rem",
+			},
+			defaultValue: -1,
 		},
 		{
 			key: "chat.mod_slider",
@@ -41,7 +45,7 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 		{
 			key: "chat.show_timestamps",
 			label: "Show Timestamps",
-			hint: "Show timestamps on messages sendt in the chat",
+			hint: "Show timestamps on messages sent in the chat",
 			type: "TOGGLE",
 			defaultValue: false,
 		},
@@ -56,7 +60,7 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 				["Colored", 2],
 				["Italic + Colored", 3],
 			],
-			defaultValue: 1,
+			defaultValue: 2,
 		},
 		{
 			key: "chat.smooth_scroll_duration",
@@ -66,9 +70,23 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			options: {
 				min: 0,
 				max: 3000,
+				step: 100,
 				unit: "ms",
 			},
 			defaultValue: 0,
+		},
+		{
+			key: "chat.line_limit",
+			label: "Line Limit",
+			hint: "The max number of lines that will be displayed in chat. Higher numbers may affect performance",
+			type: "SLIDER",
+			options: {
+				min: 50,
+				max: 1000,
+				step: 10,
+				unit: "lines",
+			},
+			defaultValue: 150,
 		},
 	],
 });

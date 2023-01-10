@@ -76,6 +76,7 @@ declare namespace SevenTV {
 			SLIDER: {
 				min: number;
 				max: number;
+				step: number;
 				unit: string;
 			};
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any

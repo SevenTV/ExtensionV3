@@ -33,7 +33,7 @@
 					v-if="part.type === MessagePartType.SEVENTVEMOTE"
 					class="emote-part"
 					:style="{
-						margin: emoteMargin,
+						margin: `${emoteMargin}rem`,
 					}"
 				>
 					<Emote :emote="part.content" :image-format="imageFormat" />
@@ -65,7 +65,7 @@ const props = defineProps<{
 
 // Get this from twitch settings instead?
 const showTimestamps = useConfig<boolean>("chat.show_timestamps");
-const emoteMargin = useConfig<string>("chat.emote_margin");
+const emoteMargin = useConfig<number>("chat.emote_margin");
 const mentionStyle = useConfig<number>("chat.slash_me_style");
 
 // Get the locale to format the timestamp

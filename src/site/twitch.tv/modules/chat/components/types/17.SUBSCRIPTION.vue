@@ -35,5 +35,40 @@ const plan = props.msg.methods?.plan == "Prime" ? "Prime" : "Tier " + props.msg.
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/submessage.scss";
+.seventv-sub-message-container {
+	display: block;
+	padding: 0.5rem 2rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+	overflow-wrap: anywhere;
+	background-color: hsla(0deg, 0%, 50%, 10%);
+}
+
+.seventv-highlight {
+	border-left: 0.4rem solid blue;
+	padding-left: 1.6rem !important;
+}
+
+.sub-part {
+	display: flex;
+	.gift-icon {
+		display: flex;
+		flex-shrink: 0;
+		padding-right: 1.6rem;
+		margin: auto 0;
+	}
+	.sub-message-text {
+		margin-left: 0.25rem;
+		.bold {
+			font-weight: 700;
+		}
+		.sub-name {
+			display: block;
+		}
+	}
+}
+
+.message-part {
+	margin-top: 0.5rem;
+}
 </style>

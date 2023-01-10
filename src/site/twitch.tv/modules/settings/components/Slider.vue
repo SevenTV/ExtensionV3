@@ -6,6 +6,7 @@
 			type="range"
 			:min="node.options?.min"
 			:max="node.options?.max"
+			:step="node.options?.step"
 			class="slider"
 		/>
 		{{ setting }}

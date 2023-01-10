@@ -28,11 +28,38 @@ defineProps<{
 </script>
 
 <style scoped lang="scss">
-@import "@/assets/style/submessage.scss";
-
-.sub-name-big {
+.seventv-sub-message-container {
 	display: block;
-	font-size: larger;
-	font-weight: 700;
+	padding: 0.5rem 2rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+	overflow-wrap: anywhere;
+	background-color: hsla(0deg, 0%, 50%, 10%);
+}
+
+.seventv-highlight {
+	border-left: 0.4rem solid blue;
+	padding-left: 1.6rem !important;
+}
+
+.sub-part {
+	display: flex;
+	.gift-icon {
+		display: flex;
+		flex-shrink: 0;
+		padding-right: 1.6rem;
+		margin: auto 0;
+	}
+	.sub-message-text {
+		margin-left: 0.25rem;
+		.bold {
+			font-weight: 700;
+		}
+		.sub-name-big {
+			display: block;
+			font-size: larger;
+			font-weight: 700;
+		}
+	}
 }
 </style>
