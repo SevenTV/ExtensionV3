@@ -17,6 +17,7 @@ export enum workerMessageType {
 	CHANNEL_ACTIVE_CHATTER,
 	ENTITLEMENT_CREATED,
 	ENTITLEMENT_DELETED,
+	STATIC_COSMETICS_FETCHED,
 }
 
 export type WorkerMessageType = keyof typeof workerMessageType;
@@ -44,6 +45,11 @@ export type TypedWorkerMessage<T extends WorkerMessageType> = {
 	};
 	ENTITLEMENT_CREATED: Pick<SevenTV.Entitlement, "id" | "kind" | "ref_id" | "user_id">;
 	ENTITLEMENT_DELETED: Pick<SevenTV.Entitlement, "id" | "kind" | "ref_id" | "user_id">;
+	STATIC_COSMETICS_FETCHED: {
+		provider: SevenTV.Provider;
+		badges: SevenTV.Cosmetic<"BADGE">[];
+		paints: SevenTV.Cosmetic<"PAINT">[];
+	};
 }[T];
 
 export interface EventAPIMessage<O extends keyof typeof EventAPIOpCode> {

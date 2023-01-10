@@ -1,6 +1,7 @@
 import { Ref, reactive, toRef } from "vue";
 import { until } from "@vueuse/core";
 import { useLiveQuery } from "./useLiveQuery";
+import { useWorker } from "./useWorker";
 import { db } from "@/db/idb";
 
 const data = reactive({
@@ -14,19 +15,53 @@ const data = reactive({
 	userPaints: {} as Record<string, SevenTV.Cosmetic<"PAINT">[]>,
 });
 
+let init = false;
 let flushTimeout: number | null = null;
 
 export function useCosmetics() {
-	useLiveQuery(
-		() => db.cosmetics.toArray(),
-		(result) => {
-			data.cosmetics = {};
+	if (!init) {
+		init = true;
 
-			for (const cos of result) {
-				data.cosmetics[cos.id] = cos;
+		const { target } = useWorker();
+
+		useLiveQuery(
+			() => db.cosmetics.toArray(),
+			(result) => {
+				data.cosmetics = {};
+
+				for (const cos of result) {
+					data.cosmetics[cos.id] = cos;
+				}
+			},
+		);
+
+		target.addEventListener("static_cosmetics_fetched", (e) => {
+			const { badges, paints } = e.detail;
+			for (const badge of badges) {
+				for (const u of badge.user_ids) {
+					if (data.userBadges[u]) continue;
+
+					data.userBadges[u] = [badge];
+				}
+
+				badge.user_ids.length = 0;
+
+				data.cosmetics[badge.id] = badge;
 			}
-		},
-	);
+
+			for (const paint of paints) {
+				for (const u of paint.user_ids) {
+					if (data.userPaints[u]) continue;
+
+					data.userPaints[u] = [paint];
+				}
+
+				paint.user_ids.length = 0;
+
+				data.cosmetics[paint.id] = paint;
+			}
+		});
+	}
 
 	/**
 	 * Bind or unbind an entitlement to a user

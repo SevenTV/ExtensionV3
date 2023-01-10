@@ -1,13 +1,14 @@
 // REST Helpers
 // Fetches initial data from API
 import { log } from "@/common/Logger";
-import { convertBttvEmoteSet, convertFFZEmoteSet } from "@/common/Transform";
+import { convertBttvEmoteSet, convertFFZEmoteSet, convertSeventvOldCosmetics } from "@/common/Transform";
 import type { WorkerDriver } from "./worker.driver";
 import type { WorkerPort } from "./worker.port";
 import { db } from "@/db/idb";
 
 namespace API_BASE {
 	export const SEVENTV = import.meta.env.VITE_APP_API_REST;
+	export const SEVENTV_OLD = import.meta.env.VITE_APP_API_REST_OLD;
 	export const FFZ = "https://api.frankerfacez.com/v1";
 	export const BTTV = "https://api.betterttv.net/3";
 }
@@ -119,6 +120,23 @@ export class WorkerHttp {
 		this.driver.eventAPI.subscribe("entitlement.*", cond, port);
 		this.driver.eventAPI.subscribe("cosmetic.*", cond, port);
 		this.driver.eventAPI.subscribe("emote_set.*", cond, port);
+
+		// Send the legacy static cosmetics to the port
+		this.API()
+			.seventv.loadOldCosmetics("twitch_id", this.driver.cache)
+			.then((data) => {
+				const cos = convertSeventvOldCosmetics(data);
+				port.postMessage("STATIC_COSMETICS_FETCHED", {
+					provider: "7TV",
+					badges: cos[0],
+					paints: cos[1],
+				});
+
+				log.info(
+					"<API/Old>",
+					`Loaded ${data.badges.length + data.paints.length} cosmetics from legacy endpoint`,
+				);
+			});
 	}
 
 	public API() {
@@ -198,6 +216,32 @@ export const seventv = {
 				id: channelID,
 			},
 		}).then(() => log.debug("<API> Presence sent"));
+	},
+
+	async loadOldCosmetics(
+		identifier: "twitch_id" | "login" | "object_id",
+		cache?: Cache | null,
+	): Promise<SevenTV.OldCosmeticsResponse> {
+		if (cache) {
+			const cached = await cache.match(API_BASE.SEVENTV_OLD + `/cosmetics?user_identifier=${identifier}`);
+			if (cached) {
+				log.debug("<API/Old> Old Cosmetics cache hit");
+				return Promise.resolve<SevenTV.OldCosmeticsResponse>(await cached.json());
+			}
+		}
+
+		const resp = await doRequest(API_BASE.SEVENTV_OLD, `cosmetics?user_identifier=${identifier}`).catch((err) =>
+			Promise.reject(err),
+		);
+		if (!resp || resp.status !== 200) {
+			return Promise.reject(resp);
+		}
+
+		if (cache) {
+			cache.add(resp.url);
+		}
+
+		return Promise.resolve<SevenTV.OldCosmeticsResponse>(await resp.json());
 	},
 };
 

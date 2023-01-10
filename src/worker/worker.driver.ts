@@ -17,6 +17,8 @@ export class WorkerDriver extends EventTarget {
 	ports = new Map<symbol, WorkerPort>();
 	portSeq = 0;
 
+	cache: Cache | null = null;
+
 	constructor(public w: SharedWorkerGlobalScope) {
 		super();
 
@@ -41,11 +43,12 @@ export class WorkerDriver extends EventTarget {
 		this.eventAPI.connect("WebSocket");
 
 		db.ready().then(async () => {
-			// Fetch global emotes
+			// Fetch global emotes & cosmetics
 			const sets = [] as SevenTV.EmoteSet[];
 			let emoteCount = 0;
 
-			await Promise.allSettled<SevenTV.EmoteSet>([
+			Promise.allSettled<SevenTV.EmoteSet>([
+				// Global Emotes
 				this.http.API().seventv.loadGlobalSet(),
 				this.http.API().frankerfacez.loadGlobalEmoteSet(),
 				this.http.API().betterttv.loadGlobalEmoteSet(),
@@ -84,6 +87,8 @@ export class WorkerDriver extends EventTarget {
 				}, getRandomInt(2500, 15000));
 			}
 		};
+
+		w.caches.open("SEVENTV#CACHE").then((c) => (this.cache = c));
 
 		this.log.info("Worker has spawned. Logs will be piped to the UI thread");
 	}
