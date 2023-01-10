@@ -223,12 +223,3 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		imageFormat,
 	};
 }
-
-export interface UserMod {
-	badges: SevenTV.ObjectID[];
-	paints: SevenTV.ObjectID[];
-	emote_sets: SevenTV.ObjectID[];
-	uninitialized?: boolean;
-}
-
-export type UserModEditable = Pick<UserMod, "badges" | "emote_sets" | "paints">;
