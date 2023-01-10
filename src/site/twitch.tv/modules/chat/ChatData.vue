@@ -4,15 +4,11 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { useStore } from "@/store/main";
-import { useCosmetics } from "@/composable/useCosmetics";
 import { useLiveQuery } from "@/composable/useLiveQuery";
-import { useWorker } from "@/composable/useWorker";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { db } from "@/db/idb";
 
-const { channel, platform } = storeToRefs(useStore());
-const { target: workerTarget } = useWorker();
-const { setEntitlement } = useCosmetics();
+const { channel } = storeToRefs(useStore());
 const chatAPI = useChatAPI();
 
 // query the channel's emote set bindings
@@ -64,28 +60,4 @@ useLiveQuery(
 		reactives: [channelSets],
 	},
 );
-
-// Set up user entitlements
-
-useLiveQuery(
-	() =>
-		db.entitlements
-			.where("scope")
-			.equals(`${platform.value}:${channel.value?.id ?? "X"}`)
-			.toArray(),
-	(ents) => {
-		for (const ent of ents) {
-			setEntitlement(ent, "+");
-		}
-	},
-);
-
-// Handle user entitlements
-workerTarget.addEventListener("entitlement_created", (ev) => {
-	setEntitlement(ev.detail, "+");
-});
-
-workerTarget.addEventListener("entitlement_deleted", (ev) => {
-	setEntitlement(ev.detail, "-");
-});
 </script>

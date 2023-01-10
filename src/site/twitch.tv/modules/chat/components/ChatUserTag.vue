@@ -46,12 +46,10 @@ const props = defineProps<{
 }>();
 
 const { twitchBadgeSets } = useChatAPI();
-const { userBadges, userPaints } = useCosmetics();
+const { badges, paints } = useCosmetics(props.user.userID);
 const twitchBadges = ref([] as Twitch.ChatBadge[]);
-const badges = userBadges(props.user.userID);
 
 const color = ref(props.user.color);
-const paints = userPaints(props.user.userID);
 const paint = computed(() => (paints.value && paints.value.length ? paints.value[0] : null));
 
 // Get these from twitch settings

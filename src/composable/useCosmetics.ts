@@ -1,5 +1,6 @@
-import { Ref, reactive, toRef } from "vue";
+import { reactive, toRef } from "vue";
 import { until } from "@vueuse/core";
+import { useStore } from "@/store/main";
 import { useLiveQuery } from "./useLiveQuery";
 import { useWorker } from "./useWorker";
 import { db } from "@/db/idb";
@@ -17,59 +18,25 @@ const data = reactive({
 	staticallyAssigned: {} as Record<string, Record<string, never>>,
 });
 
-let init = false;
 let flushTimeout: number | null = null;
 
-export function useCosmetics() {
-	if (!init) {
-		init = true;
+/**
+ * Set up cosmetics
+ */
+db.ready().then(() => {
+	const { platform, channel } = useStore();
+	const { target } = useWorker();
 
-		const { target } = useWorker();
+	const cosmetics = useLiveQuery(
+		() => db.cosmetics.toArray(),
+		(result) => {
+			data.cosmetics = {};
 
-		useLiveQuery(
-			() => db.cosmetics.toArray(),
-			(result) => {
-				data.cosmetics = {};
-
-				for (const cos of result) {
-					data.cosmetics[cos.id] = cos;
-				}
-			},
-		);
-
-		// Assign legacy V2 static cosmetics
-		target.addEventListener("static_cosmetics_fetched", (e) => {
-			const { badges, paints } = e.detail;
-
-			// Assign legacy static badges
-			for (const badge of badges) {
-				for (const u of badge.user_ids) {
-					if (data.userBadges[u]) continue;
-
-					data.userBadges[u] = [badge];
-					data.staticallyAssigned[u] = {};
-				}
-
-				badge.user_ids.length = 0;
-
-				data.cosmetics[badge.id] = badge;
+			for (const cos of result) {
+				data.cosmetics[cos.id] = cos;
 			}
-
-			// Assign legacy static paints
-			for (const paint of paints) {
-				for (const u of paint.user_ids) {
-					if (data.userPaints[u]) continue;
-
-					data.userPaints[u] = [paint];
-					data.staticallyAssigned[u] = {};
-				}
-
-				paint.user_ids.length = 0;
-
-				data.cosmetics[paint.id] = paint;
-			}
-		});
-	}
+		},
+	);
 
 	/**
 	 * Bind or unbind an entitlement to a user
@@ -128,10 +95,12 @@ export function useCosmetics() {
 		}, 50);
 	}
 
+	// Wait for a given cosmetic's data to become available
 	function awaitCosmetic(id: SevenTV.ObjectID) {
 		return until(data.cosmetics[id]).not.toBeUndefined();
 	}
 
+	// Get the list of cosmetics for a given entitlement kind
 	function userListFor(kind: SevenTV.EntitlementKind) {
 		return {
 			BADGE: data.userBadges,
@@ -140,21 +109,92 @@ export function useCosmetics() {
 		}[kind];
 	}
 
-	function userBadges(id: SevenTV.ObjectID): Ref<SevenTV.Cosmetic<"BADGE">[]> {
-		if (!data.userBadges[id]) data.userBadges[id] = [];
+	// Handle user entitlements
+	target.addEventListener("entitlement_created", (ev) => {
+		setEntitlement(ev.detail, "+");
+	});
+	target.addEventListener("entitlement_deleted", (ev) => {
+		setEntitlement(ev.detail, "-");
+	});
 
-		return toRef(data.userBadges, id);
-	}
+	// Assign stored entitlements
+	useLiveQuery(
+		() =>
+			db.entitlements
+				.where("scope")
+				.equals(`${platform}:${channel?.id ?? "X"}`)
+				.toArray(),
+		(ents) => {
+			for (const ent of ents) {
+				let assigned = false;
 
-	function userPaints(id: SevenTV.ObjectID): Ref<SevenTV.Cosmetic<"PAINT">[]> {
-		if (!data.userPaints[id]) data.userPaints[id] = [];
+				switch (ent.kind) {
+					case "BADGE":
+						if (data.userBadges[ent.user_id]) continue;
 
-		return toRef(data.userPaints, id);
-	}
+						data.userBadges[ent.user_id] = [data.cosmetics[ent.ref_id] as SevenTV.Cosmetic<"BADGE">];
+						assigned = true;
+						break;
+					case "PAINT":
+						if (data.userPaints[ent.user_id]) continue;
+
+						data.userPaints[ent.user_id] = [data.cosmetics[ent.ref_id] as SevenTV.Cosmetic<"PAINT">];
+						assigned = true;
+						break;
+				}
+
+				if (assigned) {
+					data.staticallyAssigned[ent.user_id] = {};
+				}
+			}
+		},
+		{ reactives: [cosmetics] },
+	);
+
+	// Assign legacy V2 static cosmetics
+	target.addEventListener(
+		"static_cosmetics_fetched",
+		(e) => {
+			const { badges, paints } = e.detail;
+
+			// Assign legacy static badges
+			for (const badge of badges) {
+				for (const u of badge.user_ids) {
+					if (data.userBadges[u]) continue;
+
+					data.userBadges[u] = [badge];
+					data.staticallyAssigned[u] = {};
+				}
+
+				badge.user_ids.length = 0;
+
+				data.cosmetics[badge.id] = badge;
+			}
+
+			// Assign legacy static paints
+			for (const paint of paints) {
+				for (const u of paint.user_ids) {
+					if (data.userPaints[u]) continue;
+
+					data.userPaints[u] = [paint];
+					data.staticallyAssigned[u] = {};
+				}
+
+				paint.user_ids.length = 0;
+
+				data.cosmetics[paint.id] = paint;
+			}
+		},
+		{ once: true },
+	);
+});
+
+export function useCosmetics(userID: string) {
+	if (!data.userBadges[userID]) data.userBadges[userID] = [];
+	if (!data.userPaints[userID]) data.userPaints[userID] = [];
 
 	return {
-		setEntitlement,
-		userBadges,
-		userPaints,
+		paints: toRef(data.userPaints, userID),
+		badges: toRef(data.userBadges, userID),
 	};
 }
