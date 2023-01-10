@@ -25,6 +25,7 @@ const data = reactive({
 	isDarkTheme: 1,
 	primaryColorHex: "#000000",
 	useHighContrastColors: true,
+	showTimestamps: false,
 	currentChannel: {} as CurrentChannel,
 
 	// Scroll Data
@@ -229,6 +230,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		currentChannel,
 		primaryColorHex,
 		useHighContrastColors,
+		showTimestamps,
 	} = toRefs(data);
 
 	return {
@@ -244,6 +246,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		isDarkTheme: isDarkTheme,
 		primaryColorHex: primaryColorHex,
 		useHighContrastColors: useHighContrastColors,
+		showTimestamps: showTimestamps,
 		currentChannel: currentChannel,
 
 		scrollSys: sys,

@@ -68,7 +68,6 @@ const props = defineProps<{
 }>();
 
 // Get this from twitch settings instead?
-const showTimestamps = useConfig<boolean>("chat.show_timestamps");
 const emoteMargin = useConfig<number>("chat.emote_margin");
 const mentionStyle = useConfig<number>("chat.slash_me_style");
 
@@ -76,7 +75,7 @@ const mentionStyle = useConfig<number>("chat.slash_me_style");
 const locale = navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language ?? "en";
 
 // Tokenize the message
-const { emoteMap, imageFormat } = useChatAPI();
+const { emoteMap, imageFormat, showTimestamps } = useChatAPI();
 
 const tokenizer = new Tokenizer(props.msg.messageParts);
 const tokens = computed(() => {

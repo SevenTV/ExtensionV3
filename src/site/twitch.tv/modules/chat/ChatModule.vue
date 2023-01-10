@@ -51,13 +51,6 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 			defaultValue: true,
 		},
 		{
-			key: "chat.show_timestamps",
-			label: "Show Timestamps",
-			hint: "Show timestamps on messages sent in the chat",
-			type: "TOGGLE",
-			defaultValue: false,
-		},
-		{
 			key: "chat.slash_me_style",
 			label: "/me Style",
 			hint: "How the /me type messages should be displayed",

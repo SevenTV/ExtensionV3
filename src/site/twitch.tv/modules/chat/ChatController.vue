@@ -153,6 +153,7 @@ definePropertyHook(room.value.component, "props", {
 	value(v: typeof room.value.component.props) {
 		chatAPI.primaryColorHex.value = "#" + v.primaryColorHex ?? "755ebc";
 		chatAPI.useHighContrastColors.value = v.useHighContrastColors;
+		chatAPI.showTimestamps.value = v.showTimestamps;
 	},
 });
 

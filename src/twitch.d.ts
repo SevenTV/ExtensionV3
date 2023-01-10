@@ -178,6 +178,7 @@ declare module Twitch {
 	export type ChatRoomComponent = ReactExtended.WritableComponent<{
 		primaryColorHex: string;
 		useHighContrastColors: boolean;
+		showTimestamps: boolean;
 	}>;
 
 	export interface MessageHandlerAPI {
