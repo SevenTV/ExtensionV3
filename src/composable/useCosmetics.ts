@@ -95,8 +95,15 @@ export function useCosmetics() {
 		return toRef(data.userBadges, id);
 	}
 
+	function userPaints(id: SevenTV.ObjectID): Ref<SevenTV.Cosmetic<"PAINT">[]> {
+		if (!data.userPaints[id]) data.userPaints[id] = [];
+
+		return toRef(data.userPaints, id);
+	}
+
 	return {
 		setEntitlement,
 		userBadges,
+		userPaints,
 	};
 }

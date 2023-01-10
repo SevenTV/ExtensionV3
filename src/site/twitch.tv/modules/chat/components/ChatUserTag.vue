@@ -20,18 +20,24 @@
 
 		<!-- Message Author -->
 		<span class="seventv-chat-user-username">
-			<span>{{ user.userDisplayName }}</span>
+			<span v-if="!paint">{{ user.userDisplayName }}</span>
+			<span v-else>
+				<UiPaint :paint="paint" :text="true">
+					<span>{{ user.userDisplayName }}</span>
+				</UiPaint>
+			</span>
 			<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
 		</span>
 	</span>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useCosmetics } from "@/composable/useCosmetics";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import { normalizeUsername } from "@/site/twitch.tv/modules/chat/ChatBackend";
-import ChatBadge from "./ChatBadge.vue";
+import ChatBadge from "@/site/twitch.tv/modules/chat/components/ChatBadge.vue";
+import UiPaint from "@/ui/UiPaint.vue";
 
 const props = defineProps<{
 	user: Twitch.ChatUser;
@@ -40,11 +46,13 @@ const props = defineProps<{
 }>();
 
 const { twitchBadgeSets } = useChatAPI();
-const { userBadges } = useCosmetics();
+const { userBadges, userPaints } = useCosmetics();
 const twitchBadges = ref([] as Twitch.ChatBadge[]);
 const badges = userBadges(props.user.userID);
 
 const color = ref(props.user.color);
+const paints = userPaints(props.user.userID);
+const paint = computed(() => (paints.value && paints.value.length ? paints.value[0] : null));
 
 // Get these from twitch settings
 const readableColors = true;
