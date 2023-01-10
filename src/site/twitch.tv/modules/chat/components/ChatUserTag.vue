@@ -20,13 +20,16 @@
 
 		<!-- Message Author -->
 		<span class="seventv-chat-user-username">
-			<span v-if="!paint">{{ user.userDisplayName }}</span>
+			<span v-if="!paint">
+				<span>{{ user.userDisplayName }}</span>
+				<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
+			</span>
 			<span v-else>
 				<UiPaint :paint="paint" :text="true">
 					<span>{{ user.userDisplayName }}</span>
+					<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
 				</UiPaint>
 			</span>
-			<span v-if="user.isIntl"> ({{ user.userLogin }})</span>
 		</span>
 	</span>
 </template>
