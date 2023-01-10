@@ -29,14 +29,18 @@
 		<!-- Message Content -->
 		<span class="seventv-chat-message-body">
 			<template v-for="(part, index) of tokens" :key="index">
-				<span
-					v-if="part.type === MessagePartType.SEVENTVEMOTE"
-					class="emote-part"
-					:style="{
-						margin: `${emoteMargin}rem`,
-					}"
-				>
-					<Emote :emote="part.content" :image-format="imageFormat" />
+				<span v-if="part.type === MessagePartType.SEVENTVEMOTE">
+					<span
+						class="emote-part"
+						:style="{
+							margin: `${emoteMargin}rem`,
+						}"
+					>
+						<Emote :emote="part.content" :image-format="imageFormat" />
+					</span>
+					<span v-if="part.content.cheerAmount" :style="{ color: part.content.cheerColor }">
+						{{ part.content.cheerAmount }}
+					</span>
 				</span>
 				<template v-else>
 					<Component :is="getPart(part)" :part="part" />

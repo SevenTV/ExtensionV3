@@ -4,7 +4,7 @@
 			v-if="dependenciesMet && isHookable"
 			:list="inst"
 			:controller="chatController.instances[i]"
-			:room="chatRoom.instances[i]"
+			:room="chatRoom.instances[0] ?? undefined"
 		/>
 	</template>
 </template>
@@ -101,7 +101,7 @@ const { dependenciesMet, markAsReady } = useModule("chat", {
 
 const chatRoom = useComponentHook<Twitch.ChatRoomComponent>({
 	parentSelector: ".stream-chat",
-	predicate: (n) => n.props?.primaryColorHex,
+	predicate: (n) => n.props?.primaryColorHex !== undefined,
 });
 
 const chatList = useComponentHook<Twitch.ChatListComponent>(

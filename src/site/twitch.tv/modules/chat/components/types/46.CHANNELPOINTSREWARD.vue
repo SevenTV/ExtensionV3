@@ -61,7 +61,7 @@ defineProps<{
 		margin-top: 0.5rem;
 
 		&[highlight="true"] {
-			background-color: #ff000040;
+			background-color: #755ebc;
 			border-radius: 0.5rem;
 		}
 	}
