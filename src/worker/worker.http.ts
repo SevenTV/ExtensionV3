@@ -21,6 +21,8 @@ enum ProviderPriority {
 }
 
 export class WorkerHttp {
+	private lastPresenceAt = 0;
+
 	constructor(private driver: WorkerDriver) {
 		this.driver = driver;
 
@@ -35,7 +37,11 @@ export class WorkerHttp {
 		});
 		driver.addEventListener("set_channel_presence", (ev) => {
 			if (!ev.port || !ev.port.platform || !ev.port.user || !ev.port.channel) return;
+			if (this.lastPresenceAt && this.lastPresenceAt > Date.now() - 1000) {
+				return;
+			}
 
+			this.lastPresenceAt = Date.now();
 			this.API().seventv.writePresence(ev.port.platform, ev.port.user.id, ev.port.channel.id);
 		});
 	}
