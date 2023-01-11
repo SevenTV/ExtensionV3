@@ -4,7 +4,6 @@
 
 		<div class="details">
 			<h3 class="emote-name">{{ emote.name }}</h3>
-			<div class="spacer"></div>
 			<Logo class="logo" :provider="emote.provider" />
 		</div>
 
@@ -106,7 +105,7 @@ img.tooltip-emote {
 
 .details {
 	display: flex;
-	column-gap: 0.25rem;
+	column-gap: 0.5rem;
 	flex: 1;
 
 	> h3 {
