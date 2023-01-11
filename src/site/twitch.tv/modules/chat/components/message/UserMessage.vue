@@ -20,7 +20,7 @@
 			</span>
 		</template>
 		<!-- Chat Author -->
-		<UserTag v-if="msg.user" :user="msg.user" :badges="msg.badges" :color="adjustedColor" />
+		<UserTag v-if="msg.user" :user="msg.user" :badges="msg.badges" :color="adjustedColor" @name-click="nameClick" />
 
 		<span>
 			{{ msg.messageType === 0 ? ": " : " " }}
@@ -36,7 +36,7 @@
 							margin: `${emoteMargin}rem`,
 						}"
 					>
-						<Emote :emote="part.content" :image-format="imageFormat" />
+						<Emote :emote="part.content" :image-format="imageFormat" @emote-click="emoteClick" />
 					</span>
 					<span v-if="part.content.cheerAmount" :style="{ color: part.content.cheerColor }">
 						{{ part.content.cheerAmount }}
@@ -52,6 +52,8 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
+import { normalizeUsername } from "@/common/Color";
+import { useCardOpeners } from "@/composable/useCardOpeners";
 import { useConfig } from "@/composable/useSettings";
 import { MessagePartType } from "@/site/twitch.tv";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
@@ -61,7 +63,6 @@ import { Tokenizer } from "./Tokenizer";
 import Link from "./parts/Link.vue";
 import Mention from "./parts/Mention.vue";
 import Text from "./parts/Text.vue";
-import { normalizeUsername } from "../../ChatBackend";
 
 const props = defineProps<{
 	msg: Twitch.ChatMessage;
@@ -70,6 +71,8 @@ const props = defineProps<{
 // Get this from twitch settings instead?
 const emoteMargin = useConfig<number>("chat.emote_margin");
 const mentionStyle = useConfig<number>("chat.slash_me_style");
+
+const { nameClick, emoteClick } = useCardOpeners(props.msg);
 
 // Get the locale to format the timestamp
 const locale = navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language ?? "en";
