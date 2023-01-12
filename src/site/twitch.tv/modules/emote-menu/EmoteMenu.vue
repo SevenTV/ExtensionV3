@@ -1,6 +1,6 @@
 <template>
 	<Teleport :to="containerEl">
-		<div v-show="isVisible" class="emote-menu-container">
+		<div v-if="loaded" v-show="isVisible" class="emote-menu-container">
 			<div class="emote-menu">
 				<!-- Emote Menu Header -->
 				<div class="header">
@@ -56,14 +56,8 @@ const containerEl = ref();
 containerEl.value = document.querySelector(".chat-input__textarea") ?? undefined;
 
 const isVisible = ref(false);
+const loaded = ref(false);
 const select = ref("TWITCH" as SevenTV.Provider);
-
-const providers = ref(new Map<SevenTV.Provider, SevenTV.EmoteSet[]>());
-// Determine order
-providers.value.set("TWITCH", []);
-providers.value.set("7TV", []);
-providers.value.set("FFZ", []);
-providers.value.set("BTTV", []);
 
 const selectedProvider = computed(() => {
 	return filtered.value.has(select.value)
@@ -132,23 +126,26 @@ function sortSets(a: SevenTV.EmoteSet, b: SevenTV.EmoteSet) {
 	return sa == sb ? a.name.localeCompare(b.name) : sa > sb ? 1 : -1;
 }
 
-watch(
-	emoteProviders,
-	(e) => {
-		for (const [p, sets] of Object.entries(e)) {
-			const temp = new Map<string, SevenTV.EmoteSet>();
-			for (const [, set] of Object.entries(sets))
-				temp.has(set.name) ? temp.get(set.name)?.emotes.concat(set.emotes ?? []) : temp.set(set.name, set);
-			temp.forEach((s) => s.emotes.sort(sortEmotes));
-			providers.value.set(p as SevenTV.Provider, Array.from(temp.values()).sort(sortSets));
-		}
-	},
-	{ immediate: true, deep: true },
-);
+const providers = computed(() => {
+	const temp = new Map<SevenTV.Provider, SevenTV.EmoteSet[]>();
+	temp.set("TWITCH", []);
+	temp.set("7TV", []);
+	temp.set("FFZ", []);
+	temp.set("BTTV", []);
+
+	for (const [p, sets] of Object.entries(emoteProviders.value)) {
+		const test = Object.values(sets).sort(sortSets);
+		test.forEach((s) => s.emotes.sort(sortEmotes));
+		temp.set(p as SevenTV.Provider, test);
+	}
+
+	return temp;
+});
 
 let unsub: (() => void) | undefined;
 
 function toggleEmoteMenu() {
+	loaded.value = true;
 	if (unsub) unsub();
 	if (!isVisible.value) {
 		unsub = onClickOutside(containerEl, toggleEmoteMenu);
@@ -209,6 +206,7 @@ onUnmounted(() => {
 	unsetPropertyHook(component.autocompleteInputRef, "state");
 
 	if (unsub) unsub();
+	loaded.value = false;
 });
 </script>
 
