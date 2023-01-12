@@ -64,7 +64,8 @@ defineProps<{
 			background-color: #755ebc;
 			border-radius: 0.2rem;
 			padding: 0.5rem;
-			margin: 0.5rem -0.5rem 0 -0.5rem;
+			margin-left: -0.5rem;
+			margin-right: -0.5rem;
 		}
 	}
 }
