@@ -18,6 +18,7 @@ const data = reactive({
 
 	userBadges: {} as Record<string, SevenTV.Cosmetic<"BADGE">[]>,
 	userPaints: {} as Record<string, SevenTV.Cosmetic<"PAINT">[]>,
+	userEmoteSets: {} as Record<string, SevenTV.EmoteSet[]>,
 	userEmoteMap: {} as Record<string, Record<string, SevenTV.ActiveEmote>>,
 
 	staticallyAssigned: {} as Record<string, Record<string, never> | undefined>,
@@ -158,7 +159,7 @@ db.ready().then(async () => {
 		return {
 			BADGE: data.userBadges,
 			PAINT: data.userPaints,
-			EMOTE_SET: [] as never,
+			EMOTE_SET: data.userEmoteSets,
 		}[kind];
 	}
 
@@ -207,6 +208,12 @@ db.ready().then(async () => {
 
 			log.warn("<Cosmetics>", "Emote Set could not be found", `id=${setID}`);
 			return;
+		}
+
+		if (!data.userEmoteSets[userID]) data.userEmoteSets[userID] = [];
+		const idx = data.userEmoteSets[userID].findIndex((s) => s.id === set.id);
+		if (idx === -1) {
+			data.userEmoteSets[userID].push(set);
 		}
 
 		log.info("<Cosmetics>", "Assigned Emote Set to user", `id=${setID}`, `userID=${userID}`);
@@ -266,5 +273,6 @@ export function useCosmetics(userID: string) {
 		paints: toRef(data.userPaints, userID),
 		badges: toRef(data.userBadges, userID),
 		emotes: toRef(data.userEmoteMap, userID),
+		emoteSets: toRef(data.userEmoteSets, userID),
 	};
 }

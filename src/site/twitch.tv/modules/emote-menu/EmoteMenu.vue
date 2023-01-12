@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import { useStore } from "@/store/main";
 import { determineRatio } from "@/common/Image";
 import { HookedInstance } from "@/common/ReactHooks";
 import {
@@ -42,6 +43,7 @@ import {
 	unsetNamedEventHandler,
 	unsetPropertyHook,
 } from "@/common/Reflection";
+import { useCosmetics } from "@/composable/useCosmetics";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import EmoteMenuTab from "@/site/twitch.tv/modules/emote-menu/EmoteMenuTab.vue";
 import Logo from "@/assets/svg/logos/Logo.vue";
@@ -50,7 +52,9 @@ const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatInputController>;
 }>();
 
+const { identity } = useStore();
 const { emoteProviders, currentChannel } = useChatAPI();
+const { emoteSets: personalEmoteSets } = useCosmetics(identity?.id ?? "");
 
 const containerEl = ref();
 containerEl.value = document.querySelector(".chat-input__textarea") ?? undefined;
@@ -137,6 +141,10 @@ const providers = computed(() => {
 		const test = Object.values(sets).sort(sortSets);
 		test.forEach((s) => s.emotes.sort(sortEmotes));
 		temp.set(p as SevenTV.Provider, test);
+	}
+
+	if (personalEmoteSets.value?.length) {
+		temp.set("7TV", [...temp.get("7TV")!, ...personalEmoteSets.value]);
 	}
 
 	return temp;
