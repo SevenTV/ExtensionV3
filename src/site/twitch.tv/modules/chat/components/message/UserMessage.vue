@@ -20,7 +20,14 @@
 			</span>
 		</template>
 		<!-- Chat Author -->
-		<UserTag v-if="msg.user" :user="msg.user" :badges="msg.badges" :color="adjustedColor" @name-click="nameClick" />
+		<UserTag
+			v-if="msg.user"
+			:user="msg.user"
+			:badges="msg.badges"
+			:color="adjustedColor"
+			@name-click="nameClick"
+			@badge-click="badgeClick"
+		/>
 
 		<span>
 			{{ msg.messageType === 0 ? ": " : " " }}
@@ -72,7 +79,7 @@ const props = defineProps<{
 const emoteMargin = useConfig<number>("chat.emote_margin");
 const mentionStyle = useConfig<number>("chat.slash_me_style");
 
-const { nameClick, emoteClick } = useCardOpeners(props.msg);
+const { nameClick, emoteClick, badgeClick } = useCardOpeners(props.msg);
 
 // Get the locale to format the timestamp
 const locale = navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language ?? "en";

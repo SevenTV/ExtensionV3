@@ -196,6 +196,7 @@ declare module Twitch {
 			initialTopOffset: number;
 			initialBottomOffset: number;
 		}) => void;
+		setViewerCardPage: (v: any) => void;
 	};
 
 	export interface MessageHandlerAPI {

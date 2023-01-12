@@ -272,6 +272,7 @@ awaitComponents<Twitch.ViewerCardComponent>({
 	if (!c) return;
 	tools.onShowViewerCard = c.onShowViewerCard;
 	tools.onShowEmoteCard = c.onShowEmoteCard;
+	tools.setViewerCardPage = c.setViewerCardPage;
 });
 
 // Apply new boundaries when the window is resized
