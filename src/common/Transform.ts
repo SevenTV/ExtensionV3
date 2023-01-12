@@ -57,7 +57,7 @@ export function convertTwitchEmote(data: Partial<Twitch.TwitchEmote>): SevenTV.E
 	};
 }
 
-export function convertCheerEmote(data: Twitch.ChatMessage.Part.EmoteContent): SevenTV.Emote {
+export function convertCheerEmote(data: Twitch.ChatMessage.EmotePart["content"]): SevenTV.Emote {
 	return {
 		id: data.emoteID ?? "",
 		name: `${data.alt} ${data.cheerAmount}`,
