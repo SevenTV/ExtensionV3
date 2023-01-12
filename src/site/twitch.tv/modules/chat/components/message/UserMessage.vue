@@ -67,6 +67,7 @@ import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
 import Emote from "@/site/twitch.tv/modules/chat/components/message/Emote.vue";
 import UserTag from "@/site/twitch.tv/modules/chat/components/message/UserTag.vue";
 import { Tokenizer } from "./Tokenizer";
+import FlaggedSegment from "./parts/FlaggedSegment.vue";
 import Link from "./parts/Link.vue";
 import Mention from "./parts/Mention.vue";
 import Text from "./parts/Text.vue";
@@ -104,9 +105,10 @@ function getPart(part: Twitch.ChatMessage.Part) {
 	switch (part.type) {
 		case MessagePartType.TEXT:
 		case MessagePartType.MODERATEDTEXT:
-		case MessagePartType.FLAGGEDSEGMENT:
 		case MessagePartType.CURRENTUSERHIGHLIGHT:
 			return Text;
+		case MessagePartType.FLAGGEDSEGMENT:
+			return FlaggedSegment;
 		case MessagePartType.MENTION:
 			return Mention;
 		case MessagePartType.LINK:

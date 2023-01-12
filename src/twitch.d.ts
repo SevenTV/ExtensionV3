@@ -587,11 +587,37 @@ declare module Twitch {
 
 	export namespace ChatMessage {
 		export interface Part {
-			content: string | EmoteRef | LinkContent | { [key: string]: any };
+			content: any;
 			type: number;
 		}
-		export namespace Part {
-			export interface EmoteContent {
+
+		export interface TextPart extends Part {
+			content: string;
+		}
+
+		export interface FlaggedSegmentPart extends Part {
+			categories: { [key: string]: boolean };
+			content: TextPart;
+			length: number;
+			originalText: string;
+		}
+
+		export interface LinkPart extends Part {
+			content: {
+				displayText: string;
+				url: string;
+			};
+		}
+
+		export interface MentionPart extends Part {
+			content: {
+				recipient: string;
+				currentUserMentionRelation: number;
+			};
+		}
+
+		export interface EmotePart extends Part {
+			content: {
 				alt: string;
 				emoteID?: string;
 				images?: {
@@ -613,12 +639,7 @@ declare module Twitch {
 				// Only exists if cheermote
 				cheerAmount?: number;
 				cheerColor?: string;
-			}
-
-			export interface LinkContent {
-				displayText: string;
-				url: string;
-			}
+			};
 		}
 
 		export interface AppPart {
