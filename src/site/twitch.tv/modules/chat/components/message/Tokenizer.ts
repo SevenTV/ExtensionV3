@@ -127,13 +127,13 @@ function sevenTVEmoteToPart(emote: SevenTV.ActiveEmote, zeroWidth?: SevenTV.Acti
 			content: emote,
 		};
 
-	const arr = emote.overlaid ?? [];
-	arr.push(zeroWidth);
+	const o = emote.overlaid ?? {};
+	o[zeroWidth.name] = zeroWidth;
 	return {
 		type: MessagePartType.SEVENTVEMOTE,
 		content: {
 			...emote,
-			overlaid: arr,
+			overlaid: o,
 		},
 	};
 }

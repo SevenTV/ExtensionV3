@@ -21,7 +21,7 @@
 		</div>
 
 		<!-- Zero Width -->
-		<div v-if="emote.overlaid?.length" class="zero-width-label">
+		<div v-if="Object.keys(emote.overlaid ?? {}).length" class="zero-width-label">
 			<template v-for="e of emote.overlaid" :key="e.id">
 				—
 				<img v-if="e.data" class="overlaid-emote-icon" :srcset="imageHostToSrcset(e.data.host)" />
