@@ -145,5 +145,9 @@ img.tooltip-emote {
 	> .label-global {
 		color: rgb(70, 220, 100);
 	}
+
+	> .label-personal {
+		color: rgb(220, 170, 50);
+	}
 }
 </style>

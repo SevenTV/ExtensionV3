@@ -1,12 +1,16 @@
-import { reactive, ref, toRef, toRefs } from "vue";
-import { until } from "@vueuse/core";
+import { Ref, reactive, ref, toRef, toRefs } from "vue";
+import { until, useTimeout } from "@vueuse/core";
 import { useStore } from "@/store/main";
+import { log } from "@/common/Logger";
 import { useLiveQuery } from "./useLiveQuery";
 import { useWorker } from "./useWorker";
 import { db } from "@/db/idb";
 
 const data = reactive({
 	cosmetics: {} as Record<SevenTV.ObjectID, SevenTV.Cosmetic>,
+	sets: {} as Record<SevenTV.ObjectID, SevenTV.EmoteSet>,
+	activeSets: new Set<SevenTV.ObjectID>(),
+
 	entitlementBuffers: {
 		"+": [] as SevenTV.Entitlement[],
 		"-": [] as SevenTV.Entitlement[],
@@ -14,6 +18,8 @@ const data = reactive({
 
 	userBadges: {} as Record<string, SevenTV.Cosmetic<"BADGE">[]>,
 	userPaints: {} as Record<string, SevenTV.Cosmetic<"PAINT">[]>,
+	userEmotes: {} as Record<string, SevenTV.EmoteSet[]>,
+	userEmoteMap: {} as Record<string, Record<string, SevenTV.ActiveEmote>>,
 
 	staticallyAssigned: {} as Record<string, Record<string, never> | undefined>,
 });
@@ -28,6 +34,7 @@ db.ready().then(async () => {
 	const { target } = useWorker();
 
 	const cosmeticsFetched = ref(false);
+
 	useLiveQuery(
 		() => db.cosmetics.toArray(),
 		(result) => {
@@ -125,17 +132,21 @@ db.ready().then(async () => {
 					const l = userListFor(ent.kind);
 					if (!l[ent.user_id]) l[ent.user_id] = [];
 
-					awaitCosmetic(ent.ref_id).then((cos) => {
-						const idx = l[ent.user_id].findIndex((b) => b.id === ent.ref_id);
-						if (idx === -1) {
-							l[ent.user_id].push(cos as never);
-						}
-					});
+					if (ent.kind === "EMOTE_SET") {
+						bindUserEmotes(ent.user_id, ent.ref_id);
+					} else {
+						awaitCosmetic(ent.ref_id).then((cos) => {
+							const idx = l[ent.user_id].findIndex((b) => b.id === ent.ref_id);
+							if (idx === -1) {
+								l[ent.user_id].push(cos as never);
+							}
+						});
+					}
 				}
-			}, 50);
+			}, 10);
 
 			flushTimeout = null;
-		}, 50);
+		}, 10);
 	}
 
 	// Wait for a given cosmetic's data to become available
@@ -143,13 +154,52 @@ db.ready().then(async () => {
 		return until(data.cosmetics[id]).not.toBeUndefined();
 	}
 
+	function watchSet(userID: string, setID: SevenTV.ObjectID): Ref<SevenTV.EmoteSet | null> {
+		const es = ref<SevenTV.EmoteSet | null>(null);
+
+		useLiveQuery(
+			() => db.emoteSets.where("id").equals(setID).first(),
+			(res) => {
+				es.value = res; // assign to value
+
+				data.userEmoteMap[userID] = res.emotes.reduce(
+					(acc, cur) => ({ ...acc, [cur.name]: cur }),
+					{} as Record<string, SevenTV.ActiveEmote>,
+				);
+			},
+		);
+
+		return es;
+	}
+
 	// Get the list of cosmetics for a given entitlement kind
 	function userListFor(kind: SevenTV.EntitlementKind) {
 		return {
 			BADGE: data.userBadges,
 			PAINT: data.userPaints,
-			EMOTE_SET: {},
+			EMOTE_SET: data.userEmotes,
 		}[kind];
+	}
+
+	async function bindUserEmotes(userID: string, setID: string) {
+		const es = watchSet(userID, setID);
+
+		// Wait until set becomes available
+		// or timeout after 10 seconds
+		await Promise.race([
+			until(es).not.toBeNull(),
+			until(useTimeout(10000))
+				.toBeTruthy()
+				.then(() => null),
+		]);
+		if (!es.value) {
+			log.warn("<Cosmetics>", "Entitled Set could not be found", `id=${setID}`);
+			return;
+		}
+
+		log.info("<Cosmetics>", "Entitled Set found", `id=${setID}`);
+
+		data.userEmotes[userID].push(es.value);
 	}
 
 	// Handle user entitlements
@@ -183,7 +233,15 @@ db.ready().then(async () => {
 						data.userPaints[ent.user_id] = [data.cosmetics[ent.ref_id] as SevenTV.Cosmetic<"PAINT">];
 						assigned = true;
 						break;
+					case "EMOTE_SET":
+						if (data.userEmotes[ent.user_id]) continue;
+
+						data.userEmotes[ent.user_id] = [];
+						bindUserEmotes(ent.user_id, ent.ref_id);
+						break;
 				}
+
+				log.debug("<Cosmetics>", "Assigned", ents.length.toString(), "stored entitlements");
 
 				if (assigned) {
 					data.staticallyAssigned[ent.user_id] = {};
@@ -195,9 +253,11 @@ db.ready().then(async () => {
 export function useCosmetics(userID: string) {
 	if (!data.userBadges[userID]) data.userBadges[userID] = [];
 	if (!data.userPaints[userID]) data.userPaints[userID] = [];
+	if (!data.userEmoteMap[userID]) data.userEmoteMap[userID] = {};
 
 	return {
 		paints: toRef(data.userPaints, userID),
 		badges: toRef(data.userBadges, userID),
+		emotes: toRef(data.userEmoteMap, userID),
 	};
 }
