@@ -1,4 +1,4 @@
-import { reactive, toRef } from "vue";
+import { reactive, ref, toRef, toRefs } from "vue";
 import { until } from "@vueuse/core";
 import { useStore } from "@/store/main";
 import { useLiveQuery } from "./useLiveQuery";
@@ -23,11 +23,12 @@ let flushTimeout: number | null = null;
 /**
  * Set up cosmetics
  */
-db.ready().then(() => {
-	const { platform, channel } = useStore();
+db.ready().then(async () => {
+	const { platform, channel } = toRefs(useStore());
 	const { target } = useWorker();
 
-	const cosmetics = useLiveQuery(
+	const cosmeticsFetched = ref(false);
+	useLiveQuery(
 		() => db.cosmetics.toArray(),
 		(result) => {
 			data.cosmetics = {};
@@ -35,8 +36,13 @@ db.ready().then(() => {
 			for (const cos of result) {
 				data.cosmetics[cos.id] = cos;
 			}
+
+			cosmeticsFetched.value = true;
 		},
 	);
+
+	await until(cosmeticsFetched).toBeTruthy();
+	await until(channel).not.toBeNull();
 
 	/**
 	 * Bind or unbind an entitlement to a user
@@ -117,14 +123,12 @@ db.ready().then(() => {
 		setEntitlement(ev.detail, "-");
 	});
 
-	// Assign stored entitlements
-	useLiveQuery(
-		() =>
-			db.entitlements
-				.where("scope")
-				.equals(`${platform}:${channel?.id ?? "X"}`)
-				.toArray(),
-		(ents) => {
+	// Assign stored entitlementsdb.entitlements
+	await db.entitlements
+		.where("scope")
+		.equals(`${platform.value}:${channel.value!.id ?? "X"}`)
+		.toArray()
+		.then((ents) => {
 			for (const ent of ents) {
 				let assigned = false;
 
@@ -147,9 +151,7 @@ db.ready().then(() => {
 					data.staticallyAssigned[ent.user_id] = {};
 				}
 			}
-		},
-		{ reactives: [cosmetics] },
-	);
+		});
 
 	// Assign legacy V2 static cosmetics
 	target.addEventListener(
