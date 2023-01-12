@@ -18,7 +18,7 @@
 				<!-- Emote menu body -->
 				<template v-for="[provider, emoteSets] of filtered" :key="provider">
 					<div v-show="provider == selectedProvider" class="body">
-						<EmoteMenuTab :emote-sets="emoteSets" :image-format="imageFormat" @emote-click="onEmoteClick" />
+						<EmoteMenuTab :emote-sets="emoteSets" @emote-click="onEmoteClick" />
 					</div>
 				</template>
 				<div v-if="filtered.size == 0" class="body empty">
@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
+import { determineRatio } from "@/common/Image";
 import { HookedInstance } from "@/common/ReactHooks";
 import {
 	defineFunctionHook,
@@ -42,7 +43,6 @@ import {
 	unsetPropertyHook,
 } from "@/common/Reflection";
 import { useChatAPI } from "@/site/twitch.tv/ChatAPI";
-import { determineRatio } from "@/site/twitch.tv/modules/emote-menu/EmoteMenuBackend";
 import EmoteMenuTab from "@/site/twitch.tv/modules/emote-menu/EmoteMenuTab.vue";
 import Logo from "@/assets/svg/logos/Logo.vue";
 
@@ -50,7 +50,7 @@ const props = defineProps<{
 	instance: HookedInstance<Twitch.ChatInputController>;
 }>();
 
-const { emoteProviders, currentChannel, imageFormat } = useChatAPI();
+const { emoteProviders, currentChannel } = useChatAPI();
 
 const containerEl = ref();
 containerEl.value = document.querySelector(".chat-input__textarea") ?? undefined;

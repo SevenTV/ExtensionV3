@@ -43,7 +43,7 @@
 							margin: `${emoteMargin}rem`,
 						}"
 					>
-						<Emote :emote="part.content" :image-format="imageFormat" @emote-click="emoteClick" />
+						<Emote :emote="part.content" @emote-click="emoteClick" />
 					</span>
 					<span v-if="part.content.cheerAmount" :style="{ color: part.content.cheerColor }">
 						{{ part.content.cheerAmount }}
@@ -86,7 +86,7 @@ const { nameClick, emoteClick, badgeClick } = useCardOpeners(props.msg);
 const locale = navigator.languages && navigator.languages.length ? navigator.languages[0] : navigator.language ?? "en";
 
 // Tokenize the message
-const { emoteMap, imageFormat, showTimestamps } = useChatAPI();
+const { emoteMap, showTimestamps } = useChatAPI();
 
 const tokenizer = new Tokenizer(props.msg.messageParts);
 const tokens = computed(() => {

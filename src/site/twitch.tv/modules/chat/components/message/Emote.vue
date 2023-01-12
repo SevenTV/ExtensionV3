@@ -35,10 +35,9 @@ import EmoteTooltip from "@/site/twitch.tv/modules/chat/components/message/Emote
 const props = withDefaults(
 	defineProps<{
 		emote: SevenTV.ActiveEmote;
-		imageFormat?: SevenTV.ImageFormat;
 		unload?: boolean;
 	}>(),
-	{ unload: false, imageFormat: "WEBP" },
+	{ unload: false },
 );
 
 const emit = defineEmits<{
@@ -48,7 +47,7 @@ const emit = defineEmits<{
 const imgRef = ref<HTMLImageElement>();
 
 const hideUnlisted = useConfig<boolean>("general.blur_unlisted_emotes");
-const srcset = computed(() => (props.unload ? "" : imageHostToSrcset(props.emote.data!.host, props.imageFormat)));
+const srcset = computed(() => (props.unload ? "" : imageHostToSrcset(props.emote.data!.host)));
 
 const width = ref(0);
 const height = ref(0);

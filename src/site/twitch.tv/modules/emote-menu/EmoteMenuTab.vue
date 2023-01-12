@@ -21,7 +21,7 @@
 							:emote-id="emote.id"
 							@click="emit('emoteClick', emote)"
 						>
-							<Emote :emote="emote" :image-format="imageFormat" :unload="!loaded[emote.id]" />
+							<Emote :emote="emote" :unload="!loaded[emote.id]" />
 						</div>
 					</div>
 				</div>
@@ -59,7 +59,6 @@ import Emote from "../chat/components/message/Emote.vue";
 
 const props = defineProps<{
 	emoteSets: SevenTV.EmoteSet[];
-	imageFormat: SevenTV.ImageFormat;
 }>();
 
 const emit = defineEmits<{

@@ -1,5 +1,4 @@
-import { Ref, computed, nextTick, reactive, ref, toRefs, watchEffect } from "vue";
-import { useStore } from "@/store/main";
+import { Ref, nextTick, reactive, ref, toRefs, watchEffect } from "vue";
 import { useConfig } from "@/composable/useSettings";
 import UiScrollableVue from "@/ui/UiScrollable.vue";
 
@@ -27,6 +26,7 @@ const data = reactive({
 	useHighContrastColors: true,
 	showTimestamps: false,
 	currentChannel: {} as CurrentChannel,
+	imageFormat: "AVIF" as SevenTV.ImageFormat,
 
 	// Scroll Data
 	userInput: 0,
@@ -51,10 +51,7 @@ const data = reactive({
 let flushTimeout: number | undefined;
 
 export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> | undefined>, bounds?: Ref<DOMRect>) {
-	const store = useStore();
 	const container = ref<HTMLElement | null>(null);
-
-	const imageFormat = computed<SevenTV.ImageFormat>(() => (store.avifSupported ? "AVIF" : "WEBP"));
 
 	watchEffect(() => {
 		if (scroller?.value?.container) {
@@ -231,6 +228,7 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		primaryColorHex,
 		useHighContrastColors,
 		showTimestamps,
+		imageFormat,
 	} = toRefs(data);
 
 	return {
