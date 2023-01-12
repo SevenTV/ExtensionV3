@@ -15,7 +15,7 @@ const data = reactive({
 	userBadges: {} as Record<string, SevenTV.Cosmetic<"BADGE">[]>,
 	userPaints: {} as Record<string, SevenTV.Cosmetic<"PAINT">[]>,
 
-	staticallyAssigned: {} as Record<string, Record<string, never>>,
+	staticallyAssigned: {} as Record<string, Record<string, never> | undefined>,
 });
 
 let flushTimeout: number | null = null;
@@ -39,6 +39,43 @@ db.ready().then(async () => {
 
 			cosmeticsFetched.value = true;
 		},
+	);
+
+	// Assign legacy V2 static cosmetics
+	target.addEventListener(
+		"static_cosmetics_fetched",
+		(e) => {
+			const { badges, paints } = e.detail;
+
+			// Assign legacy static badges
+			for (const badge of badges) {
+				for (const u of badge.user_ids) {
+					if (data.userBadges[u]) continue;
+
+					data.userBadges[u] = [badge];
+					data.staticallyAssigned[u] = {};
+				}
+
+				badge.user_ids.length = 0;
+
+				data.cosmetics[badge.id] = badge;
+			}
+
+			// Assign legacy static paints
+			for (const paint of paints) {
+				for (const u of paint.user_ids) {
+					if (data.userPaints[u]) continue;
+
+					data.userPaints[u] = [paint];
+					data.staticallyAssigned[u] = {};
+				}
+
+				paint.user_ids.length = 0;
+
+				data.cosmetics[paint.id] = paint;
+			}
+		},
+		{ once: true },
 	);
 
 	await until(cosmeticsFetched).toBeTruthy();
@@ -124,7 +161,7 @@ db.ready().then(async () => {
 	});
 
 	// Assign stored entitlementsdb.entitlements
-	await db.entitlements
+	db.entitlements
 		.where("scope")
 		.equals(`${platform.value}:${channel.value!.id ?? "X"}`)
 		.toArray()
@@ -132,15 +169,16 @@ db.ready().then(async () => {
 			for (const ent of ents) {
 				let assigned = false;
 
+				const isLegacy = !!data.staticallyAssigned[ent.user_id];
 				switch (ent.kind) {
 					case "BADGE":
-						if (data.userBadges[ent.user_id]) continue;
+						if (!isLegacy && data.userBadges[ent.user_id]) continue;
 
 						data.userBadges[ent.user_id] = [data.cosmetics[ent.ref_id] as SevenTV.Cosmetic<"BADGE">];
 						assigned = true;
 						break;
 					case "PAINT":
-						if (data.userPaints[ent.user_id]) continue;
+						if (!isLegacy && data.userPaints[ent.user_id]) continue;
 
 						data.userPaints[ent.user_id] = [data.cosmetics[ent.ref_id] as SevenTV.Cosmetic<"PAINT">];
 						assigned = true;
@@ -152,43 +190,6 @@ db.ready().then(async () => {
 				}
 			}
 		});
-
-	// Assign legacy V2 static cosmetics
-	target.addEventListener(
-		"static_cosmetics_fetched",
-		(e) => {
-			const { badges, paints } = e.detail;
-
-			// Assign legacy static badges
-			for (const badge of badges) {
-				for (const u of badge.user_ids) {
-					if (data.userBadges[u]) continue;
-
-					data.userBadges[u] = [badge];
-					data.staticallyAssigned[u] = {};
-				}
-
-				badge.user_ids.length = 0;
-
-				data.cosmetics[badge.id] = badge;
-			}
-
-			// Assign legacy static paints
-			for (const paint of paints) {
-				for (const u of paint.user_ids) {
-					if (data.userPaints[u]) continue;
-
-					data.userPaints[u] = [paint];
-					data.staticallyAssigned[u] = {};
-				}
-
-				paint.user_ids.length = 0;
-
-				data.cosmetics[paint.id] = paint;
-			}
-		},
-		{ once: true },
-	);
 });
 
 export function useCosmetics(userID: string) {
