@@ -18,7 +18,6 @@ const data = reactive({
 
 	userBadges: {} as Record<string, SevenTV.Cosmetic<"BADGE">[]>,
 	userPaints: {} as Record<string, SevenTV.Cosmetic<"PAINT">[]>,
-	userEmotes: {} as Record<string, SevenTV.EmoteSet[]>,
 	userEmoteMap: {} as Record<string, Record<string, SevenTV.ActiveEmote>>,
 
 	staticallyAssigned: {} as Record<string, Record<string, never> | undefined>,
@@ -154,52 +153,63 @@ db.ready().then(async () => {
 		return until(data.cosmetics[id]).not.toBeUndefined();
 	}
 
+	// Get the list of cosmetics for a given entitlement kind
+	function userListFor(kind: SevenTV.EntitlementKind) {
+		return {
+			BADGE: data.userBadges,
+			PAINT: data.userPaints,
+			EMOTE_SET: [] as never,
+		}[kind];
+	}
+
+	// Watch a user's personal emote set for creation or changes
 	function watchSet(userID: string, setID: SevenTV.ObjectID): Ref<SevenTV.EmoteSet | null> {
 		const es = ref<SevenTV.EmoteSet | null>(null);
+
+		data.userEmoteMap[userID] = {};
 
 		useLiveQuery(
 			() => db.emoteSets.where("id").equals(setID).first(),
 			(res) => {
 				es.value = res; // assign to value
 
+				// Re-assign the user's personal emote map
 				data.userEmoteMap[userID] = res.emotes.reduce(
-					(acc, cur) => ({ ...acc, [cur.name]: cur }),
+					(acc, cur) => ({ ...acc, [cur.name]: { ...cur, scope: "PERSONAL" } }),
 					{} as Record<string, SevenTV.ActiveEmote>,
 				);
+			},
+			{
+				until: until(data.userEmoteMap[userID])
+					.toBeUndefined()
+					.then(() => true),
 			},
 		);
 
 		return es;
 	}
 
-	// Get the list of cosmetics for a given entitlement kind
-	function userListFor(kind: SevenTV.EntitlementKind) {
-		return {
-			BADGE: data.userBadges,
-			PAINT: data.userPaints,
-			EMOTE_SET: data.userEmotes,
-		}[kind];
-	}
-
+	// Bind a user's personal emote set
 	async function bindUserEmotes(userID: string, setID: string) {
 		const es = watchSet(userID, setID);
 
 		// Wait until set becomes available
 		// or timeout after 10 seconds
-		await Promise.race([
+		const set = await Promise.race([
 			until(es).not.toBeNull(),
 			until(useTimeout(10000))
 				.toBeTruthy()
 				.then(() => null),
 		]);
-		if (!es.value) {
-			log.warn("<Cosmetics>", "Entitled Set could not be found", `id=${setID}`);
+
+		if (!set) {
+			delete data.userEmoteMap[userID];
+
+			log.warn("<Cosmetics>", "Emote Set could not be found", `id=${setID}`);
 			return;
 		}
 
-		log.info("<Cosmetics>", "Entitled Set found", `id=${setID}`);
-
-		data.userEmotes[userID].push(es.value);
+		log.info("<Cosmetics>", "Assigned Emote Set to user", `id=${setID}`, `userID=${userID}`);
 	}
 
 	// Handle user entitlements
@@ -234,9 +244,6 @@ db.ready().then(async () => {
 						assigned = true;
 						break;
 					case "EMOTE_SET":
-						if (data.userEmotes[ent.user_id]) continue;
-
-						data.userEmotes[ent.user_id] = [];
 						bindUserEmotes(ent.user_id, ent.ref_id);
 						break;
 				}
