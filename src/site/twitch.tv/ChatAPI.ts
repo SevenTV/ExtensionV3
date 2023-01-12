@@ -128,6 +128,12 @@ export function useChatAPI(scroller?: Ref<InstanceType<typeof UiScrollableVue> |
 		data.scrollClear();
 
 		data.sys = true;
+		if (duration === 0) {
+			container.value.scrollTo({ top: container.value.scrollHeight });
+
+			bounds.value = container.value.getBoundingClientRect();
+			return;
+		}
 
 		const from = container.value.scrollTop;
 		const start = Date.now();
