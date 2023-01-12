@@ -175,7 +175,7 @@ db.ready().then(async () => {
 
 				// Re-assign the user's personal emote map
 				data.userEmoteMap[userID] = res.emotes.reduce(
-					(acc, cur) => ({ ...acc, [cur.name]: { ...cur, scope: "PERSONAL" } }),
+					(acc, cur) => ({ ...acc, [cur.name]: { ...cur, provider: "7TV", scope: "PERSONAL" } }),
 					{} as Record<string, SevenTV.ActiveEmote>,
 				);
 			},
