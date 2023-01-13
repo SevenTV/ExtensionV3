@@ -119,6 +119,7 @@ function specialCases(s: SevenTV.EmoteSet) {
 
 	// Clauses that should place at top
 	if (s.name == currentChannel.value.display_name) return -1;
+	if (s.flags & 4) return -2;
 	return 0;
 }
 
@@ -144,7 +145,7 @@ const providers = computed(() => {
 	}
 
 	if (personalEmoteSets.value?.length) {
-		temp.set("7TV", [...temp.get("7TV")!, ...personalEmoteSets.value]);
+		temp.set("7TV", [...temp.get("7TV")!, ...personalEmoteSets.value].sort(sortSets));
 	}
 
 	return temp;
