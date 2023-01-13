@@ -34,6 +34,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { onClickOutside } from "@vueuse/core";
 import { useStore } from "@/store/main";
+import { debounceFn } from "@/common/Async";
 import { determineRatio } from "@/common/Image";
 import { HookedInstance } from "@/common/ReactHooks";
 import {
@@ -54,7 +55,7 @@ const props = defineProps<{
 
 const { identity } = useStore();
 const { emoteProviders, currentChannel } = useChatAPI();
-const { emoteSets: personalEmoteSets } = useCosmetics(identity?.id ?? "");
+const { emoteSets: personalEmoteSets, emotes: personalEmotes } = useCosmetics(identity?.id ?? "");
 
 const containerEl = ref();
 containerEl.value = document.querySelector(".chat-input__textarea") ?? undefined;
@@ -63,6 +64,7 @@ const isVisible = ref(false);
 const loaded = ref(false);
 const select = ref("TWITCH" as SevenTV.Provider);
 
+const providers = ref<Map<SevenTV.Provider, SevenTV.EmoteSet[]>>(new Map());
 const selectedProvider = computed(() => {
 	return filtered.value.has(select.value)
 		? select.value
@@ -131,7 +133,7 @@ function sortSets(a: SevenTV.EmoteSet, b: SevenTV.EmoteSet) {
 	return sa == sb ? a.name.localeCompare(b.name) : sa > sb ? 1 : -1;
 }
 
-const providers = computed(() => {
+const remap = debounceFn(() => {
 	const temp = new Map<SevenTV.Provider, SevenTV.EmoteSet[]>();
 	temp.set("TWITCH", []);
 	temp.set("7TV", []);
@@ -148,8 +150,11 @@ const providers = computed(() => {
 		temp.set("7TV", [...temp.get("7TV")!, ...personalEmoteSets.value].sort(sortSets));
 	}
 
-	return temp;
-});
+	providers.value = temp;
+}, 1000);
+
+watch(emoteProviders, () => remap(), { immediate: true, deep: true });
+watch(personalEmotes, () => remap(), { immediate: true });
 
 let unsub: (() => void) | undefined;
 

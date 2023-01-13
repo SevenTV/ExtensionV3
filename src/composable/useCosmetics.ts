@@ -174,11 +174,16 @@ db.ready().then(async () => {
 			(res) => {
 				es.value = res; // assign to value
 
+				data.sets[setID] = es.value;
+
 				// Re-assign the user's personal emote map
-				data.userEmoteMap[userID] = res.emotes.reduce(
+				data.userEmoteMap[userID] = es.value.emotes.reduce(
 					(acc, cur) => ({ ...acc, [cur.name]: { ...cur, provider: "7TV", scope: "PERSONAL" } }),
 					{} as Record<string, SevenTV.ActiveEmote>,
 				);
+
+				// Update the set's data
+				data.userEmoteSets[userID]?.splice(data.userEmoteSets[userID].indexOf(es.value), 1, es.value);
 			},
 			{
 				until: until(data.userEmoteMap[userID])
