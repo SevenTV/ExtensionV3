@@ -10,11 +10,15 @@ export function imageHostToSrcset(host: SevenTV.ImageHost, imageF: SevenTV.Image
 		.join(", ");
 }
 
-export function imageHostAndSizeToSrcset(height: number, width: number, host: SevenTV.ImageHost): string {
+export function imageHostToSrcsetWithsize(height: number, width: number, host: SevenTV.ImageHost): string {
 	const format = host.files.some((fi) => fi.format === imageFormat.value) ? imageFormat.value : host.files[0]?.format;
 	return host.files
 		.filter((f) => f.format === format)
-		.map((f, i) => `https:${host.url}/${f.name} ${width * (i + 1)}w ${height * (i + 1)}h`)
+		.map((f, i) => {
+			const fileName = isNaN(Number(f.name.at(0))) ? i : parseInt(f.name.at(0)!);
+
+			return `https:${host.url}/${f.name} ${width * fileName}w ${height * fileName}h`;
+		})
 		.join(", ");
 }
 

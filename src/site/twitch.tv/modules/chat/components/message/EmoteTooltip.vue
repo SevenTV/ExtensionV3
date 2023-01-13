@@ -18,15 +18,6 @@
 			<span class="creator-name">{{ emote.data.owner.display_name }}</span>
 		</div>
 
-		<!-- Zero Width -->
-		<div v-if="emote.overlaid?.length" class="zero-width-label">
-			<template v-for="e of emote.overlaid" :key="e.id">
-				—
-				<img v-if="e.data" class="overlaid-emote-icon" :srcset="imageHostToSrcset(e.data.host)" />
-				<span>{{ e.name }}</span>
-			</template>
-		</div>
-
 		<!-- Labels -->
 		<div class="scope-labels">
 			<div v-if="isGlobal" class="label-global">Global Emote</div>
@@ -50,7 +41,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { DecimalToStringRGBA } from "@/common/Color";
-import { imageHostAndSizeToSrcset, imageHostToSrcset } from "@/common/Image";
+import { imageHostToSrcset, imageHostToSrcsetWithsize } from "@/common/Image";
 import Logo from "@/assets/svg/logos/Logo.vue";
 
 const props = withDefaults(
@@ -64,7 +55,7 @@ const props = withDefaults(
 );
 
 const srcset = computed(() =>
-	props.unload ? "" : imageHostAndSizeToSrcset(props.height, props.width, props.emote.data!.host),
+	props.unload ? "" : imageHostToSrcsetWithsize(props.height, props.width, props.emote.data!.host),
 );
 const overlayEmotes = computed(() => Object.values(props.emote.overlaid ?? {}));
 const width = computed(() => `${props.width * 2}px`);
