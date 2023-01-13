@@ -12,8 +12,6 @@
 			aka <span>{{ emote.data?.name }}</span>
 		</div>
 
-		<div class="divider" />
-
 		<!-- Creator -->
 		<div v-if="emote.data?.owner" class="creator-label">
 			by
@@ -21,7 +19,7 @@
 		</div>
 
 		<!-- Zero Width -->
-		<div v-if="Object.keys(emote.overlaid ?? {}).length" class="zero-width-label">
+		<div v-if="emote.overlaid?.length" class="zero-width-label">
 			<template v-for="e of emote.overlaid" :key="e.id">
 				—
 				<img v-if="e.data" class="overlaid-emote-icon" :srcset="imageHostToSrcset(e.data.host)" />
@@ -36,13 +34,22 @@
 			<div v-if="isChannel" class="label-channel">Channel Emote</div>
 			<div v-if="isPersonal" class="label-personal">Personal Emote</div>
 		</div>
+		<!-- Zero Width -->
+		<div v-if="emote.overlaid?.length" class="divider" />
+		<div v-if="emote.overlaid?.length" class="zero-width-label">
+			<template v-for="e of emote.overlaid" :key="e.id">
+				<img v-if="e.data" class="overlaid-emote-icon" :srcset="imageHostToSrcset(e.data.host)" />
+				-
+				<span>{{ e.name }}</span>
+			</template>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
 import { DecimalToStringRGBA } from "@/common/Color";
-import { imageHostToSrcset } from "@/common/Image";
+import { imageHostAndSizeToSrcset, imageHostToSrcset } from "@/common/Image";
 import Logo from "@/assets/svg/logos/Logo.vue";
 
 const props = withDefaults(
@@ -55,7 +62,9 @@ const props = withDefaults(
 	{ unload: false },
 );
 
-const srcset = computed(() => (props.unload ? "" : imageHostToSrcset(props.emote.data!.host)));
+const srcset = computed(() =>
+	props.unload ? "" : imageHostAndSizeToSrcset(props.height, props.width, props.emote.data!.host),
+);
 const width = computed(() => `${props.width * 2}px`);
 const height = computed(() => `${props.height * 2}px`);
 
@@ -93,6 +102,7 @@ const creatorColor = computed(() => {
 	width: 2rem;
 	height: auto;
 	float: right;
+	flex-shrink: 0;
 	align-self: end;
 }
 
@@ -113,16 +123,16 @@ img.tooltip-emote {
 }
 
 .divider {
-	width: 100%;
+	width: 65%;
 	height: 0.01em;
 	background-color: currentColor;
-	opacity: 0.5;
-	margin: 0.25rem 0;
+	opacity: 0.15;
+	margin-top: 0.85rem;
+	margin-bottom: 1.25rem;
 }
 
 .creator-label {
-	font-size: 0.9rem;
-
+	font-size: 1.3rem;
 	.creator-name {
 		color: v-bind("creatorColor");
 	}
@@ -133,15 +143,16 @@ img.tooltip-emote {
 	flex-wrap: wrap;
 	justify-content: center;
 	gap: 0.25rem;
-	font-size: 0.9rem;
-
+	font-size: 1.3rem;
+	font-weight: 600;
 	.overlaid-emote-icon {
 		width: 1.5rem;
 	}
 }
 
 .scope-labels {
-	font-size: 0.9rem;
+	font-size: 1.3rem;
+	font-weight: 600;
 	> .label-global {
 		color: rgb(70, 220, 100);
 	}
