@@ -295,9 +295,9 @@ a.then(
 );
 
 if (a instanceof ObserverPromise) {
-	setTimeout(() => {
-		a.disconnect();
-	}, 10000);
+	until(useTimeout(10e3))
+		.toBeTruthy()
+		.then(() => a.disconnect());
 }
 
 // Apply new boundaries when the window is resized
