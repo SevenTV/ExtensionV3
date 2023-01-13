@@ -34,12 +34,13 @@
 			<div v-if="isChannel" class="label-channel">Channel Emote</div>
 			<div v-if="isPersonal" class="label-personal">Personal Emote</div>
 		</div>
+
 		<!-- Zero Width -->
-		<div v-if="emote.overlaid?.length" class="divider" />
-		<div v-if="emote.overlaid?.length" class="zero-width-label">
-			<template v-for="e of emote.overlaid" :key="e.id">
+		<div v-if="overlayEmotes.length" class="divider" />
+		<div v-if="overlayEmotes.length" class="zero-width-label">
+			<template v-for="e of overlayEmotes" :key="e.id">
 				<img v-if="e.data" class="overlaid-emote-icon" :srcset="imageHostToSrcset(e.data.host)" />
-				-
+				—
 				<span>{{ e.name }}</span>
 			</template>
 		</div>
@@ -65,6 +66,7 @@ const props = withDefaults(
 const srcset = computed(() =>
 	props.unload ? "" : imageHostAndSizeToSrcset(props.height, props.width, props.emote.data!.host),
 );
+const overlayEmotes = computed(() => Object.values(props.emote.overlaid ?? {}));
 const width = computed(() => `${props.width * 2}px`);
 const height = computed(() => `${props.height * 2}px`);
 
