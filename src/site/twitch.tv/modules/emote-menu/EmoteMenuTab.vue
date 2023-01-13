@@ -76,8 +76,9 @@ const observer = new IntersectionObserver((entries) => {
 
 		// if the element is intersecting, wait 350ms before loading it
 		if (entry.isIntersecting && !loaded[eid]) {
+			const previouslyLoaded = loaded[eid] === -1;
 			loaded[eid] = 0;
-			await until(useTimeout(350)).toBeTruthy();
+			if (!previouslyLoaded) await until(useTimeout(350)).toBeTruthy();
 		}
 
 		// if the element was intersecting, but not anymore, delete it from the loaded map
@@ -87,13 +88,14 @@ const observer = new IntersectionObserver((entries) => {
 		}
 
 		// if the element has been intersecting for 350ms, load it
-		if (loaded[eid] === 0) {
+		if (entry.isIntersecting && loaded[eid] === 0) {
 			loaded[eid] = 1;
+			return;
 		}
 
 		// if the element is not intersecting anymore, delete it from the loaded map
-		if (!entry.isIntersecting) {
-			delete loaded[eid];
+		if (!entry.isIntersecting && loaded[eid] >= 0) {
+			loaded[eid] = loaded[eid] === 1 ? -1 : 0;
 		}
 	});
 });
